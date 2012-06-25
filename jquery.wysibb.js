@@ -1,16 +1,15 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Release date: 20.06.12
-	Version: 0.5.3
+	Version: 0.5.4
 */
 
 (function($) {
 	$.fn.wysibb = function(settings, extraSettings) {
 		var options,isMobile,IE6,IE7;
-		var version = "0.5.3";
+		var version = "0.5.4";
 		var options = {
-			debug:				true,
+			debug:				false,
 			onlyBBmode:			false,
 			bbmode:				false,
 			watchTxtArea:		true,
@@ -19,6 +18,7 @@
 			bbset:				'default',
 			themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
+			textTags:			"span,font",
 			buttons:			"bold,italic,underline,strike,sup,sub,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
@@ -106,45 +106,56 @@
 				"justifyleft": {
 					title:"Текст по левому краю",
 					buttonHTML: '<span class="ve-tlb-textleft"></span>',
-					command: 'new NativeCommand("justifyLeft")',
+					command: 'new justifyCommand("justifyleft")',
+					htmlOpen: '<div class="wbb-left">',
+					htmlClose: '</div>',
 					bbName: "left", 
 					bbOpen:"[left]",
 					bbClose:"[/left]",
-					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"}, //
-					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'} //
+					htmlToBB: {'div.wbb-left': '[left]%$(this).html()%[/left]'},
+					rootNode: 'div.wbb-left',
+					contentSelector: '$(rootNode).html()'
+					
 				},
 				"justifycenter": {
 					title:"Текст по центру",
 					buttonHTML: '<span class="ve-tlb-textcenter"></span>',
-					command: 'new NativeCommand("justifyCenter")',
+					command: 'new justifyCommand("justifycenter")',
+					htmlOpen: '<div class="wbb-center" style="text-align:center">',
+					htmlClose: '</div>',
 					bbName: "center", 
 					bbOpen:"[center]",
 					bbClose:"[/center]",
-					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"}, //
-					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'} //
+					htmlToBB: {'div.wbb-center': '[center]%$(this).html()%[/center]'},
+					rootNode: 'div.wbb-center',
+					contentSelector: '$(rootNode).html()'
+					
 				},
 				"justifyright": {
-					title:"Текст по правому краю",
+					title:"Текст правому краю",
 					buttonHTML: '<span class="ve-tlb-textright"></span>',
-					command: 'new NativeCommand("justifyRight")',
+					command: 'new justifyCommand("justifyright")',
+					htmlOpen: '<div class="wbb-right" style="text-align:right">',
+					htmlClose: '</div>',
 					bbName: "right", 
 					bbOpen:"[right]",
 					bbClose:"[/right]",
-					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"}, //
-					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'} //
+					htmlToBB: {'div.wbb-right': '[right]%$(this).html()%[/right]'},
+					rootNode: 'div.wbb-right',
+					contentSelector: '$(rootNode).html()'
+					
 				},
 				"offtopic": {
 					title:"Оффтоп",
 					buttonHTML: '<span class="ve-tlb-offtopic"></span>',
 					command: 'new CustomCommand("offtopic")',
-					htmlOpen: '<span style="font-size:9px;color:gray;">',
+					htmlOpen: '<span class="offtop" style="font-size:9px;color:gray;">',
 					htmlClose: '</span>',
 					bbName: "offtop", 
 					bbOpen:"[offtop]",
 					bbClose:"[/offtop]",
-					htmlToBB: {'span[style*="font-size:9px;color:gray;"]': '[offtop]%$(this).html()%[/offtop]'},
-					//bbToHTML: {'[offtop](.*?)[/offtop]':'<font style="font-size:9px;color:gray;">$1</font>'},
-					rootNode: 'span[style*="font-size:9px;color:gray;"]',
+					htmlToBB: {'span.offtop': '[offtop]%$(this).html()%[/offtop]'},
+					rootNode: 'span.offtop',
 					contentSelector: '$(rootNode).html()'
 				},
 				"code": {
@@ -157,10 +168,8 @@
 					bbOpen:"[code]",
 					bbClose:"[/code]",
 					htmlToBB: {'div.codetop': '[code]%$(this).skipWBB().next("div.codemain").skipWBB().html()%[/code]'},
-					//bbToHTML: {'[code](.*?)[/code]':'<div class="code"><div class="codetop">Код</div><div class="codemain">$1</div></div>'},
 					rootNode: 'div.code',
-					contentSelector: '$(rootNode).find("div.codemain").html()',
-					removeFormatOnDeSelect:true
+					contentSelector: '$(rootNode).find("div.codemain").html()'
 				},
 				"spoiler": {
 					title:"Сворачиваемый текст",
@@ -267,9 +276,7 @@
 				
 				//init form submit
 				initFormSubmit();
-				
-				//test unclosed tags
-				fixAllTags("sdfsdf <i>sdffsdsdf</i> <span> a <b>sd </font>sas</div>");
+
 				return;
 				
 			}
@@ -331,11 +338,11 @@
 				//insert iframe if needed
 				if (options.onlyBBmode!==true) {
 					var frameWidth = $txtArea.width();
-					var frameHeight = $txtArea.outerHeight();
+					var frameHeight = $txtArea.height();
 					wbbLog("iFrame width:"+frameWidth);
 					
 					$txtArea.parents(".wysibb").css("width",frameWidth+"px");
-					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px");
+					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0");
 					
 					$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:{width}px;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
 					
@@ -347,10 +354,10 @@
 						iFrameWindow=iFrame.contentWindow;
 						iFrameDoc = iFrame.contentWindow.document;
 						iFrameBody=iFrame.contentWindow.document.body;
-						var iFrameHead=iFrame.contentWindow.document.head;
+						var iFrameHead=iFrameDoc.getElementsByTagName('head')[0];
 						
 						//set styles from main page
-						$(document.head).find("link[rel='stylesheet']").each(function(idx,el) {
+						$(document.getElementsByTagName('head')[0]).find("link[rel='stylesheet']").each(function(idx,el) {
 							$(iFrameHead).append($(el).clone());
 						});
 						
@@ -408,14 +415,12 @@
 							$txtArea.data("prevVal",$txtArea.val());
 						}
 						
-						//wbbLog("IE7: "+IE7);
 						//onEnter event, insert br
 						$(iFrameBody).bind("keydown",function(event) {
 							if (event.which == 13 && selection.getNode().tagName!="LI") {
 								event.preventDefault();
 								iFrameBody.focus();
 								var snode = selection.getNode();
-								var psnode = getContaining("div");
 								
 								if ((snode.tagName=="DIV" || snode.tagName=="BODY") && snode.lastChild.nodeName.toLowerCase()!="br") {
 									$(snode).append("<br/>");
@@ -423,9 +428,6 @@
 								var elem = iFrameWindow.document.createElement("BR");
 								selection.overrideWithNode(elem,null);
 							}
-							/* if (!$.browser.msie && (!iFrameBody.lastChild || iFrameBody.lastChild.nodeName.toLowerCase() != "br")) {
-								$(iFrameBody).append("<br/>");
-							} */
 						});
 						
 					})
@@ -505,11 +507,22 @@
 						var quoteBlock = getContaining(tagfilter);
 						if (quoteBlock) {
 							//remove
+							
+							
 							$quoteBlock = $(quoteBlock);
 							if ($quoteBlock.is("span,font")) {
 								//is is text, multievents
-								tagKnife(quoteBlock,opt.rootNode);
-								
+								var selHTML = selection.getHTML();
+								if (selHTML=="") {
+									//close cur tag, set selectio after this node;
+									wbbLog("Close cur tag");
+									var snode = selection.getNode();
+									var txtnode = createElementFromString("<span>&nbsp;</span>");
+									$(snode).after(txtnode);
+									selection.setSelection(null,txtnode,0,1);
+								}else{
+									tagKnife(quoteBlock,opt.rootNode);
+								}
 							}else{
 								//it is block, remove all
 								wbbLog("it is block, remove all");
@@ -523,35 +536,44 @@
 						}else{
 							//insert
 							var selHTML = selection.getHTML();
-							var snode = selection.getNode();
-							var replaceNode=false;
-							//wbbLog("snode: "+snode);
-							while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
-								selHTML = snode.outerHTML;
-								replaceNode=snode;
-								//selection.setSelection(null,snode);
-								snode = snode.parentNode;
-							}
-							//wbbLog(selHTML);
 							
-							//clear selHTML
-							var el = iFrameDoc.createElement("SPAN");
-							el.innerHTML = selHTML;
-							if (opt.contentSelector) {
-								var remRules = opt.contentSelector;
-								remRules = remRules.replace(/rootNode/g,"el");
-								$(el).find(opt.rootNode).each(function(idx,el) {wbbLog(el); $(el).replaceWith(eval(remRules))});
-							}
-							//end clear
-							
-							selHTML = el.innerHTML;
-							var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
-							if (replaceNode) {
-								$(replaceNode).replaceWith(reshtml);
+							if (selHTML=="") {
+								//open empty tag
+								wbbLog("open empty tag");
+								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}&nbsp;{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+								selection.overrideWithNode(crnode);
+								if ($(crnode).children().size()==0) {
+									selection.setSelection(null,crnode,0,1);
+								}
 							}else{
-								selection.overrideWithNode(reshtml,null);
+							
+								var snode = selection.getNode();
+								var replaceNode=false;
+								while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
+									selHTML = snode.outerHTML;
+									replaceNode=snode;
+									//selection.setSelection(null,snode);
+									snode = snode.parentNode;
+								}
+								
+								//clear selHTML
+								var el = iFrameDoc.createElement("SPAN");
+								el.innerHTML = selHTML;
+								if (opt.contentSelector) {
+									var remRules = opt.contentSelector;
+									remRules = remRules.replace(/rootNode/g,"el");
+									$(el).find(opt.rootNode).each(function(idx,el) {wbbLog(el); $(el).replaceWith(eval(remRules))});
+								}
+								//end clear
+								
+								selHTML = el.innerHTML;
+								var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
+								if (replaceNode) {
+									$(replaceNode).replaceWith(reshtml);
+								}else{
+									selection.overrideWithNode(reshtml,null);
+								}
 							}
-							//$(iFrameBody).find(opt.rootNode+":empty").remove();
 						}
 						
 					}
@@ -757,6 +779,39 @@
 					return false;
 				};
 			}
+			function justifyCommand() {
+				this.execute = function(opt) {
+					if (bbmode) {
+						txtArea.focus();
+						setBBCode(opt,null);
+					}else{
+						iFrameBody.focus();
+						var curContain = getContaining(opt.rootNode);
+						if (curContain) {
+							if (opt.contentSelector) {
+								var remRules = opt.contentSelector;
+								remRules = remRules.replace(/rootNode/g,"curContain");
+								$(curContain).replaceWith(eval(remRules));
+							}
+						}else{
+							var pblock = getContaining(".wbb-left,.wbb-center,.wbb-right");
+							var sHTML = selection.getHTML();
+							var crnode;
+							if (pblock) {
+								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
+								$(pblock).replaceWith(crnode);
+							}else{
+								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}&nbsp;{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
+								selection.overrideWithNode(crnode);
+							}
+							selection.setSelection(null,crnode,0,1);
+						}
+					}
+				};
+				this.queryState = function(opt) {
+					return isContaining(opt.rootNode,opt.bbName,selection.getNode());
+				};
+			}
 			function setBBCode(opt,params) {
 				var cursel = selection.getTextWithInfo();
 				var bbOpen = (opt.bbOpen) ? opt.bbOpen:"";
@@ -803,8 +858,11 @@
 					return ($(el).is(parentsel) || $(el).parents(parentsel).size()>0);
 				}
 			}
-			function getContaining(psel) {
-				var el = selection.getNode();
+			function getContaining(psel,rng) {
+				if (!rng) {
+					rng = selection.getRange();
+				}
+				var el = selection.getNodeByRange(rng);
 				while (el && el.tagName!="BODY") {
 					if ($(el).is(psel)) {return el};
 					if (el) {el = el.parentNode;}
@@ -1172,21 +1230,24 @@
 						node = iFrameDoc.createTextNode(node);
 					}else if (typeof(node)=="string") {
 						//wrap to iFrameDoc for opera
-						var el = iFrameDoc.createElement("SPAN");
+						/* var el = iFrameDoc.createElement("SPAN");
 						node = $(el).append(node).get(0);
-						createFromText=true;
+						createFromText=true; */
+						node = createElementFromString(node);
 						
 					}
 					var $wnode = $(node);
 					var wnode = $wnode.get(0);
 					if (removeSelector) {
 						//check for node override
-						var containNode = getContaining(removeSelector);
+						var containNode = getContaining(removeSelector,rng);
 						if (containNode) {
 							$(containNode).remove();
 						}
 					}else{
-						rng.deleteContents();
+						if (w3c_selection) {
+							rng.deleteContents();
+						}
 					}
 					
 					if (w3c_selection) {
@@ -1194,11 +1255,6 @@
 						rng.insertNode(wnode);
 						rng.setStartAfter(wnode);
 						rng.setEndAfter(wnode);
-						
-						if (createFromText) {
-							//remove wrap span (wrap to iFrameDoc for opera)
-							$(wnode).children().unwrap();
-						}
 						
 						sel.removeAllRanges();
 						sel.addRange(rng);
@@ -1244,13 +1300,30 @@
 						sel.addRange(rng);
 						
 					}else{
-						rng.moveToElementText(node);
-						if (start && stop) {
-							rng.moveStart('character',start);
-							rng.moveEnd ('character',stop);
+						if (node) {
+							rng.moveToElementText(node);
+							if (start>=0 && stop>=0) {
+								rng.moveStart('character',start);
+								rng.moveEnd ('character',stop);
+							}
+							rng.select();
 						}
 					}
 				}
+				/* this.setSelectionAfterNode = function(node) {
+					var rng = this.getRange();
+					var sel = selection.get();
+					if (window.getSelection) {
+						rng.collapse();
+						rng.setStartAfter(node);
+						sel.removeAllRanges();
+						sel.addRange(rng);
+					}else{
+						rng.moveToElementText(node);
+						rng.collapse();
+						rng.select ();
+					}
+				} */
 			}
 			function sanitizeHTML(rootEl) {
 				$(rootEl).children().each(function() {
@@ -1339,64 +1412,6 @@
 				}
 				return str;
 			}
-			function fixAllTags(html) {
-				var notClosedTags = new Array();
-				var notOpensTags = new Array();
-				
-				var openTags = html.match(/<([a-z]+).*?>/mig);
-				var closeTags = html.match(/<\/([a-z]+).*?>/mig);
-				
-				var checkTag = {};
-				//wbbLog(html);
-				for (var otag in openTags) {
-					var cleartag = openTags[otag].replace(/<([a-z]+).*?>/gi,"$1");
-					var curcnt = (checkTag[cleartag] && checkTag[cleartag].count) ? checkTag[cleartag].count:0;
-					checkTag[cleartag] = {count:curcnt+1, pos:otag};
-				}
-				for (var ctag in closeTags) {
-					var cleartag = closeTags[ctag].replace(/<\/([a-z]+).*?>/gi,"$1");
-					var curcnt = (checkTag[cleartag] && checkTag[cleartag].count) ? checkTag[cleartag].count:0;
-					checkTag[cleartag] = {count:curcnt-1, pos:ctag};
-				}
-				
-				for (var tag in checkTag) {
-					var cnt = checkTag[tag].count;
-					if (cnt!=0) {
-						var pos = checkTag[tag].pos;
-						if (cnt>0) {
-							//must close
-							notClosedTags.push([tag,pos]);
-						}else{
-							//must open
-							notOpensTags.push([tag,pos]);
-						}
-					}
-				}
-				
-				
-				
-				notOpensTags.sort(function(a,b) {
-					return ((a[1] > b[1]) ? 1:-1);
-				});
-				
-				notClosedTags.sort(function(a,b) {
-					return ((a[1] > b[1]) ? 1:-1);
-				});
-				for (var i=0; i<notOpensTags.length; i++) {
-					//rempve unOpenedTags
-					//var n =notOpensTags[i][1];
-					//var rgx = new RegExp("<\/([a-z]+).*?>{"+n+","+n+"}","mig");
-					//html = html.replace(rgx,"");
-					html = "<"+notOpensTags[i][0]+">"+html;
-				}
-				for (var i=notClosedTags.length-1; i>=0; i--) {
-					html += "</"+notClosedTags[i][0]+">";
-				}
-				
-				//wbbLog(html);
-				
-				return html;
-			}
 			function initFormSubmit() {
 				wbbLog("initFormSubmit");
 				$txtArea.parents("form").bind("submit",function() {
@@ -1412,7 +1427,7 @@
 			function tagKnife(tree,rootSelector) {
 				wbbLog("is is text, multievents");
 								
-				var nd = selection.getNode(true);
+				var nd = selection.getNode();
 				var ndHTML = selection.getHTML();
 				var $nd = $(nd);
 
@@ -1478,10 +1493,10 @@
 				}
 				
 				$rootND.before($bf).after($af).replaceWith(ndHTML);
-				
-				//wbbLog($bf.get(0));
-				//wbbLog($rootND.get(0));
-				//wbbLog($af.get(0));
+				//selection.setSelectionAfterNode($af.get(0));
+				/* wbbLog($bf.get(0));
+				wbbLog($rootND.get(0));
+				wbbLog($af.get(0)); */
 				clearEmpty(iFrameBody);
 			}
 			function clearEmpty(root) {
@@ -1500,6 +1515,11 @@
 						}
 					}
 				}
+			}
+			function createElementFromString(nodestr) {
+				var el = iFrameDoc.createElement("SPAN");
+				el.innerHTML = nodestr;
+				return $(el).children().unwrap().get(0);
 			}
 			
 			init();
