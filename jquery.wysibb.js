@@ -9,7 +9,7 @@
 		var options,isMobile,IE6,IE7;
 		var version = "0.5.4";
 		var options = {
-			debug:				false,
+			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
 			watchTxtArea:		true,
@@ -181,10 +181,8 @@
 					bbOpen:"[spoiler]",
 					bbClose:"[/spoiler]",
 					htmlToBB: {'div.spoiler': '[spoiler]%$(this).children("div.hidetop").skipWBB().next("div.hidemain").html()%[/spoiler]'},
-					//bbToHTML: {'[spoiler](.*?)[/spoiler]':'<div class="spoiler"><div class="hidetop">Спойлер (+/-)</div><div class="hidemain">$1</div></div>'},
 					rootNode: 'div.spoiler',
-					contentSelector: '$(rootNode).find("div.hidemain").html()',
-					removeFormatOnDeSelect:true
+					contentSelector: '$(rootNode).find("div.hidemain").html()'
 				},
 				"sub": {
 					title:"Подстрочный текст",
@@ -209,14 +207,15 @@
 				"quote": {
 					title:"Вставить цитату",
 					buttonHTML: '<span class="ve-tlb-quote"></span>',
-					command: 'new quoteCommand()',
+					command: 'new CustomCommand("quote")',
+					htmlOpen: '<div class="blockquote">',
+					htmlClose: '</div></div>',
 					bbName: "quote", 
 					bbOpen:"[quote]",
 					bbClose:"[/quote]",
-					htmlToBB: {'div.blockquote':'[quote]%$(this).html()%[/quote]'},
-					bbToHTML: {'[quote](.*?)[/quote]':'<div class="quote">$1</div>'},
-					insertHTML:'<div class="blockquote">{SELTEXT}</div>',
-					rootNode: 'div.blockquote'
+					htmlToBB: {'div.blockquote': '[quote]%$(this).html()%[/quote]'},
+					rootNode: 'div.blockquote',
+					contentSelector: '$(rootNode).html()'
 				},
 				'wbbConvertation': {
 					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
@@ -500,7 +499,7 @@
 							//remove bb
 							removeBBCode(bbcode);
 						}else{
-							setBBCode(bbcode,null);
+							setBBCode(opt,null);
 						}
 					}else{
 						iFrameBody.focus();
