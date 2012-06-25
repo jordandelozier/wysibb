@@ -1,23 +1,14 @@
-/* if (!Array.prototype.map) {
-	Array.prototype.map = function(fun) {
-		var collect = [];
-		for (var ix = 0; ix < this.length; ix++) { collect[ix] = fun(this[ix]); }
-		return collect;
-	}
-} */
-//init jQuery nano
-/* (function($){$.nano = function(template, data) {return template.replace(/\{([\w\.]*)\}/g, function (str, key) {var keys = key.split("."), value = data[keys.shift()];$.each(keys, function () { value = value[this]; });return (value === null || value === undefined) ? "" : value;});};})(jQuery);
-jQuery.fn.skipWBB = function(){
-	return $(this).attr("mustremoved","1");
-}; */
-
-//init jQuery nano
-
-/*END UTILS */
+/*
+	Autor: DVG
+	WysiBB - WYSIWYG BBcode editor
+	Release date: 20.06.12
+	Version: 0.5.3
+*/
 
 (function($) {
 	$.fn.wysibb = function(settings, extraSettings) {
 		var options,isMobile,IE6,IE7;
+		var version = "0.5.3";
 		var options = {
 			debug:				true,
 			onlyBBmode:			false,
@@ -28,7 +19,7 @@ jQuery.fn.skipWBB = function(){
 			bbset:				'default',
 			themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
-			buttons:			"bold,italic,underline,strike,sup,sub,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler,", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -146,14 +137,15 @@ jQuery.fn.skipWBB = function(){
 					title:"Оффтоп",
 					buttonHTML: '<span class="ve-tlb-offtopic"></span>',
 					command: 'new CustomCommand("offtopic")',
-					htmlOpen: '<font style="font-size:9px;color:gray;">',
-					htmlClose: '</font>',
+					htmlOpen: '<span style="font-size:9px;color:gray;">',
+					htmlClose: '</span>',
 					bbName: "offtop", 
 					bbOpen:"[offtop]",
 					bbClose:"[/offtop]",
-					htmlToBB: {'font[style*="font-size:9px;color:gray;"]': '[offtop]%$(this).html()%[/offtop]'},
-					bbToHTML: {'[offtop](.*?)[/offtop]':'<font style="font-size:9px;color:gray;">$1</font>'},
-					rootNode: 'font[style*="font-size:9px;color:gray;"]'
+					htmlToBB: {'span[style*="font-size:9px;color:gray;"]': '[offtop]%$(this).html()%[/offtop]'},
+					//bbToHTML: {'[offtop](.*?)[/offtop]':'<font style="font-size:9px;color:gray;">$1</font>'},
+					rootNode: 'span[style*="font-size:9px;color:gray;"]',
+					contentSelector: '$(rootNode).html()'
 				},
 				"code": {
 					title:"Вставить код",
@@ -212,10 +204,10 @@ jQuery.fn.skipWBB = function(){
 					bbName: "quote", 
 					bbOpen:"[quote]",
 					bbClose:"[/quote]",
-					htmlToBB: {'div.quote':'[quote]%$(this).html()%[/quote]'},
+					htmlToBB: {'div.blockquote':'[quote]%$(this).html()%[/quote]'},
 					bbToHTML: {'[quote](.*?)[/quote]':'<div class="quote">$1</div>'},
-					insertHTML:'<div class="quote">{SELTEXT}</div>',
-					rootNode: 'div.quote'
+					insertHTML:'<div class="blockquote">{SELTEXT}</div>',
+					rootNode: 'div.blockquote'
 				},
 				'wbbConvertation': {
 					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
@@ -266,7 +258,7 @@ jQuery.fn.skipWBB = function(){
 				if (options.smileAutoDetect) {
 					smileAutoDetect();
 				}
-				
+
 				//create wbb editor
 				buildEditor();
 				
@@ -275,6 +267,11 @@ jQuery.fn.skipWBB = function(){
 				
 				//init form submit
 				initFormSubmit();
+				
+				//test unclosed tags
+				fixAllTags("sdfsdf <i>sdffsdsdf</i> <span> a <b>sd </font>sas</div>");
+				return;
+				
 			}
 			function buildEditor() {
 				$txtArea.css("border","0").css("outline","none");
@@ -364,7 +361,7 @@ jQuery.fn.skipWBB = function(){
 						//set default styles for body
 						$(iFrameBody).css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
 						
-						if ('contentEditable' in iFrameBody) {
+						if (('contentEditable' in iFrameBody) && !isMobile) {
 							iFrameBody.contentEditable=true;
 							try{
 								//fix for mfirefox
@@ -417,12 +414,18 @@ jQuery.fn.skipWBB = function(){
 							if (event.which == 13 && selection.getNode().tagName!="LI") {
 								event.preventDefault();
 								iFrameBody.focus();
+								var snode = selection.getNode();
+								var psnode = getContaining("div");
+								
+								if ((snode.tagName=="DIV" || snode.tagName=="BODY") && snode.lastChild.nodeName.toLowerCase()!="br") {
+									$(snode).append("<br/>");
+								}
 								var elem = iFrameWindow.document.createElement("BR");
-								selection.overrideWithNode(elem,null,null);
+								selection.overrideWithNode(elem,null);
 							}
-							if (!$.browser.msie && (!iFrameBody.lastChild || iFrameBody.lastChild.nodeName.toLowerCase() != "br")) {
+							/* if (!$.browser.msie && (!iFrameBody.lastChild || iFrameBody.lastChild.nodeName.toLowerCase() != "br")) {
 								$(iFrameBody).append("<br/>");
-							}
+							} */
 						});
 						
 					})
@@ -502,61 +505,53 @@ jQuery.fn.skipWBB = function(){
 						var quoteBlock = getContaining(tagfilter);
 						if (quoteBlock) {
 							//remove
-							if (opt.removeFormatOnDeSelect===true) {
-								//remove all block
+							$quoteBlock = $(quoteBlock);
+							if ($quoteBlock.is("span,font")) {
+								//is is text, multievents
+								tagKnife(quoteBlock,opt.rootNode);
+								
+							}else{
+								//it is block, remove all
+								wbbLog("it is block, remove all");
 								if (opt.contentSelector) {
 									var remRules = opt.contentSelector;
-										remRules = remRules.replace(/rootNode/g,"quoteBlock");
-										$(quoteBlock).replaceWith(eval(remRules));
-								}else{
-									var html = quoteBlock.outerHTML;
-										html = html.replace(/\n|\r/mgi,"");
-										html = html.replace(opt.htmlOpen,"");
-										html = html.replace(opt.htmlClose,"");
-									$(quoteBlock).replaceWith(html);
-								}
-							}else{
-								var selText = selection.getHTML();
-								if (selText=="") {
-									//remove all
-									var tnode = iFrameDoc.createTextNode(" ");
-									if ($(quoteBlock).next().size()==0) {
-										$(quoteBlock).after(tnode);
-									}
-									selection.setSelection(null,tnode,1,1);
-								}else{
-									//remove for selection
-									var html = quoteBlock.innerHTML;
-										html = html.replace("&nbsp;"," ");
-									selText = selText.replace("&nbsp;"," ");
-									var spos = html.indexOf(selText);
-									if (spos!=-1) {
-										var beforeHTML = html.substr(0,spos);
-											beforeHTML = beforeHTML.replace(opt.htmlOpen,"");
-											beforeHTML = beforeHTML.replace(opt.htmlClose,"");
-										var afterHTML = html.substr(spos+selText.length,html.length-spos);
-											afterHTML = afterHTML.replace(opt.htmlOpen,"");
-											afterHTML = afterHTML.replace(opt.htmlClose,"");
-										
-										selText = afterHTML.replace(opt.htmlOpen,"");
-										selText = afterHTML.replace(opt.htmlClose,"");
-										
-										wbbLog("beforeHTML: "+beforeHTML+" afterHTML: "+afterHTML+" ");
-										if (beforeHTML!="") {
-											$(quoteBlock).before(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:fixAllTags(beforeHTML)}));
-										}
-										if (afterHTML!="") {
-											$(quoteBlock).after(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:fixAllTags(afterHTML)}));
-										}
-										$(quoteBlock).replaceWith(fixAllTags(selText));
-									}
+									remRules = remRules.replace(/rootNode/g,"quoteBlock");
+									//wbbLog(remRules);
+									$quoteBlock.replaceWith(eval(remRules));
 								}
 							}
 						}else{
 							//insert
-							var selText = selection.getHTML();
-							//wbbLog(selText);
-							selection.overrideWithNode(wbbStringFormat("{htmlOpen}{txt} {htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selText}),null,null);
+							var selHTML = selection.getHTML();
+							var snode = selection.getNode();
+							var replaceNode=false;
+							//wbbLog("snode: "+snode);
+							while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
+								selHTML = snode.outerHTML;
+								replaceNode=snode;
+								//selection.setSelection(null,snode);
+								snode = snode.parentNode;
+							}
+							//wbbLog(selHTML);
+							
+							//clear selHTML
+							var el = iFrameDoc.createElement("SPAN");
+							el.innerHTML = selHTML;
+							if (opt.contentSelector) {
+								var remRules = opt.contentSelector;
+								remRules = remRules.replace(/rootNode/g,"el");
+								$(el).find(opt.rootNode).each(function(idx,el) {wbbLog(el); $(el).replaceWith(eval(remRules))});
+							}
+							//end clear
+							
+							selHTML = el.innerHTML;
+							var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
+							if (replaceNode) {
+								$(replaceNode).replaceWith(reshtml);
+							}else{
+								selection.overrideWithNode(reshtml,null);
+							}
+							//$(iFrameBody).find(opt.rootNode+":empty").remove();
 						}
 						
 					}
@@ -618,7 +613,7 @@ jQuery.fn.skipWBB = function(){
 							elem.setAttribute("href",$ahref.val());
 							elem.innerHTML = $atitle.val();
 							
-							selection.overrideWithNode(elem,selection.getSavedRange(),null);
+							selection.overrideWithNode(elem,selection.getSavedRange(),"a");
 							
 							$(document).unbind("mousedown");
 							$ahtml.find("#veditor_ahref").unbind("keyup change");
@@ -629,7 +624,7 @@ jQuery.fn.skipWBB = function(){
 						$ahtml.find("button.wbb-redbtn").click(function() {
 							//remove link event
 							var a = selection.getNodeByRange(selection.getSavedRange());
-							selection.overrideWithNode($(a).html(),selection.getSavedRange(),a);
+							selection.overrideWithNode($(a).html(),selection.getSavedRange(),"a");
 							$("#wbbModalWindow").hide();
 							iFrameBody.focus();
 						})
@@ -689,7 +684,7 @@ jQuery.fn.skipWBB = function(){
 							elem.setAttribute("src",$imgsrc.val());
 							
 							//selection.overrideWithNode(elem,selection.lastRange,null);
-							selection.overrideWithNode(elem,selection.lastRange,null,false,false);
+							selection.overrideWithNode(elem,selection.getSavedRange());
 							
 							$("#wbbModalWindow").hide();
 							$(document).unbind("mousedown");
@@ -752,10 +747,10 @@ jQuery.fn.skipWBB = function(){
 				this.execute = function(opt) {
 					if (bbmode) {
 						txtArea.focus();
-						setBBCode(opt.bbcode,null);
+						setBBCode(opt,null);
 					}else{
 						iFrameBody.focus();
-						selection.overrideWithNode(wbbStringFormat(opt.img,options),null,null,false,false);
+						selection.overrideWithNode(wbbStringFormat(opt.img,options));
 					}
 				};
 				this.queryState = function() {
@@ -764,13 +759,21 @@ jQuery.fn.skipWBB = function(){
 			}
 			function setBBCode(opt,params) {
 				var cursel = selection.getTextWithInfo();
-				if (!opt.bbOpen) {opt.bbOpen="";}
-				if (!opt.bbClose) {opt.bbClose="";}
+				var bbOpen = (opt.bbOpen) ? opt.bbOpen:"";
+				var bbClose = (opt.bbClose) ? opt.bbClose:"";
+				var bbcode = (opt.bbcode) ? opt.bbcode:"";
+				
 				if (opt.skipSelectRange===true) {cursel.text="";}
-				var bbstring = wbbStringFormat(opt.bbOpen+cursel.text+opt.bbClose,params);
+				var bbstring="";
+				if (bbcode!="") {
+					//smile bbcode
+					bbstring = bbcode;
+				}else{
+					bbstring = wbbStringFormat(bbOpen+cursel.text+bbClose,params);
+				}
 				txtArea.value = txtArea.value.substr(0,cursel.start)+bbstring+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
-				if (opt.bbName!="url" && opt.bbName!="img" && cursel.length==0) {
-					selection.setRange(cursel.start + bbstring.length-(opt.bbClose.length));
+				if (opt.bbName!="url" && opt.bbName!="img" && (!cursel || cursel.length==0)) {
+					selection.setRange(cursel.start + bbstring.length-(bbClose.length));
 				}
 			}
 			function checkBBContain(bbcode) {
@@ -802,7 +805,7 @@ jQuery.fn.skipWBB = function(){
 			}
 			function getContaining(psel) {
 				var el = selection.getNode();
-				while (el.tagName!="BODY") {
+				while (el && el.tagName!="BODY") {
 					if ($(el).is(psel)) {return el};
 					if (el) {el = el.parentNode;}
 					else{return null;}
@@ -839,6 +842,7 @@ jQuery.fn.skipWBB = function(){
 			}
 			function transformHTMLtoBB(rootel) {
 				var outbb="";
+				clearEmpty(iFrameBody);
 				var cloneObj = 	$(rootel).clone();
 				
 				//smileTransform
@@ -959,7 +963,7 @@ jQuery.fn.skipWBB = function(){
 				return resobj.html();
 			}
 			function initSelection() {
-				this.getNode = function() {
+				this.getNode = function(withTextNodes) {
 					//get current selection node
 					if (bbmode) {txtArea.focus();return txtArea;
 					}else{
@@ -970,7 +974,7 @@ jQuery.fn.skipWBB = function(){
 							//IE
 							elem = this.getRange().parentElement();
 						}
-						elem = (elem.nodeType===3) ? $(elem).parent().get(0):elem;
+						elem = (!withTextNodes && elem.nodeType===3) ? elem.parentNode:elem;
 						return elem;
 					}
 				}
@@ -1073,7 +1077,7 @@ jQuery.fn.skipWBB = function(){
 						}
 					}
 				}
-				this.overrideWithNode = function(node,rng,removeEl,selInsideNode,notRemoveSelNode) {
+				/* this.overrideWithNode_OLD = function(node,rng,removeEl,selInsideNode,notRemoveSelNode) {
 					if (!rng) {
 						rng = this.getRange();
 					}
@@ -1132,18 +1136,19 @@ jQuery.fn.skipWBB = function(){
 						if (w3c_selection) {
 							rng.insertNode(wnode);
 							
-							if (!selInsideNode) {
+							if (selInsideNode===true) {
+								rng.selectNodeContents(wnode);
+								rng.collapse(false);
+							}else{
+								wbbLog("Select after node");
 								rng.setStartAfter(wnode);
 								rng.setEndAfter(wnode);
-							}else{
-								//select inside node content
-								rng.setStart(wnode,0);
-								rng.setEnd(wnode,0);
 							}
 							
 							sel.removeAllRanges();
 							sel.addRange(rng);
 						}else{
+							
 							rng.pasteHTML(wnode.outerHTML);
 							rng.collapse();
 							rng.select();
@@ -1151,6 +1156,60 @@ jQuery.fn.skipWBB = function(){
 					}
 					
 					updateToolbar();
+				} */
+				this.overrideWithNode = function(node,rng,removeSelector) {
+					if (!rng) {
+						rng = this.getRange();
+					}
+					iFrameBody.focus();
+					var w3c_selection = (window.getSelection) ? true:false;
+					var sel = selection.get();
+					var rootNode = this.getNodeByRange(rng);
+					
+					//fix if node is text
+					var createFromText=false;
+					if (typeof(node)=="string" && (node.substr(0,1)!="<" || node.substr(node.length-1,1)!=">")) {
+						node = iFrameDoc.createTextNode(node);
+					}else if (typeof(node)=="string") {
+						//wrap to iFrameDoc for opera
+						var el = iFrameDoc.createElement("SPAN");
+						node = $(el).append(node).get(0);
+						createFromText=true;
+						
+					}
+					var $wnode = $(node);
+					var wnode = $wnode.get(0);
+					if (removeSelector) {
+						//check for node override
+						var containNode = getContaining(removeSelector);
+						if (containNode) {
+							$(containNode).remove();
+						}
+					}else{
+						rng.deleteContents();
+					}
+					
+					if (w3c_selection) {
+						
+						rng.insertNode(wnode);
+						rng.setStartAfter(wnode);
+						rng.setEndAfter(wnode);
+						
+						if (createFromText) {
+							//remove wrap span (wrap to iFrameDoc for opera)
+							$(wnode).children().unwrap();
+						}
+						
+						sel.removeAllRanges();
+						sel.addRange(rng);
+					}else{
+						rng.pasteHTML(wnode.outerHTML);
+						rng.collapse();
+						rng.select();
+					}
+					
+					updateToolbar();
+					return wnode;
 				}
 				this.lastRange=null;
 				this.get = function() {
@@ -1174,16 +1233,22 @@ jQuery.fn.skipWBB = function(){
 					var w3c_selection = (window.getSelection) ? true:false;
 					if (w3c_selection) {
 						//rng.selectNodeContents(node);
-						rng.setStart(node,start);
-						rng.setEnd(node,stop);
+						if (start && stop) {
+							rng.setStart(node,start);
+							rng.setEnd(node,stop);
+						}else{
+							rng.selectNodeContents(node);
+						}
 						
 						sel.removeAllRanges();
 						sel.addRange(rng);
 						
 					}else{
 						rng.moveToElementText(node);
-						rng.moveStart('character',start);
-						rng.moveEnd ('character',stop);
+						if (start && stop) {
+							rng.moveStart('character',start);
+							rng.moveEnd ('character',stop);
+						}
 					}
 				}
 			}
@@ -1275,9 +1340,62 @@ jQuery.fn.skipWBB = function(){
 				return str;
 			}
 			function fixAllTags(html) {
-				var div = iFrameDoc.createElement("DIV");
-				$(div).append(html);
-				return $(div).html();
+				var notClosedTags = new Array();
+				var notOpensTags = new Array();
+				
+				var openTags = html.match(/<([a-z]+).*?>/mig);
+				var closeTags = html.match(/<\/([a-z]+).*?>/mig);
+				
+				var checkTag = {};
+				//wbbLog(html);
+				for (var otag in openTags) {
+					var cleartag = openTags[otag].replace(/<([a-z]+).*?>/gi,"$1");
+					var curcnt = (checkTag[cleartag] && checkTag[cleartag].count) ? checkTag[cleartag].count:0;
+					checkTag[cleartag] = {count:curcnt+1, pos:otag};
+				}
+				for (var ctag in closeTags) {
+					var cleartag = closeTags[ctag].replace(/<\/([a-z]+).*?>/gi,"$1");
+					var curcnt = (checkTag[cleartag] && checkTag[cleartag].count) ? checkTag[cleartag].count:0;
+					checkTag[cleartag] = {count:curcnt-1, pos:ctag};
+				}
+				
+				for (var tag in checkTag) {
+					var cnt = checkTag[tag].count;
+					if (cnt!=0) {
+						var pos = checkTag[tag].pos;
+						if (cnt>0) {
+							//must close
+							notClosedTags.push([tag,pos]);
+						}else{
+							//must open
+							notOpensTags.push([tag,pos]);
+						}
+					}
+				}
+				
+				
+				
+				notOpensTags.sort(function(a,b) {
+					return ((a[1] > b[1]) ? 1:-1);
+				});
+				
+				notClosedTags.sort(function(a,b) {
+					return ((a[1] > b[1]) ? 1:-1);
+				});
+				for (var i=0; i<notOpensTags.length; i++) {
+					//rempve unOpenedTags
+					//var n =notOpensTags[i][1];
+					//var rgx = new RegExp("<\/([a-z]+).*?>{"+n+","+n+"}","mig");
+					//html = html.replace(rgx,"");
+					html = "<"+notOpensTags[i][0]+">"+html;
+				}
+				for (var i=notClosedTags.length-1; i>=0; i--) {
+					html += "</"+notClosedTags[i][0]+">";
+				}
+				
+				//wbbLog(html);
+				
+				return html;
 			}
 			function initFormSubmit() {
 				wbbLog("initFormSubmit");
@@ -1290,6 +1408,98 @@ jQuery.fn.skipWBB = function(){
 						return false;
 					}
 				})
+			}
+			function tagKnife(tree,rootSelector) {
+				wbbLog("is is text, multievents");
+								
+				var nd = selection.getNode(true);
+				var ndHTML = selection.getHTML();
+				var $nd = $(nd);
+
+				var rnd = Math.floor(Math.random(0,10000)*1000);
+				selection.overrideWithNode(wbbStringFormat("<span sl=\"{rnd}\"></span>",{rnd:rnd}));
+				
+				var $rootND = $nd.closest(rootSelector);
+				
+				$bf = $rootND.clone(true);
+				$af = $rootND.clone(true);
+				
+				if (ndHTML.indexOf(">")==-1 || ndHTML.indexOf("</")==-1) {
+					//it is plain text, check for parent tags
+					var txtNode = iFrameDoc.createTextNode(ndHTML);
+					$nd.parents().each(function() {
+						if (!$(this).is(rootSelector)) {
+							wbbLog("Parent: "+this.tagName);
+							var $p = $(this).clone().empty();
+							$p.append(txtNode);
+							txtNode = $p.get(0);
+						}else{
+							return false;
+						}
+					});
+					ndHTML = (txtNode.nodeType==3) ? txtNode.textContent:txtNode.outerHTML;
+					//wbbLog(ndHTML);
+				}else{
+					if (!$nd.is(rootSelector)) {
+						ndHTML = $nd.clone().empty().append(ndHTML).get(0).outerHTML;
+					}
+				}
+				
+				
+				var remove=false;
+				//before remove
+				$bf.contents().filter(filterCheckBefore).remove();
+				function filterCheckBefore(idx) {
+					if ($(this).attr("sl")==rnd) {
+						remove=true;
+						return true;
+					}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
+						$(this).contents().filter(filterCheckBefore).remove();
+						return false;
+					}
+					return remove;
+				}
+				
+				remove=true;
+				//$af.contents().filter(filterCheckAfter).remove().end().find("*").contents().filter(filterCheckAfter).remove();
+				$af.contents().filter(filterCheckAfter).remove();
+				function filterCheckAfter(idx) {
+					//wbbLog(this);
+					if ($(this).attr("sl")==rnd) {
+						//wbbLog("Find node: "+this);
+						remove=false;
+						return true;
+					}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
+						//wbbLog("Find parent [after]:"+this);
+						$(this).contents().filter(filterCheckAfter).remove();
+						return false;
+					}
+					return remove;
+				}
+				
+				$rootND.before($bf).after($af).replaceWith(ndHTML);
+				
+				//wbbLog($bf.get(0));
+				//wbbLog($rootND.get(0));
+				//wbbLog($af.get(0));
+				clearEmpty(iFrameBody);
+			}
+			function clearEmpty(root) {
+				$(root).children().filter(emptyFilter).remove();
+				function emptyFilter(idx) {
+					if (!$(this).is("span,font")) {
+						//clear empty only for span,font
+						return false;
+					}
+					if ($(this).html().length==0) {
+						return true;
+					}else if ($(this).children().size()>0) {
+						$(this).children().filter(emptyFilter).remove();
+						if ($(this).html().length==0 && this.tagName!="BODY") {
+							return true;
+						}
+					}
+				}
 			}
 			
 			init();
