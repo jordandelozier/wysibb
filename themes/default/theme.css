@@ -2,13 +2,15 @@
 .wysibb{margin:0;}
 .wysibb .wysibb-toolbar{/* height:35px; */border-top:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;border-bottom:0;background:#f5f5f5;padding:0 60px 0 10px;margin:0px;position:relative;}
 .wysibb .wysibb-bottom-toolbar{border-bottom:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;border-top:0;background:#f5f5f5;padding:0 10px;margin:0px;} 
-.wysibb .wysibb-toolbar .wysibb-toolbar-btn{/* float:left; */display:inline-block; *display:inline;zoom: 1;;height:22px;cursor:pointer;padding:2px 3px;margin:5px -1px; //margin:5px 0px;outline: none;}
+.wysibb .wysibb-bottom-toolbar img{max-width:20px}
+.wysibb .wysibb-toolbar .wysibb-toolbar-btn{/* float:left; */display:inline-block;*display:inline;zoom: 1;/* height:22px; */cursor:pointer;padding:2px 3px;margin:5px -1px; //margin:5px 0px;outline: none;}
 .wysibb .wysibb-toolbar .btnModeSwitch{width:46px;text-align:center;position:absolute;right:5px;top:0px;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn span{display:block;/* width:20px; */height:20px;margin:1px;z-index:1;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn:hover{border-radius:2px;border:1px solid #aaa;padding:1px 2px;box-shadow:0px 0px 3px #aaa;z-index:1;background:#fafafa;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn.on,.wysibb .wysibb-toolbar .wysibb-toolbar-btn:active{border:1px solid #aaa;padding:1px;box-shadow:inset 0px 0px 3px #aaa;border-radius:2px;background:#ddd;z-index:10;padding:1px 2px;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn.off,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:active{cursor:default;opacity:0.3;border:0;padding:2px 3px;box-shadow:none}
 .wysibb .wysibb-toolbar .wysibb-toolbar-vert{display:inline-block;*display:inline;zoom: 1;/* margin-top:8px; */width:21px;height:27px;background:url(//www.wysibb.com/static/theme/default/img/vert.png) 0 0 no-repeat;}
+.wysibb-toolbar-linebreak{}
 .ve-tlb-bold{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 0 no-repeat;width:20px;}
 .ve-tlb-italic{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -40px no-repeat;width:20px;}
 .ve-tlb-underline{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -20px no-repeat;width:20px;}
@@ -30,6 +32,22 @@
 .ve-tlb-sub{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -360px no-repeat;width:20px;}
 .ve-tlb-sup{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -380px no-repeat;width:20px;}
 
+/* SELECT BOX */
+.wysibb-toolbar-select{display: inline-block;*display:inline;zoom:1;outline:none;vertical-align: top;overflow:visible;width:100px;height:24px;border:1px solid #ddd;border-radius:3px;padding-right:14px;position:relative;cursor:pointer;margin:5px;font-size:14px;}
+.wysibb-toolbar-select .select-arrow{width:16px;height:24px;display:block;position:absolute;right:0;top:0;background:#f5f5f5;border-left:1px solid #ddd;}
+.wysibb-toolbar-select .select-arrow span{width:15px;height:24px;display:block;position:absolute;right:0;top:0;background:url(//www.wysibb.com/static/theme/default/img/icons.png) -4px -417px no-repeat;}
+.wysibb-toolbar-select .select-wrap{background:#fff;height:24px;position:relative;}
+.wysibb-toolbar-select:hover,.wysibb-toolbar-select.on{box-shadow:0px 0px 3px #aaa;border:1px solid #aaa;background:#dedede}
+/* .wysibb-toolbar-select:hover .select-wrap,.wysibb-toolbar-select.on .select-wrap{background:#fffef5} */
+.wysibb-toolbar-select:hover .select-arrow,.wysibb-toolbar-select.on .select-arrow{background:#eee}
+.wysibb-toolbar-select:hover .select-arrow,.wysibb-toolbar-select.on .select-arrow span{/* border-left:1px solid #aaa; */opacity:1;}
+.wysibb-toolbar-select .select-wrap .select-list{position:absolute;left:-1px;top:24px;background:#fff;padding:0;border:1px solid #aaa;display:none;max-height:200px;overflow:scroll;overflow-x:hidden;z-index:10;}
+.wysibb-toolbar-select.on .select-wrap .select-list{display:block;box-shadow:0px 0px 3px #aaa;//width:250px;}
+.wysibb-toolbar-select .select-wrap .select-list .select-row{display:block;padding:2px 14px;text-decoration:none;color:#333;white-space: nowrap;}
+.wysibb-toolbar-select .select-wrap .select-list .select-row:hover{background:#dff0ff}
+.wysibb-toolbar-select .select-wrap .select-list .isdefault-true{background:#eee;font-size:12px;font-weight:bold;border-bottom:1px solid #ddd}
+.wysibb-toolbar-select .select-wrap  .sel-value{display:block;overflow:hidden;font-size:11px;color:#555;height:24px;line-height:24px;padding:0 5px;text-overflow:ellipsis;white-space: nowrap;}
+/* END SELECT BOX */
 
 
 .wysibb .wysibb-text{border:1px solid #ddd;padding:5px;background:#fff;font-size:0.9em;margin:0;}

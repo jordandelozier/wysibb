@@ -1,13 +1,13 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.5.4
+	Version: 0.5.5
 */
 
 (function($) {
 	$.fn.wysibb = function(settings, extraSettings) {
 		var options,isMobile,IE6,IE7;
-		var version = "0.5.4";
+		var version = "0.5.5";
 		var options = {
 			debug:				true,
 			onlyBBmode:			false,
@@ -19,7 +19,7 @@
 			themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
 			textTags:			"span,font",
-			buttons:			"bold,italic,underline,strike,sup,sub,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -92,6 +92,16 @@
 					bbClose:"\n[/list]",
 					htmlToBB: {'ul': '[list]%$(this).html()%[/list]','li': "[*]%$(this).html()%"},
 					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list](.*?)[/list]':'<ul>$1</ul>'}
+				},
+				"bullist2": {
+					title:"Вставить список",
+					buttonHTML: '<span class="ve-tlb-list"></span>',
+					command: 'new NativeCommand("InsertUnorderedList")',
+					bbName: "list", 
+					bbOpen:"[list]\n[*]",
+					bbClose:"[/*]\n[/list]",
+					htmlToBB: {'ul': '[list]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
+					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list](.*?)[/list]':'<ul>$1</ul>'}
 				},
 				"numlist": {
 					title:"Вставить нумерованный список",
@@ -217,9 +227,191 @@
 					rootNode: 'div.blockquote',
 					contentSelector: '$(rootNode).html()'
 				},
+				"fontsizeselect": {
+					title:		"Размер текста",
+					type:		"select",
+					options:	"fontsizedefault,fontverysmall,fontsmall,fontnormal,fontbig,fontverybig", //default select list, phpBB3,
+					htmlToBB:	{},
+					bbToHTML:	{}
+				},
+				"fontfamilyselect": {
+					title:		"Шрифт текста",
+					type:		"select",
+					options:	"fontfamilydefault,arial,comic_sans_ms,courier_new,georgia,lucida,tahoma,times,trebuchet,verdana", //default select list, IPB3.3
+					htmlToBB:	{},
+					bbToHTML:	{}
+				},
 				'wbbConvertation': {
 					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
 					bbToHTML: {'[table](.*?)[/table]':'<table>$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>','\n':'<br/>'}
+				}
+			},
+			selectOptions: {
+				"fontsizedefault": {
+					title: "Размер текста",
+					command: 'new CustomCommand("fontsizedefault")',
+					isDefault:	true,
+					htmlOpen: '<span class="defvalue">',
+					htmlClose: '</span>',
+					bbName: "", 
+					bbOpen:"",
+					bbClose:"",
+					rootNode: 'font[size!=""]',
+					htmlToBB: {},
+					bbToHTML: {}
+				},
+				"fontfamilydefault": {
+					title: "Шрифт текста",
+					command: 'new CustomCommand("fontfamilydefault")',
+					isDefault:	true,
+					htmlOpen: '<span class="defvalue">',
+					htmlClose: '</span>',
+					bbName: "", 
+					bbOpen:"",
+					bbClose:"",
+					rootNode: 'font[face!=""]',
+					htmlToBB: {},
+					bbToHTML: {}
+				},
+				"fontverysmall": {
+					title: "Очень маленький",
+					command: 'new NativeCommand("fontSize",1)',
+					htmlOpen: '<font size="1">',
+					htmlClose: '</font>',
+					bbName: "size=50", 
+					bbOpen:"[size=50]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="1"]': '[size=50]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fontsmall": {
+					title: "Маленький",
+					command: 'new NativeCommand("fontSize",2)',
+					htmlOpen: '<font size="2">',
+					htmlClose: '</font>',
+					bbName: "size=85", 
+					bbOpen:"[size=85]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="2"]': '[size=85]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fontnormal": {
+					title: "Нормальный",
+					command: 'new NativeCommand("fontSize",3)',
+					htmlOpen: '<font size="3">',
+					htmlClose: '</font>',
+					bbName: "size=100", 
+					bbOpen:"[size=100]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="3"]': '[size=100]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fontbig": {
+					title: "Большой",
+					command: 'new NativeCommand("fontSize",4)',
+					htmlOpen: '<font size="4">',
+					htmlClose: '</font>',
+					bbName: "size=150", 
+					bbOpen:"[size=150]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="4"]': '[size=150]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fontverybig": {
+					title: "Очень большой",
+					command: 'new NativeCommand("fontSize",6)',
+					htmlOpen: '<font size="6">',
+					htmlClose: '</font>',
+					bbName: "size=200", 
+					bbOpen:"[size=200]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="6"]': '[size=200]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"arial": {
+					title: "Arial",
+					command: 'new NativeCommand("fontName","arial")',
+					htmlOpen: '<font face="arial">',
+					htmlClose: '</font>',
+					bbName: "font=arial", 
+					bbOpen:"[font=arial]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="arial"]': '[font=arial]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"comic_sans_ms": {
+					title: "Comic Sans MS",
+					command: 'new NativeCommand("fontName","Comic Sans MS")',
+					htmlOpen: '<font face="Comic Sans MS">',
+					htmlClose: '</font>',
+					bbName: "font=comic sans ms,cursive", 
+					bbOpen:"[font=comic sans ms,cursive]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Comic Sans MS"]': '[font=comic sans ms,cursive]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"courier_new": {
+					title: "Courier New",
+					command: 'new NativeCommand("fontName", "Courier New")',
+					htmlOpen: '<font face="Courier New">',
+					htmlClose: '</font>',
+					bbName: "font=courier new,courier,monospace", 
+					bbOpen:"[font=courier new,courier,monospace]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Courier New"]': '[font=courier new,courier,monospace]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"georgia": {
+					title: "Georgia",
+					command: 'new NativeCommand("fontName", "Georgia")',
+					htmlOpen: '<font face="Georgia">',
+					htmlClose: '</font>',
+					bbName: "font=georgia,serif", 
+					bbOpen:"[font=georgia,serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Georgia"]': '[font=georgia,serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"lucida": {
+					title: "Lucida Sans Unicode",
+					command: 'new NativeCommand("fontName", "Lucida Sans Unicode")',
+					htmlOpen: '<font face="Lucida Sans Unicode">',
+					htmlClose: '</font>',
+					bbName: "font=lucida sans unicode,lucida grande,sans-serif", 
+					bbOpen:"[font=lucida sans unicode,lucida grande,sans-serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Lucida Sans Unicode"]': '[font=lucida sans unicode,lucida grande,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"tahoma": {
+					title: "Tahoma",
+					command: 'new NativeCommand("fontName", "Tahoma")',
+					htmlOpen: '<font face="Tahoma">',
+					htmlClose: '</font>',
+					bbName: "font=tahoma,geneva,sans-serif", 
+					bbOpen:"[font=tahoma,geneva,sans-serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Tahoma"]': '[font=tahoma,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"times": {
+					title: "Times New Roman",
+					command: 'new NativeCommand("fontName", "Times New Roman")',
+					htmlOpen: '<font face="Times New Roman">',
+					htmlClose: '</font>',
+					bbName: "font=times new roman,times,serif", 
+					bbOpen:"[font=times new roman,times,serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Times New Roman"]': '[font=times new roman,times,serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"trebuchet": {
+					title: "Trebuchet MS",
+					command: 'new NativeCommand("fontName", "Trebuchet MS")',
+					htmlOpen: '<font face="Trebuchet MS">',
+					htmlClose: '</font>',
+					bbName: "font=trebuchet ms,helvetica,sans-serif", 
+					bbOpen:"[font=trebuchet ms,helvetica,sans-serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Trebuchet MS"]': '[font=trebuchet ms,helvetica,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+				},
+				"verdana": {
+					title: "Verdana",
+					command: 'new NativeCommand("fontName", "Verdana")',
+					htmlOpen: '<font face="Verdana">',
+					htmlClose: '</font>',
+					bbName: "font=verdana,geneva,sans-serif", 
+					bbOpen:"[font=verdana,geneva,sans-serif]",
+					bbClose:"[/font]",
+					htmlToBB: {'font[face="Verdana"]': '[font=verdana,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'} // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				}
 			},
 			smileList:			[
@@ -232,11 +424,34 @@
 				{title:"Шок",img: '<img src="{themePrefix}{themeName}/img/smiles/sm6.png" class="sm">',bbcode:":shock:"},
 				{title:"Злой",img: '<img src="{themePrefix}{themeName}/img/smiles/sm7.png" class="sm">',bbcode:":angry:"},
 				{title:"Тошнит",img: '<img src="{themePrefix}{themeName}/img/smiles/sm9.png" class="sm">',bbcode:":sick:"}
-			]
+			], //default smileList
+			bbPresets:	{
+				'phpbb3':	{
+					allButtons: {
+						"numlist": {
+							bbName: "list=1", 
+							bbOpen:"[list=1]\n[*]",
+							bbClose:"\n[/list]",
+							htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"},
+							bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'}
+						},
+						"code": {
+							htmlOpen: '<blockquote class="uncited"><div>',
+							htmlClose: '</div></blockquote>',
+							bbName: "code", 
+							bbOpen:"[code]",
+							bbClose:"[/code]",
+							htmlToBB: {'blockquote.uncited': '[code]%$(this).children("div").skipWBB().html()%[/code]'},
+							rootNode: 'blockquote.uncited',
+							contentSelector: '$(rootNode).children("div").html()'
+						}
+					}
+				}
+			}
 		}
 		$.extend(options, settings, extraSettings);
-		//wbbLog(options);
-		//wbbLog("Options.onlyBBmode: "+options.onlyBBmode);
+		//$.log(options);
+		//$.log("Options.onlyBBmode: "+options.onlyBBmode);
 		//init css prefix, if not set
 		if (!options.themePrefix) {
 			$('script').each(function(idx, el) {
@@ -250,10 +465,10 @@
 		isMobile = (function(a){if(/android.+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) {return true} else {return false}})(navigator.userAgent||navigator.vendor||window.opera);
 		IE6 = (navigator.userAgent.toLowerCase().indexOf('msie 6') != -1) && (navigator.userAgent.toLowerCase().indexOf('msie 7') == -1);
 		IE7 = (navigator.userAgent.toLowerCase().indexOf('msie 7') != -1);
-		//wbbLog(navigator.userAgent.toLowerCase());
+		//$.log(navigator.userAgent.toLowerCase());
 		return this.each(function() {
 			var txtArea,bbmode,updateListeners,selection,enabledButtons,txtAreaSync;
-			wbbLog("Init WysiBB");
+			$.log("Init WysiBB");
 			
 			var $txtArea = $(this);
 			var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc;
@@ -290,7 +505,7 @@
 				if (activeButtons && activeButtons.length>0) {
 					$.extend(options.allButtons,options.extraButtons);
 					delete options.extraButtons;
-					wbbLog("Create toolbar. Active buttons: "+activeButtons.length);
+					$.log("Create toolbar. Active buttons: "+activeButtons.length);
 					var $topBar = $txtArea.before('<div class="wysibb-toolbar"></div>').prev();
 					for (var i=0; i<activeButtons.length; i++) {
 						var btnname = $.trim(activeButtons[i].toLowerCase());
@@ -298,15 +513,58 @@
 							//create separator
 							$topBar.append('<div class="wysibb-toolbar-vert"></div>');
 							continue;
+						}else if (btnname=="-") {
+							//create line break
+							$topBar.append('<div class="wysibb-toolbar-linebreak"></div>');
+							continue;
 						}
 						var btnopt = options.allButtons[btnname];
 						if (btnopt) {
-							btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
-							var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt));
-							$topBar.append($btn);
-							var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
-							updateListeners.push(controller);
-							enabledButtons.push(btnname);
+							var type = btnopt.type;
+							if (type && type=="select") {
+								//create select box
+								var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-select" title="{title}"><div class="select-wrap"><span class="sel-value">{title}</span><div class="select-list"></div></div><span class="select-arrow"><span></span></span></div>',btnopt),document));
+								var $slistwrap = $btn.find(".select-wrap");
+								var $arrow = $btn.find(".select-arrow");
+								var $slist = $btn.find(".select-list").css("display","none");;
+								var optlist = (btnopt.options) ? btnopt.options.split(","):[];
+								//$.log(optlist);
+								var enoptions = [];
+								for (var j=0; j<optlist.length; j++) {
+									var oname = optlist[j];
+									var o = options.selectOptions[oname];
+									if (o) {
+										o.html = wbbStringFormat(o.htmlOpen+o.title+o.htmlClose);
+										var $option = $(createElementFromString(wbbStringFormat('<a href="javascript:void(0)" class="select-row isdefault-{isDefault}">{html}</a>',o),document));
+										$slist.append($option);
+										if (!o.isDefault) { //DEFAULT LISTENER OFF
+											$.extend(btnopt.htmlToBB,o.htmlToBB);
+											if (!o.bbToHTML) {
+												o.bbToHTML = {};
+												var bbkey = o.bbOpen+"(.*?)"+o.bbClose;
+												var bbval = o.htmlOpen+"$1"+o.htmlClose;
+												o.bbToHTML[bbkey] = bbval;
+												//$.log(o.bbToHTML);
+											}
+											$.extend(btnopt.bbToHTML,o.bbToHTML);
+										}
+										enoptions.push({opt:o,el:$option,option: oname});
+									}
+								}
+								var controller = new SelectController(enoptions, $btn,btnopt);		
+								updateListeners.push(controller);
+								enabledButtons.push(btnname);
+								$topBar.append($btn);
+								$btn.live("click",selectBoxToggle);
+							}else{
+								//create button
+								btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
+								var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt));
+								$topBar.append($btn);
+								var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
+								updateListeners.push(controller);
+								enabledButtons.push(btnname);
+							}
 						}
 					}
 					$topBar.append('<div class="wysibb-toolbar-btn btnModeSwitch" title="Показать BBcode" unselectable="on"><span class="ve-tlb-bbcode" unselectable="on"></span></div>');
@@ -337,11 +595,10 @@
 				//insert iframe if needed
 				if (options.onlyBBmode!==true) {
 					var frameWidth = $txtArea.width();
-					var frameHeight = $txtArea.height();
-					wbbLog("iFrame width:"+frameWidth);
+					var frameHeight = $txtArea.outerHeight();
 					
-					$txtArea.parents(".wysibb").css("width",frameWidth+"px");
-					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0");
+					$txtArea.parents(".wysibb").css("width",frameWidth+"px").css("max-width","100%");
+					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0").css("max-width","100%");
 					
 					$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:{width}px;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
 					
@@ -386,10 +643,16 @@
 						}
 						
 						//set listener for keyup and mouse up for iframe
-						$(iFrameDoc).bind("keyup mouseup", updateToolbar);
+						$(iFrameDoc).live("mouseup", updateToolbar);
+						
+						$(iFrameDoc).live("keyup", function(evt) {
+							if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
+								updateToolbar();
+							}
+						});
 						
 						//clear html on paste from external editors
-						$(iFrameBody).bind('paste',function() {
+						$(iFrameBody).live('paste',function() {
 							var el = $(this);
 							setTimeout(function() {
 								sanitizeHTML(el);
@@ -400,10 +663,11 @@
 						//init watching for txtArea
 						if (options.watchTxtArea===true) {
 							$(document).live('click',function(evt) {
+								//$.log(evt);
 								if (!bbmode) {
 									if ($(evt.target).parents(".wysibb").size()==0 ) {
 										if ($txtArea.data("prevVal")!=$txtArea.val()) {
-											wbbLog("txtArea has changed");
+											$.log("txtArea has changed");
 											selection.overrideWithNode(transformBBtoHTML($txtArea.val()),null,null,true,true);
 											$txtArea.val("");
 											$txtArea.data("prevVal","");
@@ -415,12 +679,12 @@
 						}
 						
 						//onEnter event, insert br
-						$(iFrameBody).bind("keydown",function(event) {
-							if (event.which == 13 && selection.getNode().tagName!="LI") {
+						$(iFrameBody).live("keydown",function(event) {
+							var parentLI = getContaining("li");
+							if (event.which == 13 && !parentLI) {
 								event.preventDefault();
 								iFrameBody.focus();
 								var snode = selection.getNode();
-								
 								if ((snode.tagName=="DIV" || snode.tagName=="BODY") && snode.lastChild.nodeName.toLowerCase()!="br") {
 									$(snode).append("<br/>");
 								}
@@ -442,7 +706,7 @@
 				}
 				
 				//set listener for keyup and mouse up for txtarea
-				$txtArea.bind("keyup mouseup", updateToolbar);
+				$txtArea.live("keyup mouseup", updateToolbar);
 			}
 			function CommandController(command, el, opt) {
 				this.updateUI = function() {
@@ -453,7 +717,7 @@
 				
 				$(el).attr("unselectable","on");
 				$(el).find("*").attr("unselectable","on");
-				$(el).bind("mousedown", function(event) { 
+				$(el).live("mousedown", function(event) { 
 					if (event.preventDefault) event.preventDefault();
 				});		
 				
@@ -462,12 +726,54 @@
 					updateToolbar();
 				});
 			}
+			function SelectController(optlist, el,sopt) {
+				//el - select box
+				var commandList=[];
+				this.updateUI = function() {
+					$(el).find(".sel-value").html(sopt.title);
+					$(optlist).each(function(idx,e) {
+						var command = commandList[e.option].cmd;
+						var opt = commandList[e.option].opt;
+						var state = command.queryState(opt);
+						if (state===true && !opt.isDefault) {
+							$(el).find(".sel-value").html(opt.title);
+							return false;
+						}
+					});
+				}
+				
+				$(el).attr("unselectable","on");
+				$(el).find("*").attr("unselectable","on");
+				$(el).live("mousedown", function(event) { 
+					if (event.preventDefault) event.preventDefault();
+				});		
+				
+				if (optlist.length>0) {
+					
+					for (var i=0; i<optlist.length; i++) {
+						var optrow = optlist[i].opt;
+						var elrow = optlist[i].el;
+						var optname = optlist[i].option
+						commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
+						//$.log(elrow);
+						$(elrow).attr("optname",optname).live('click',function() {
+							var oname = $(this).attr("optname");
+							commandList[oname].cmd.execute(commandList[oname].opt,optlist);
+							$(el).find(".sel-value").html(commandList[oname].opt.title);
+							$.log(el);
+							//$(el).removeClass("on");
+						});
+					}
+				}
+				
+			}
 			function updateToolbar() {
 				$(updateListeners).each(function(idx,controller){
 					controller.updateUI();
 				});
 			}
-			function NativeCommand(command) {
+			function NativeCommand(command,param) {
+				if (!param) {param=null;}
 				this.execute = function(opt) {
 					if (bbmode) {
 						var bbcode = opt.bbName;
@@ -480,12 +786,17 @@
 						}
 					}else{
 						iFrameBody.focus();
-						iFrameDoc.execCommand(command, false, null); 
+						iFrameDoc.execCommand(command, false, param); 
 					}
 				};
 				this.queryState = function(opt) {
 					//highlite if active tag
 					var bbcode = opt.bbName;
+					if (param) {
+						var cval = iFrameDoc.queryCommandValue(command)+"";
+						cval = cval.replace(/\'/g,"");
+						return (cval==param);
+					}
 					return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
 				};
 			}
@@ -514,7 +825,7 @@
 								var selHTML = selection.getHTML();
 								if (selHTML=="") {
 									//close cur tag, set selectio after this node;
-									wbbLog("Close cur tag");
+									$.log("Close cur tag");
 									var snode = selection.getNode();
 									var txtnode = createElementFromString("<span>&nbsp;</span>");
 									$(snode).after(txtnode);
@@ -524,11 +835,11 @@
 								}
 							}else{
 								//it is block, remove all
-								wbbLog("it is block, remove all");
+								$.log("it is block, remove all");
 								if (opt.contentSelector) {
 									var remRules = opt.contentSelector;
 									remRules = remRules.replace(/rootNode/g,"quoteBlock");
-									//wbbLog(remRules);
+									//$.log(remRules);
 									$quoteBlock.replaceWith(eval(remRules));
 								}
 							}
@@ -538,7 +849,7 @@
 							
 							if (selHTML=="") {
 								//open empty tag
-								wbbLog("open empty tag");
+								$.log("open empty tag");
 								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}&nbsp;{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
 								selection.overrideWithNode(crnode);
 								if ($(crnode).children().size()==0) {
@@ -561,7 +872,7 @@
 								if (opt.contentSelector) {
 									var remRules = opt.contentSelector;
 									remRules = remRules.replace(/rootNode/g,"el");
-									$(el).find(opt.rootNode).each(function(idx,el) {wbbLog(el); $(el).replaceWith(eval(remRules))});
+									$(el).find(opt.rootNode).each(function(idx,el) {$.log(el); $(el).replaceWith(eval(remRules))});
 								}
 								//end clear
 								
@@ -921,7 +1232,7 @@
 					var htmlToBB = currow.htmlToBB;
 					for (var matchel in htmlToBB) {
 						var bbrepl = htmlToBB[matchel];
-						//wbbLog("Match: '"+matchel+"' bb: '"+bbrepl+"'");
+						//$.log("Match: '"+matchel+"' bb: '"+bbrepl+"'");
 						cloneObj.find(matchel).each(function(idx,el) {
 							var bbReplCopy = bbrepl;
 							bbReplCopy = bbReplCopy.replace(/\%(.*?)\%/g,function(rpl) {
@@ -1134,86 +1445,6 @@
 						}
 					}
 				}
-				/* this.overrideWithNode_OLD = function(node,rng,removeEl,selInsideNode,notRemoveSelNode) {
-					if (!rng) {
-						rng = this.getRange();
-					}
-					iFrameBody.focus();
-					var w3c_selection = (window.getSelection) ? true:false;
-					var sel = selection.get();
-					var rootNode = this.getNodeByRange(rng);
-					
-					
-					if (removeEl) {
-						$(removeEl).remove();
-					}
-					
-					var $node;
-					var wnode=node;
-					
-					if (typeof(node)=="string") {
-
-						wnode = iFrameDoc.createElement("SPAN");
-						node = $.trim(node);
-						
-						if (node.substr(0,1)=="<" && node.substr(node.length-1,1)) {
-							//it is tag node
-							$node = $(node);
-							
-							//if ($node.html()=="") {$node.append(" ");} //bug in ie 7
-							$(wnode).append(node);
-						}else{
-							//it is only text   
-							$(wnode).html(node);
-						}
-					}else{
-						$node = $(node);
-					}
-					
-					if (notRemoveSelNode===true) {
-						if (rootNode.tagName!="BODY") { 
-							if ($(rootNode).parent().is("span")) {
-								//after wrap span
-								$(rootNode).parent().after(wnode); 
-							}else{
-								$(rootNode).after(wnode); 
-							}
-						}else{
-							$(rootNode).append(wnode);
-						}
-						
-					}else{ 
-						if($node && $node.is(rootNode.tagName)) {
-							$(rootNode).remove();
-						}else{
-							if (w3c_selection) { rng.deleteContents();}
-						}
-						
-						
-						if (w3c_selection) {
-							rng.insertNode(wnode);
-							
-							if (selInsideNode===true) {
-								rng.selectNodeContents(wnode);
-								rng.collapse(false);
-							}else{
-								wbbLog("Select after node");
-								rng.setStartAfter(wnode);
-								rng.setEndAfter(wnode);
-							}
-							
-							sel.removeAllRanges();
-							sel.addRange(rng);
-						}else{
-							
-							rng.pasteHTML(wnode.outerHTML);
-							rng.collapse();
-							rng.select();
-						}
-					}
-					
-					updateToolbar();
-				} */
 				this.overrideWithNode = function(node,rng,removeSelector) {
 					if (!rng) {
 						rng = this.getRange();
@@ -1224,16 +1455,8 @@
 					var rootNode = this.getNodeByRange(rng);
 					
 					//fix if node is text
-					var createFromText=false;
-					if (typeof(node)=="string" && (node.substr(0,1)!="<" || node.substr(node.length-1,1)!=">")) {
-						node = iFrameDoc.createTextNode(node);
-					}else if (typeof(node)=="string") {
-						//wrap to iFrameDoc for opera
-						/* var el = iFrameDoc.createElement("SPAN");
-						node = $(el).append(node).get(0);
-						createFromText=true; */
+					if (typeof(node)=="string") {
 						node = createElementFromString(node);
-						
 					}
 					var $wnode = $(node);
 					var wnode = $wnode.get(0);
@@ -1243,10 +1466,10 @@
 						if (containNode) {
 							$(containNode).remove();
 						}
-					}else{
-						if (w3c_selection) {
-							rng.deleteContents();
-						}
+					}
+					
+					if (w3c_selection) {
+						rng.deleteContents();
 					}
 					
 					if (w3c_selection) {
@@ -1257,10 +1480,15 @@
 						
 						sel.removeAllRanges();
 						sel.addRange(rng);
+						
 					}else{
 						rng.pasteHTML(wnode.outerHTML);
 						rng.collapse();
 						rng.select();
+					}
+					
+					if ($wnode.is("div,blockquote,table")) {
+						$wnode.after("<br/>");
 					}
 					
 					updateToolbar();
@@ -1309,20 +1537,6 @@
 						}
 					}
 				}
-				/* this.setSelectionAfterNode = function(node) {
-					var rng = this.getRange();
-					var sel = selection.get();
-					if (window.getSelection) {
-						rng.collapse();
-						rng.setStartAfter(node);
-						sel.removeAllRanges();
-						sel.addRange(rng);
-					}else{
-						rng.moveToElementText(node);
-						rng.collapse();
-						rng.select ();
-					}
-				} */
 			}
 			function sanitizeHTML(rootEl) {
 				$(rootEl).children().each(function() {
@@ -1372,15 +1586,35 @@
 			}
 			function smileAutoDetect() {
 				var smList=new Array();
-				$("img[alt=':)']:first").parent().parent().find("img").each(function(idx,el) {
-					var title = $(el).attr("title");
-					var bbcode = $(el).attr("alt");
-					var imghtml = el.outerHTML;
-					//wbbLog(imghtml);
-					if (title && bbcode) {
-						smList.push({title:title,img:imghtml,bbcode:bbcode});
-					}
-				});
+				var $sm1 = $("img[alt=':)']");
+				var $sm2 = $("img[alt=';)']");
+				
+				if ($sm1.size()>0 && $sm2.size()>0) {
+					//find common parent
+					var commonParent;
+					var $sm2parents = $sm2.parents();
+					$sm1.parents().each(function(idx,el) {
+						$sm2parents.each(function(idx2,el2) {
+							if (el==el2) {
+								commonParent=el;
+								return false;
+							}
+						});
+						if (commonParent) {
+							return false;
+						}
+					})
+					
+					$(commonParent).find("img[alt!='']").each(function(idx,el) {
+						var title = $(el).attr("title");
+						var bbcode = $(el).attr("alt");
+						var imghtml = el.outerHTML;
+						if (title && bbcode) {
+							smList.push({title:title,img:imghtml,bbcode:bbcode});
+						}
+					});
+				}
+			
 				if (smList.length>5) {
 					options.smileList = smList;
 				}
@@ -1412,7 +1646,7 @@
 				return str;
 			}
 			function initFormSubmit() {
-				wbbLog("initFormSubmit");
+				$.log("initFormSubmit");
 				$txtArea.parents("form").bind("submit",function() {
 					try {
 						$txtArea.val(transformHTMLtoBB(iFrameBody));
@@ -1424,7 +1658,7 @@
 				})
 			}
 			function tagKnife(tree,rootSelector) {
-				wbbLog("is is text, multievents");
+				$.log("is is text, multievents");
 								
 				var nd = selection.getNode();
 				var ndHTML = selection.getHTML();
@@ -1443,7 +1677,7 @@
 					var txtNode = iFrameDoc.createTextNode(ndHTML);
 					$nd.parents().each(function() {
 						if (!$(this).is(rootSelector)) {
-							wbbLog("Parent: "+this.tagName);
+							$.log("Parent: "+this.tagName);
 							var $p = $(this).clone().empty();
 							$p.append(txtNode);
 							txtNode = $p.get(0);
@@ -1452,7 +1686,7 @@
 						}
 					});
 					ndHTML = (txtNode.nodeType==3) ? txtNode.textContent:txtNode.outerHTML;
-					//wbbLog(ndHTML);
+					//$.log(ndHTML);
 				}else{
 					if (!$nd.is(rootSelector)) {
 						ndHTML = $nd.clone().empty().append(ndHTML).get(0).outerHTML;
@@ -1478,13 +1712,13 @@
 				//$af.contents().filter(filterCheckAfter).remove().end().find("*").contents().filter(filterCheckAfter).remove();
 				$af.contents().filter(filterCheckAfter).remove();
 				function filterCheckAfter(idx) {
-					//wbbLog(this);
+					//$.log(this);
 					if ($(this).attr("sl")==rnd) {
-						//wbbLog("Find node: "+this);
+						//$.log("Find node: "+this);
 						remove=false;
 						return true;
 					}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
-						//wbbLog("Find parent [after]:"+this);
+						//$.log("Find parent [after]:"+this);
 						$(this).contents().filter(filterCheckAfter).remove();
 						return false;
 					}
@@ -1493,9 +1727,9 @@
 				
 				$rootND.before($bf).after($af).replaceWith(ndHTML);
 				//selection.setSelectionAfterNode($af.get(0));
-				/* wbbLog($bf.get(0));
-				wbbLog($rootND.get(0));
-				wbbLog($af.get(0)); */
+				/* $.log($bf.get(0));
+				$.log($rootND.get(0));
+				$.log($af.get(0)); */
 				clearEmpty(iFrameBody);
 			}
 			function clearEmpty(root) {
@@ -1515,10 +1749,42 @@
 					}
 				}
 			}
-			function createElementFromString(nodestr) {
-				var el = iFrameDoc.createElement("SPAN");
-				el.innerHTML = nodestr;
-				return $(el).children().unwrap().get(0);
+			function createElementFromString(nodestr,doc) {
+				if (!doc) {
+					doc = iFrameDoc;
+				}
+				if (nodestr.indexOf("<")!=-1) {
+					var el = doc.createElement("SPAN");
+					el.innerHTML = nodestr;
+					return $(el).children().unwrap().get(0);
+				}else{
+					var el = doc.createTextNode(nodestr);
+					return el;
+				}
+			}
+			function selectBoxToggle(evt) {
+				var $el = $(this);
+				if ($el.hasClass("on")) {
+					//hide block
+					$el.removeClass("on");
+					$el.find(".select-list").hide();
+					$(document).die("mousedown",selectBoxHideEvent);
+					$(iFrameBody).die('mousedown',selectBoxHideEvent);
+				}else{
+					//show block
+					$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+					$el.addClass("on");
+					$el.find(".select-list").show();
+					$(document).live("mousedown",selectBoxHideEvent);
+					$(iFrameBody).live('mousedown',selectBoxHideEvent);
+				}
+			}
+			function selectBoxHideEvent(e) {
+				if ($(e.target).parents(".wysibb-toolbar-select").size()==0) {
+					$(window.parent.document.body).find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+					$(document).die('mousedown',selectBoxHideEvent);
+					$(iFrameBody).die('mousedown',selectBoxHideEvent);
+				}
 			}
 			
 			init();
@@ -1554,26 +1820,19 @@
 			$(document).bind("mousedown",documentClickEventHandler);
 		}
 		function documentClickEventHandler(e) {
-			
-			/* if ($(e.target).attr("id")=="wbbCloseModal") {
-				//close button click
-				$mw.hide();
-				$(document).unbind("mousedown",documentClickEventHandler);
-			}else  */
-			
 			if ($(e.target).parents("#wbbModalWindow").size()==0) {
 				//click on document
 				$("#wbbModalWindow").hide();
 				$(document).unbind("mousedown",documentClickEventHandler);
 			}
 		}
-		function wbbLog(msg) {
-			if (options.debug && typeof(console)!="undefined") {
-				console.log(msg);
-			}
-		}
 	}
 	$.fn.skipWBB = function(){
 		return $(this).attr("mustremoved","1");
 	};
+	$.log = function(msg) {
+		if (typeof(console)!="undefined") {
+			console.log(msg);
+		}
+	}
 })(jQuery);
