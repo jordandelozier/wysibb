@@ -1,13 +1,13 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.5.5
+	Version: 0.5.7
 */
 
 (function($) {
 	$.fn.wysibb = function(settings, extraSettings) {
 		var options,isMobile,IE6,IE7;
-		var version = "0.5.5";
+		var version = "0.5.7";
 		var options = {
 			debug:				true,
 			onlyBBmode:			false,
@@ -15,10 +15,9 @@
 			watchTxtArea:		true,
 			smileAutoDetect:	true,
 			themeName:			'default',
-			bbset:				'default',
-			themePrefix:		'http://www.wysibb.com/static/theme/',
+			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
-			textTags:			"span,font",
+			//textTags:			"span,font", //don't used
 			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
@@ -112,6 +111,16 @@
 					bbClose:"\n[/list]",
 					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"},
 					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'}
+				},
+				"numlist2": {
+					title:"Вставить список",
+					buttonHTML: '<span class="ve-tlb-list"></span>',
+					command: 'new NativeCommand("InsertUnorderedList")',
+					bbName: "list=1", 
+					bbOpen:"[list=1]\n[*]",
+					bbClose:"[/*]\n[/list]",
+					htmlToBB: {'ul': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
+					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list=1](.*?)[/list]':'<ul>$1</ul>'}
 				},
 				"justifyleft": {
 					title:"Текст по левому краю",
@@ -219,7 +228,7 @@
 					buttonHTML: '<span class="ve-tlb-quote"></span>',
 					command: 'new CustomCommand("quote")',
 					htmlOpen: '<div class="blockquote">',
-					htmlClose: '</div></div>',
+					htmlClose: '</div>',
 					bbName: "quote", 
 					bbOpen:"[quote]",
 					bbClose:"[/quote]",
@@ -321,7 +330,77 @@
 					bbName: "size=200", 
 					bbOpen:"[size=200]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="6"]': '[size=200]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="200"]': '[size=200]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs1": {
+					title: "1 (8pt)",
+					command: 'new NativeCommand("fontSize",1)',
+					htmlOpen: '<font size="1">',
+					htmlClose: '</font>',
+					bbName: "size=1", 
+					bbOpen:"[size=1]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="1"]': '[size=1]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs2": {
+					title: "2 (10pt)",
+					command: 'new NativeCommand("fontSize",2)',
+					htmlOpen: '<font size="2">',
+					htmlClose: '</font>',
+					bbName: "size=2", 
+					bbOpen:"[size=2]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="2"]': '[size=2]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs3": {
+					title: "3 (12pt)",
+					command: 'new NativeCommand("fontSize",3)',
+					htmlOpen: '<font size="2">',
+					htmlClose: '</font>',
+					bbName: "size=3", 
+					bbOpen:"[size=3]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="3"]': '[size=3]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs4": {
+					title: "4 (14pt)",
+					command: 'new NativeCommand("fontSize",4)',
+					htmlOpen: '<font size="4">',
+					htmlClose: '</font>',
+					bbName: "size=4", 
+					bbOpen:"[size=4]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="4"]': '[size=4]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs5": {
+					title: "5 (18pt)",
+					command: 'new NativeCommand("fontSize",5)',
+					htmlOpen: '<font size="5">',
+					htmlClose: '</font>',
+					bbName: "size=5", 
+					bbOpen:"[size=5]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="5"]': '[size=5]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs6": {
+					title: "6 (24pt)",
+					command: 'new NativeCommand("fontSize",6)',
+					htmlOpen: '<font size="6">',
+					htmlClose: '</font>',
+					bbName: "size=6", 
+					bbOpen:"[size=6]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="6"]': '[size=6]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+				},
+				"fs7": {
+					title: "7 (36pt)",
+					command: 'new NativeCommand("fontSize",7)',
+					htmlOpen: '<font size="7">',
+					htmlClose: '</font>',
+					bbName: "size=7", 
+					bbOpen:"[size=7]",
+					bbClose:"[/size]",
+					htmlToBB: {'font[size="7"]': '[size=7]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
 				},
 				"arial": {
 					title: "Arial",
@@ -411,7 +490,7 @@
 					bbName: "font=verdana,geneva,sans-serif", 
 					bbOpen:"[font=verdana,geneva,sans-serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Verdana"]': '[font=verdana,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'} // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					htmlToBB: {'font[face="Verdana"]': '[font=verdana,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
 				}
 			},
 			smileList:			[
@@ -424,30 +503,55 @@
 				{title:"Шок",img: '<img src="{themePrefix}{themeName}/img/smiles/sm6.png" class="sm">',bbcode:":shock:"},
 				{title:"Злой",img: '<img src="{themePrefix}{themeName}/img/smiles/sm7.png" class="sm">',bbcode:":angry:"},
 				{title:"Тошнит",img: '<img src="{themePrefix}{themeName}/img/smiles/sm9.png" class="sm">',bbcode:":sick:"}
-			], //default smileList
-			bbPresets:	{
-				'phpbb3':	{
-					allButtons: {
-						"numlist": {
-							bbName: "list=1", 
-							bbOpen:"[list=1]\n[*]",
-							bbClose:"\n[/list]",
-							htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%"},
-							bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'}
-						},
-						"code": {
-							htmlOpen: '<blockquote class="uncited"><div>',
-							htmlClose: '</div></blockquote>',
-							bbName: "code", 
-							bbOpen:"[code]",
-							bbClose:"[/code]",
-							htmlToBB: {'blockquote.uncited': '[code]%$(this).children("div").skipWBB().html()%[/code]'},
-							rootNode: 'blockquote.uncited',
-							contentSelector: '$(rootNode).children("div").html()'
-						}
+			] //default smileList
+		}
+		var presets = {
+			'phpbb3' : {
+				buttons: "bold,italic,underline,|,quote,code,bullist2,numlist,|,img,link,fontsizeselect",
+				allButtons : {
+					'fontsizeselect': {
+						options:	"fontsizedefault,fontverysmall,fontsmall,fontnormal,fontbig,fontverybig"
+					},
+					'quote': {
+						htmlOpen: '<blockquote class="uncited"><div>',
+						htmlClose: '</div></blockquote>',
+						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]'},
+						rootNode: 'blockquote.uncited'
+					},
+					'code': {
+						htmlOpen: '<dl class="codebox"><dt>Код: <a href="#">Выделить всё</a></dt><dd><code>',
+						htmlClose: '</code></dd></dl>',
+						htmlToBB: {'dl.codebox': '[code]%$(this).children("dt").skipWBB().next("dd").children("code").html()%[/code]'},
+						rootNode: 'dl.codebox'
 					}
 				}
+			},
+			'ipb3' : {
+				buttons: "bold,italic,underline,strike,sub,sup,|,link,img,bullist,numlist,|,fontsizeselect,fontfamilyselect,|,justifyleft,justifycenter,justifyright,|,quote,code",
+				allButtons : {
+					'fontsizeselect': {
+						options:	"fs1,fs2,fs3,fs4,fs5,fs6,fs7"
+					},
+					'quote': {
+						htmlOpen: '<div class="blockquote"><div class="quote">',
+						htmlClose: '</div></div>',
+						htmlToBB: {'div.blockquote': '[quote]%$(this).html()%[/quote]'},
+						rootNode: 'div.blockquote'
+					},
+					'code': {
+						htmlOpen: '<pre class="prettyprint">',
+						htmlClose: '</pre>',
+						htmlToBB: {'pre.prettyprint': '[quote]%$(this).html()%[/quote]'},
+						rootNode: 'pre.prettyprint'
+					},
+				}
 			}
+		}
+		
+		if (settings && settings.preset) {
+			$.log("Load preset: "+settings.preset);
+			var propt = presets[settings.preset] || {};
+			$.extend(true,options, propt);
 		}
 		$.extend(options, settings, extraSettings);
 		//$.log(options);
@@ -455,7 +559,7 @@
 		//init css prefix, if not set
 		if (!options.themePrefix) {
 			$('script').each(function(idx, el) {
-				var sriptMatch = $(el).get(0).src.match(/(.*)jquery\.wysibb(\.min)?\.js$/);
+				var sriptMatch = $(el).get(0).src.match(/(.*)jquery\.wysibb(\.min)?\.js.*$/);
 				if (sriptMatch !== null) {
 					options.themePrefix = sriptMatch[1];
 				}
@@ -471,7 +575,7 @@
 			$.log("Init WysiBB");
 			
 			var $txtArea = $(this);
-			var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc;
+			var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc,$iFrameBody;
 			txtArea = this;
 			bbmode=options.bbmode;
 			updateListeners=[];
@@ -503,7 +607,7 @@
 				//init toolbar
 				var activeButtons = options.buttons.split(",");
 				if (activeButtons && activeButtons.length>0) {
-					$.extend(options.allButtons,options.extraButtons);
+					$.extend(true,options.allButtons,options.extraButtons);
 					delete options.extraButtons;
 					$.log("Create toolbar. Active buttons: "+activeButtons.length);
 					var $topBar = $txtArea.before('<div class="wysibb-toolbar"></div>').prev();
@@ -597,10 +701,10 @@
 					var frameWidth = $txtArea.width();
 					var frameHeight = $txtArea.outerHeight();
 					
-					$txtArea.parents(".wysibb").css("width",frameWidth+"px").css("max-width","100%");
+					//$txtArea.parents(".wysibb").css("width",frameWidth+"px").css("max-width","100%");
 					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0").css("max-width","100%");
 					
-					$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:{width}px;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
+					$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:100%;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
 					
 					
 					//$txtArea.css("height",(frameHeight - $txtArea.parent().prev(".wysibb-toolbar").height() - $txtArea.parent().next(".wysibb-bottom-toolbar").height())+"px");
@@ -610,6 +714,7 @@
 						iFrameWindow=iFrame.contentWindow;
 						iFrameDoc = iFrame.contentWindow.document;
 						iFrameBody=iFrame.contentWindow.document.body;
+						$iFrameBody = $(iFrameBody);
 						var iFrameHead=iFrameDoc.getElementsByTagName('head')[0];
 						
 						//set styles from main page
@@ -622,7 +727,7 @@
 						});
 						
 						//set default styles for body
-						$(iFrameBody).css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
+						$iFrameBody.css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
 						
 						if (('contentEditable' in iFrameBody) && !isMobile) {
 							iFrameBody.contentEditable=true;
@@ -638,12 +743,13 @@
 						
 						//check if value exist
 						if ($txtArea.val()!="")  {
-							$(iFrameBody).html(transformBBtoHTML($txtArea.val()));
+							$iFrameBody.html(transformBBtoHTML($txtArea.val()));
 							$txtArea.val("");
+							checkForBR();
 						}
 						
 						//set listener for keyup and mouse up for iframe
-						$(iFrameDoc).live("mouseup", updateToolbar);
+						$(iFrameDoc).live("click", updateToolbar);
 						
 						$(iFrameDoc).live("keyup", function(evt) {
 							if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
@@ -652,7 +758,7 @@
 						});
 						
 						//clear html on paste from external editors
-						$(iFrameBody).live('paste',function() {
+						$iFrameBody.live('paste',function() {
 							var el = $(this);
 							setTimeout(function() {
 								sanitizeHTML(el);
@@ -671,6 +777,7 @@
 											selection.overrideWithNode(transformBBtoHTML($txtArea.val()),null,null,true,true);
 											$txtArea.val("");
 											$txtArea.data("prevVal","");
+											checkForBR();
 										}
 									}
 								}
@@ -679,7 +786,7 @@
 						}
 						
 						//onEnter event, insert br
-						$(iFrameBody).live("keydown",function(event) {
+						$iFrameBody.live("keydown",function(event) {
 							var parentLI = getContaining("li");
 							if (event.which == 13 && !parentLI) {
 								event.preventDefault();
@@ -722,8 +829,9 @@
 				});		
 				
 				$(el).click(function(evt) {
-					command.execute(opt); 	
+					command.execute(opt);
 					updateToolbar();
+					checkForBR();
 				});
 			}
 			function SelectController(optlist, el,sopt) {
@@ -816,20 +924,16 @@
 						iFrameBody.focus();
 						var quoteBlock = getContaining(tagfilter);
 						if (quoteBlock) {
-							//remove
-							
-							
 							$quoteBlock = $(quoteBlock);
 							if ($quoteBlock.is("span,font")) {
 								//is is text, multievents
 								var selHTML = selection.getHTML();
 								if (selHTML=="") {
 									//close cur tag, set selectio after this node;
-									$.log("Close cur tag");
 									var snode = selection.getNode();
-									var txtnode = createElementFromString("<span>&nbsp;</span>");
+									var txtnode = createElementFromString("<span>\uFEFF</span>");
 									$(snode).after(txtnode);
-									selection.setSelection(null,txtnode,0,1);
+									selection.setSelection(null,txtnode,0,0);
 								}else{
 									tagKnife(quoteBlock,opt.rootNode);
 								}
@@ -850,10 +954,10 @@
 							if (selHTML=="") {
 								//open empty tag
 								$.log("open empty tag");
-								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}&nbsp;{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
 								selection.overrideWithNode(crnode);
 								if ($(crnode).children().size()==0) {
-									selection.setSelection(null,crnode,0,1);
+									selection.setSelection(null,crnode,0,0);
 								}
 							}else{
 							
@@ -1111,10 +1215,10 @@
 								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
 								$(pblock).replaceWith(crnode);
 							}else{
-								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}&nbsp;{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
+								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
 								selection.overrideWithNode(crnode);
 							}
-							selection.setSelection(null,crnode,0,1);
+							selection.setSelection(null,crnode,0,0);
 						}
 					}
 				};
@@ -1195,13 +1299,16 @@
 			function modeSwitch(btn) {
 				if (bbmode) {
 					bbmode=false;
-					$(iFrameBody).html(transformBBtoHTML($txtArea.val()));
+					$iFrameBody.html(transformBBtoHTML($txtArea.val()));
 					$iFrame.show();
 					$txtArea.hide().val("");
 					$(btn).removeClass("on");
 					
 				}else{
 					bbmode=true;
+					if (iFrameBody && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+						$(iFrameBody.lastChild).remove();
+					}
 					$txtArea.val(transformHTMLtoBB(iFrameBody));
 					$iFrame.hide();
 					$txtArea.show();
@@ -1487,9 +1594,9 @@
 						rng.select();
 					}
 					
-					if ($wnode.is("div,blockquote,table")) {
+					/* if ($wnode.is("div,blockquote,table")) {
 						$wnode.after("<br/>");
-					}
+					} */
 					
 					updateToolbar();
 					return wnode;
@@ -1649,7 +1756,12 @@
 				$.log("initFormSubmit");
 				$txtArea.parents("form").bind("submit",function() {
 					try {
-						$txtArea.val(transformHTMLtoBB(iFrameBody));
+						if (!bbmode) {
+							if (iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+								$(iFrameBody.lastChild).remove();
+							}
+							$txtArea.val(transformHTMLtoBB(iFrameBody));
+						}
 						return true;
 					}catch(e){
 						$iFrame.after('<div style="color:red;font-siz:10px;padding:10px;">Ошибка при формировании bbcode.</div>"')
@@ -1769,21 +1881,26 @@
 					$el.removeClass("on");
 					$el.find(".select-list").hide();
 					$(document).die("mousedown",selectBoxHideEvent);
-					$(iFrameBody).die('mousedown',selectBoxHideEvent);
+					$iFrameBody.die('mousedown',selectBoxHideEvent);
 				}else{
 					//show block
 					$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
 					$el.addClass("on");
 					$el.find(".select-list").show();
 					$(document).live("mousedown",selectBoxHideEvent);
-					$(iFrameBody).live('mousedown',selectBoxHideEvent);
+					$iFrameBody.live('mousedown',selectBoxHideEvent);
 				}
 			}
 			function selectBoxHideEvent(e) {
 				if ($(e.target).parents(".wysibb-toolbar-select").size()==0) {
 					$(window.parent.document.body).find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
 					$(document).die('mousedown',selectBoxHideEvent);
-					$(iFrameBody).die('mousedown',selectBoxHideEvent);
+					$iFrameBody.die('mousedown',selectBoxHideEvent);
+				}
+			}
+			function checkForBR() {
+				if (!bbmode && iFrameBody.lastChild.nodeName.toLowerCase()!="br") { //fix br
+					$iFrameBody.append("<br/>");
 				}
 			}
 			
@@ -1826,6 +1943,11 @@
 				$(document).unbind("mousedown",documentClickEventHandler);
 			}
 		}
+		/* function wbbLog(msg) {
+			if (options.debug && typeof(console)!="undefined") {
+				console.log(msg);
+			}
+		} */
 	}
 	$.fn.skipWBB = function(){
 		return $(this).attr("mustremoved","1");
