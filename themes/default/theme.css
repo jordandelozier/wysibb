@@ -11,31 +11,31 @@
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn.off,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:active{cursor:default;opacity:0.3;border:0;padding:2px 3px;box-shadow:none}
 .wysibb .wysibb-toolbar .wysibb-toolbar-vert{display:inline-block;*display:inline;zoom: 1;/* margin-top:8px; */width:21px;height:27px;background:url(//www.wysibb.com/static/theme/default/img/vert.png) 0 0 no-repeat;}
 .wysibb-toolbar-linebreak{}
-.ve-tlb-bold{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 0 no-repeat;width:20px;}
-.ve-tlb-italic{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -40px no-repeat;width:20px;}
-.ve-tlb-underline{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -20px no-repeat;width:20px;}
-.ve-tlb-strike{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -120px no-repeat;width:20px;}
-.ve-tlb-link{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -80px no-repeat;width:20px;}
-.ve-tlb-unlink{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -100px no-repeat;width:20px;}
-.ve-tlb-img{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -60px no-repeat;width:20px;}
-.ve-tlb-quote{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -140px no-repeat;width:20px;}
-.ve-tlb-spoiler{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -160px no-repeat;width:20px;}
-.ve-tlb-list{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -180px no-repeat;width:20px;}
-.ve-tlb-bbcode{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -200px no-repeat;width:40px !important;margin:1px auto !important;}
-.ve-tlb-numlist{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -220px no-repeat;width:20px;}
-.ve-tlb-textleft{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -240px no-repeat;width:20px;}
-.ve-tlb-textcenter{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -260px no-repeat;width:20px;}
-.ve-tlb-textright{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -280px no-repeat;width:20px;}
-.ve-tlb-offtopic{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -300px no-repeat;width:20px;}
-.ve-tlb-code{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -320px no-repeat;width:20px;}
-.ve-tlb-spoiler{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -340px no-repeat;width:20px;}
-.ve-tlb-sub{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -360px no-repeat;width:20px;}
-.ve-tlb-sup{background:url(//www.wysibb.com/static/theme/default/img/icons.png) 0 -380px no-repeat;width:20px;}
+.ve-tlb-bold{background:url(./img/icons.png) 0 0 no-repeat;width:20px;}
+.ve-tlb-italic{background:url(./img/icons.png) 0 -40px no-repeat;width:20px;}
+.ve-tlb-underline{background:url(./img/icons.png) 0 -20px no-repeat;width:20px;}
+.ve-tlb-strike{background:url(./img/icons.png) 0 -120px no-repeat;width:20px;}
+.ve-tlb-link{background:url(./img/icons.png) 0 -80px no-repeat;width:20px;}
+.ve-tlb-unlink{background:url(./img/icons.png) 0 -100px no-repeat;width:20px;}
+.ve-tlb-img{background:url(./img/icons.png) 0 -60px no-repeat;width:20px;}
+.ve-tlb-quote{background:url(./img/icons.png) 0 -140px no-repeat;width:20px;}
+.ve-tlb-spoiler{background:url(./img/icons.png) 0 -160px no-repeat;width:20px;}
+.ve-tlb-list{background:url(./img/icons.png) 0 -180px no-repeat;width:20px;}
+.ve-tlb-bbcode{background:url(./img/icons.png) 0 -200px no-repeat;width:40px !important;margin:1px auto !important;}
+.ve-tlb-numlist{background:url(./img/icons.png) 0 -220px no-repeat;width:20px;}
+.ve-tlb-textleft{background:url(./img/icons.png) 0 -240px no-repeat;width:20px;}
+.ve-tlb-textcenter{background:url(./img/icons.png) 0 -260px no-repeat;width:20px;}
+.ve-tlb-textright{background:url(./img/icons.png) 0 -280px no-repeat;width:20px;}
+.ve-tlb-offtopic{background:url(./img/icons.png) 0 -300px no-repeat;width:20px;}
+.ve-tlb-code{background:url(./img/icons.png) 0 -320px no-repeat;width:20px;}
+.ve-tlb-spoiler{background:url(./img/icons.png) 0 -340px no-repeat;width:20px;}
+.ve-tlb-sub{background:url(./img/icons.png) 0 -360px no-repeat;width:20px;}
+.ve-tlb-sup{background:url(./img/icons.png) 0 -380px no-repeat;width:20px;}
 
 /* SELECT BOX */
 .wysibb-toolbar-select{display: inline-block;*display:inline;zoom:1;outline:none;vertical-align: top;overflow:visible;width:100px;height:24px;border:1px solid #ddd;border-radius:3px;padding-right:14px;position:relative;cursor:pointer;margin:5px;font-size:14px;}
 .wysibb-toolbar-select .select-arrow{width:16px;height:24px;display:block;position:absolute;right:0;top:0;background:#f5f5f5;border-left:1px solid #ddd;}
-.wysibb-toolbar-select .select-arrow span{width:15px;height:24px;display:block;position:absolute;right:0;top:0;background:url(//www.wysibb.com/static/theme/default/img/icons.png) -4px -417px no-repeat;}
+.wysibb-toolbar-select .select-arrow span{width:15px;height:24px;display:block;position:absolute;right:0;top:0;background:url(./img/icons.png) -4px -417px no-repeat;}
 .wysibb-toolbar-select .select-wrap{background:#fff;height:24px;position:relative;}
 .wysibb-toolbar-select:hover,.wysibb-toolbar-select.on{box-shadow:0px 0px 3px #aaa;border:1px solid #aaa;background:#dedede}
 /* .wysibb-toolbar-select:hover .select-wrap,.wysibb-toolbar-select.on .select-wrap{background:#fffef5} */
@@ -48,6 +48,21 @@
 .wysibb-toolbar-select .select-wrap .select-list .isdefault-true{background:#eee;font-size:12px;font-weight:bold;border-bottom:1px solid #ddd}
 .wysibb-toolbar-select .select-wrap  .sel-value{display:block;overflow:hidden;font-size:11px;color:#555;height:24px;line-height:24px;padding:0 5px;text-overflow:ellipsis;white-space: nowrap;}
 /* END SELECT BOX */
+
+/* COLOR PICKER */
+.wysibb-toolbar-colorpicker{display: inline-block;*display:inline;zoom:1;outline:none;vertical-align: top;overflow:visible;/* width:24px; */height:24px;border-radius:3px;padding:1px 14px 1px 1px;position:relative;cursor:pointer;margin:5px;font-size:14px;}
+.wysibb-toolbar-colorpicker:hover{box-shadow:0px 0px 3px #aaa;border:1px solid #aaa;padding:0 13px 0 0}
+.wysibb-toolbar-colorpicker.on{box-shadow:inset 0px 0px 3px #aaa;background:#ddd;z-index:10;}
+.wysibb-toolbar-colorpicker .cpicker-dropdown{position:absolute;right:1px;top:0px;width:10px;height:24px;border-radius: 0 3px 3px 0;background:url(./img/icons.png) -6px -398px;}
+.wysibb-toolbar-colorpicker .val{width:24px;height:24px;background:url(./img/icons.png) 5px -436px;position:relative;}
+.wysibb-toolbar-colorpicker  .val .val-line{display:block;position:absolute;width:20px;height:3px;background:#000;bottom:3px;left:5px;}
+.wysibb-toolbar-colorpicker .clist{position:absolute;left:-1px;top:24px;width:190px;background:#fff;padding:5px;border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;cursor:default;display:none}
+.wysibb-toolbar-colorpicker .clist .pl{display:block;height:5px;}
+.wysibb-toolbar-colorpicker .clist .nocolor{height:24px;text-align:center;font-size:12px;margin:0 0 5px 0;line-height:24px;cursor:pointer;}
+.wysibb-toolbar-colorpicker .clist .nocolor:hover{background:#eee}
+.wysibb-toolbar-colorpicker .clist .scolor{width:16px;height:16px;margin:1px 1px 2px 2px;display: inline-block;*display:inline;zoom:1;cursor:pointer;}
+.wysibb-toolbar-colorpicker .clist .scolor:hover{border:1px solid #333;margin:0 0 1px 1px;box-shadow:0px 0px 3px #aaa;}
+/* END COLOR PICKER */
 
 
 .wysibb .wysibb-text{border:1px solid #ddd;padding:5px;background:#fff;font-size:0.9em;margin:0;}

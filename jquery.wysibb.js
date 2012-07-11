@@ -9,6 +9,7 @@
 		var options,isMobile,IE6,IE7;
 		var version = "0.5.7";
 		var options = {
+			version: 			"0.5.7",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -17,8 +18,7 @@
 			themeName:			'default',
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
-			//textTags:			"span,font", //don't used
-			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -247,8 +247,23 @@
 					title:		"Шрифт текста",
 					type:		"select",
 					options:	"fontfamilydefault,arial,comic_sans_ms,courier_new,georgia,lucida,tahoma,times,trebuchet,verdana", //default select list, IPB3.3
-					htmlToBB:	{},
-					bbToHTML:	{}
+					htmlToBB:	{}
+				},
+				"fontcolor": {
+					title:		"Цвет текста",
+					type:		"colorpicker",
+					buttonHTML: '<div class="val"><span class="val-line"></span></div>',
+					command: 	'new NativeCommand("foreColor","{color}")',
+					colorList:	"#000000,#444444,#666666,#999999,#b6b6b6,#cccccc,#d8d8d8,#efefef,#f4f4f4,#ffffff,-, \
+								 #ff0000,#980000,#ff7700,#ffff00,#00ff00,#00ffff,#1e84cc,#0000ff,#9900ff,#ff00ff,-, \
+								 #f4cccc,#dbb0a7,#fce5cd,#fff2cc,#d9ead3,#d0e0e3,#c9daf8,#cfe2f3,#d9d2e9,#ead1dc, \
+								 #ea9999,#dd7e6b,#f9cb9c,#ffe599,#b6d7a8,#a2c4c9,#a4c2f4,#9fc5e8,#b4a7d6,#d5a6bd, \
+								 #e06666,#cc4125,#f6b26b,#ffd966,#93c47d,#76a5af,#6d9eeb,#6fa8dc,#8e7cc3,#c27ba0, \
+								 #cc0000,#a61c00,#e69138,#f1c232,#6aa84f,#45818e,#3c78d8,#3d85c6,#674ea7,#a64d79, \
+								 #900000,#85200C,#B45F06,#BF9000,#38761D,#134F5C,#1155Cc,#0B5394,#351C75,#741B47, \
+								 #660000,#5B0F00,#783F04,#7F6000,#274E13,#0C343D,#1C4587,#073763,#20124D,#4C1130",
+					htmlToBB: {'font[color*="#"]': '[color=%$(this).attr("color")%]%$(this).removeAttr("color").get(0).outerHTML%[/color]'},
+					bbToHTML: {'[color=[[\"\']]?(.*?)[[\"\']]?](.*?)[/color]':'<font color="$1">$2</font>'}
 				},
 				'wbbConvertation': {
 					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
@@ -290,7 +305,7 @@
 					bbName: "size=50", 
 					bbOpen:"[size=50]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="1"]': '[size=50]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="1"]': '[size=50]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fontsmall": {
 					title: "Маленький",
@@ -300,7 +315,7 @@
 					bbName: "size=85", 
 					bbOpen:"[size=85]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="2"]': '[size=85]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="2"]': '[size=85]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fontnormal": {
 					title: "Нормальный",
@@ -310,7 +325,7 @@
 					bbName: "size=100", 
 					bbOpen:"[size=100]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="3"]': '[size=100]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="3"]': '[size=100]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fontbig": {
 					title: "Большой",
@@ -320,7 +335,7 @@
 					bbName: "size=150", 
 					bbOpen:"[size=150]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="4"]': '[size=150]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="4"]': '[size=150]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fontverybig": {
 					title: "Очень большой",
@@ -330,7 +345,7 @@
 					bbName: "size=200", 
 					bbOpen:"[size=200]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="200"]': '[size=200]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="200"]': '[size=200]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs1": {
 					title: "1 (8pt)",
@@ -340,7 +355,7 @@
 					bbName: "size=1", 
 					bbOpen:"[size=1]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="1"]': '[size=1]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="1"]': '[size=1]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs2": {
 					title: "2 (10pt)",
@@ -350,7 +365,7 @@
 					bbName: "size=2", 
 					bbOpen:"[size=2]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="2"]': '[size=2]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="2"]': '[size=2]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs3": {
 					title: "3 (12pt)",
@@ -360,7 +375,7 @@
 					bbName: "size=3", 
 					bbOpen:"[size=3]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="3"]': '[size=3]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="3"]': '[size=3]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs4": {
 					title: "4 (14pt)",
@@ -370,7 +385,7 @@
 					bbName: "size=4", 
 					bbOpen:"[size=4]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="4"]': '[size=4]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="4"]': '[size=4]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs5": {
 					title: "5 (18pt)",
@@ -380,7 +395,7 @@
 					bbName: "size=5", 
 					bbOpen:"[size=5]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="5"]': '[size=5]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="5"]': '[size=5]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs6": {
 					title: "6 (24pt)",
@@ -390,7 +405,7 @@
 					bbName: "size=6", 
 					bbOpen:"[size=6]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="6"]': '[size=6]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="6"]': '[size=6]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs7": {
 					title: "7 (36pt)",
@@ -400,7 +415,7 @@
 					bbName: "size=7", 
 					bbOpen:"[size=7]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="7"]': '[size=7]%$(this).attr("size",false).get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="7"]': '[size=7]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"arial": {
 					title: "Arial",
@@ -410,7 +425,7 @@
 					bbName: "font=arial", 
 					bbOpen:"[font=arial]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="arial"]': '[font=arial]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="arial"]': '[font=arial]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"comic_sans_ms": {
 					title: "Comic Sans MS",
@@ -420,7 +435,7 @@
 					bbName: "font=comic sans ms,cursive", 
 					bbOpen:"[font=comic sans ms,cursive]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Comic Sans MS"]': '[font=comic sans ms,cursive]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Comic Sans MS"]': '[font=comic sans ms,cursive]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"courier_new": {
 					title: "Courier New",
@@ -430,7 +445,7 @@
 					bbName: "font=courier new,courier,monospace", 
 					bbOpen:"[font=courier new,courier,monospace]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Courier New"]': '[font=courier new,courier,monospace]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Courier New"]': '[font=courier new,courier,monospace]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"georgia": {
 					title: "Georgia",
@@ -440,7 +455,7 @@
 					bbName: "font=georgia,serif", 
 					bbOpen:"[font=georgia,serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Georgia"]': '[font=georgia,serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Georgia"]': '[font=georgia,serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"lucida": {
 					title: "Lucida Sans Unicode",
@@ -450,7 +465,7 @@
 					bbName: "font=lucida sans unicode,lucida grande,sans-serif", 
 					bbOpen:"[font=lucida sans unicode,lucida grande,sans-serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Lucida Sans Unicode"]': '[font=lucida sans unicode,lucida grande,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Lucida Sans Unicode"]': '[font=lucida sans unicode,lucida grande,sans-serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"tahoma": {
 					title: "Tahoma",
@@ -460,7 +475,7 @@
 					bbName: "font=tahoma,geneva,sans-serif", 
 					bbOpen:"[font=tahoma,geneva,sans-serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Tahoma"]': '[font=tahoma,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Tahoma"]': '[font=tahoma,geneva,sans-serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"times": {
 					title: "Times New Roman",
@@ -470,7 +485,7 @@
 					bbName: "font=times new roman,times,serif", 
 					bbOpen:"[font=times new roman,times,serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Times New Roman"]': '[font=times new roman,times,serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Times New Roman"]': '[font=times new roman,times,serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"trebuchet": {
 					title: "Trebuchet MS",
@@ -480,7 +495,7 @@
 					bbName: "font=trebuchet ms,helvetica,sans-serif", 
 					bbOpen:"[font=trebuchet ms,helvetica,sans-serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Trebuchet MS"]': '[font=trebuchet ms,helvetica,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Trebuchet MS"]': '[font=trebuchet ms,helvetica,sans-serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				},
 				"verdana": {
 					title: "Verdana",
@@ -490,7 +505,7 @@
 					bbName: "font=verdana,geneva,sans-serif", 
 					bbOpen:"[font=verdana,geneva,sans-serif]",
 					bbClose:"[/font]",
-					htmlToBB: {'font[face="Verdana"]': '[font=verdana,geneva,sans-serif]%$(this).attr("face",false).get(0).outerHTML%[/font]'}
+					htmlToBB: {'font[face="Verdana"]': '[font=verdana,geneva,sans-serif]%$(this).removeAttr("face").get(0).outerHTML%[/font]'}
 				}
 			},
 			smileList:			[
@@ -543,7 +558,7 @@
 						htmlClose: '</pre>',
 						htmlToBB: {'pre.prettyprint': '[quote]%$(this).html()%[/quote]'},
 						rootNode: 'pre.prettyprint'
-					},
+					}
 				}
 			}
 		}
@@ -554,8 +569,7 @@
 			$.extend(true,options, propt);
 		}
 		$.extend(options, settings, extraSettings);
-		//$.log(options);
-		//$.log("Options.onlyBBmode: "+options.onlyBBmode);
+
 		//init css prefix, if not set
 		if (!options.themePrefix) {
 			$('script').each(function(idx, el) {
@@ -600,7 +614,7 @@
 			}
 			function buildEditor() {
 				$txtArea.css("border","0").css("outline","none");
-				$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css" />',options));
+				$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',options));
 				
 				$txtArea.wrap('<div class="wysibb"></div>');
 				
@@ -625,7 +639,7 @@
 						var btnopt = options.allButtons[btnname];
 						if (btnopt) {
 							var type = btnopt.type;
-							if (type && type=="select") {
+							if (type && type=="select") { //select box
 								//create select box
 								var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-select" title="{title}"><div class="select-wrap"><span class="sel-value">{title}</span><div class="select-list"></div></div><span class="select-arrow"><span></span></span></div>',btnopt),document));
 								var $slistwrap = $btn.find(".select-wrap");
@@ -660,6 +674,26 @@
 								enabledButtons.push(btnname);
 								$topBar.append($btn);
 								$btn.live("click",selectBoxToggle);
+							}else if (type && type=="colorpicker") { //colorpicker
+								//create color picker
+								var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-colorpicker" title="{title}">{buttonHTML}<span class="cpicker-dropdown"></span><div class="clist"><div class="nocolor" title="Не выбран">Авто</div></div>',btnopt),document));
+								var $clist = $btn.find("div.clist");
+								var colorlist = (btnopt.colorList) ? btnopt.colorList.split(","):[];
+								for (var j=0; j<colorlist.length; j++) {
+									var oname = $.trim(colorlist[j]) || "";
+									colorlist[j]=oname;
+									if (oname=="-") {
+										//insert padding
+										$clist.append('<span class="pl"></span>');
+									}else{
+										$clist.append(wbbStringFormat('<div class="scolor" style="background:{color}" title="{color}"></div>',{color:oname}));
+									}
+								}
+								var controller = new ColorPickerController(colorlist, $btn,btnopt);		
+								updateListeners.push(controller);
+								enabledButtons.push(btnname);
+								$topBar.append($btn);
+								$btn.live("click",colorPickerToggle);
 							}else{
 								//create button
 								btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
@@ -679,7 +713,7 @@
 				}
 				
 				//init smilelist
-				if (options.smileList) {
+				if (options.smileList && options.smileList.length>0) {
 					var $bottomBar = $txtArea.after('<div class="wysibb-toolbar wysibb-bottom-toolbar"></div>').next();
 					for (var i=0; i<options.smileList.length; i++) {
 						var curSmile = options.smileList[i];
@@ -863,15 +897,54 @@
 						var elrow = optlist[i].el;
 						var optname = optlist[i].option
 						commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
-						//$.log(elrow);
 						$(elrow).attr("optname",optname).live('click',function() {
 							var oname = $(this).attr("optname");
-							commandList[oname].cmd.execute(commandList[oname].opt,optlist);
+							commandList[oname].cmd.execute(commandList[oname].opt);
 							$(el).find(".sel-value").html(commandList[oname].opt.title);
-							$.log(el);
 							//$(el).removeClass("on");
 						});
 					}
+				}
+				
+			}
+			function ColorPickerController(colorlist, el,sopt) {
+				//el - colorpicker
+				var commandList=[];
+				this.updateUI = function() {
+					$(el).find(".val-line").css("background-color","#000000");
+					$(colorlist).each(function(idx,color) {
+						var command = commandList[color].cmd;
+						var state = command.queryState(commandList[color].opt);
+						if (state===true) {
+							$(el).find(".val-line").css("background-color",color);
+							return false;
+						}
+					});
+					
+				}
+				
+				$(el).attr("unselectable","on");
+				$(el).find("*").attr("unselectable","on");
+				$(el).live("mousedown", function(event) { 
+					if (event.preventDefault) event.preventDefault();
+				});		
+				
+				if (colorlist.length>0) {
+					for (var i=0; i<colorlist.length; i++) {
+						var colorname = colorlist[i];
+						commandList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
+					}
+					$(el).find("div.scolor").live("click",function() {
+						var colorname = $(this).attr("title");
+						commandList[colorname].cmd.execute(commandList[colorname].opt);
+						updateToolbar();
+					});
+					
+					$(el).find("div.nocolor").live("click",function() {
+						var colorname = "#000000";
+						commandList[colorname].cmd.execute(commandList[colorname].opt);
+						updateToolbar();
+					});
 				}
 				
 			}
@@ -903,6 +976,9 @@
 					if (param) {
 						var cval = iFrameDoc.queryCommandValue(command)+"";
 						cval = cval.replace(/\'/g,"");
+						if (command=="foreColor") {
+							cval = colorToHex(cval);
+						}
 						return (cval==param);
 					}
 					return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
@@ -1306,7 +1382,7 @@
 					
 				}else{
 					bbmode=true;
-					if (iFrameBody && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+					if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
 						$(iFrameBody.lastChild).remove();
 					}
 					$txtArea.val(transformHTMLtoBB(iFrameBody));
@@ -1898,12 +1974,61 @@
 					$iFrameBody.die('mousedown',selectBoxHideEvent);
 				}
 			}
+			function colorPickerToggle(evt) {
+				var $el = $(this);
+				if ($el.hasClass("on")) {
+					//hide block
+					$el.attr("title","Цвет текста");
+					$el.removeClass("on");
+					$el.find(".clist").hide();
+					$(document).die("mousedown",colorPickerHideEvent);
+					$iFrameBody.die('mousedown',colorPickerHideEvent);
+				}else{
+					//show block
+					$el.removeAttr("title",false);
+					$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+					$el.addClass("on");
+					$el.find(".clist").show();
+					$(document).live("mousedown",colorPickerHideEvent);
+					$iFrameBody.live('mousedown',colorPickerHideEvent);
+				}
+			}
+			function colorPickerHideEvent(e) {
+				if ($(e.target).parents(".wysibb-toolbar-colorpicker").size()==0) {
+					$(window.parent.document.body).find(".wysibb-toolbar-colorpicker").removeClass("on").find(".clist").hide();
+					$(document).die('mousedown',selectBoxHideEvent);
+					$iFrameBody.die('mousedown',selectBoxHideEvent);
+				}
+			}
 			function checkForBR() {
 				if (!bbmode && iFrameBody.lastChild.nodeName.toLowerCase()!="br") { //fix br
 					$iFrameBody.append("<br/>");
 				}
 			}
-			
+			function colorToHex(color) {
+				
+				if (color.substr(0, 1) === '#') {
+					return color;
+				}
+				if (color.indexOf("rgb")==-1) {
+					//ie
+					color = parseInt(color);
+					color = ((color & 0x0000ff) << 16) | (color & 0x00ff00) | ((color & 0xff0000) >>> 16);
+					return '#'+color.toString(16);
+				}
+				
+				var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+				
+				var red = parseInt(digits[2]);
+				var green = parseInt(digits[3]);
+				var blue = parseInt(digits[4]);
+				if (red==0 && green==0 && blue==0) {return "#000000";}
+				
+				var rgb = blue | (green << 8) | (red << 16);
+				var r = rgb.toString(16);
+				if (r.length<6) {r="000000"+r;r=r.substr(r.length-6,6);}
+				return '#' + r;
+			}
 			init();
 		});
 		
