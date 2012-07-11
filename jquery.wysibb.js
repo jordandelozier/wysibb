@@ -9,7 +9,6 @@
 		var options,isMobile,IE6,IE7;
 		var version = "0.5.7";
 		var options = {
-			version: 			"0.5.7",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -614,7 +613,7 @@
 			}
 			function buildEditor() {
 				$txtArea.css("border","0").css("outline","none");
-				$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',options));
+				$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css" />',options));
 				
 				$txtArea.wrap('<div class="wysibb"></div>');
 				
@@ -1833,7 +1832,7 @@
 				$txtArea.parents("form").bind("submit",function() {
 					try {
 						if (!bbmode) {
-							if (iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+							if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
 								$(iFrameBody.lastChild).remove();
 							}
 							$txtArea.val(transformHTMLtoBB(iFrameBody));
