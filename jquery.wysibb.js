@@ -19,7 +19,7 @@
 			smileAutoDetect:	true,
 			themeName:			'default',
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
-			validTags:			["a","b","i","s","u","div","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
+			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
 			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
@@ -755,6 +755,8 @@
 					$iFrameBody = $(iFrameBody);
 					var iFrameHead=iFrameDoc.getElementsByTagName('head')[0];
 					
+					
+					
 					//set styles from main page
 					$(document.getElementsByTagName('head')[0]).find("link[rel='stylesheet']").each(function(idx,el) {
 						$(iFrameHead).append($(el).clone());
@@ -763,6 +765,8 @@
 					$(document.body).find("link[rel='stylesheet']").each(function(idx,el) {
 						$(iFrameHead).append($(el).clone());
 					});
+					
+					
 					
 					//set default styles for body
 					$iFrameBody.css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
@@ -779,6 +783,7 @@
 						bbmode=true;
 					}
 					
+				
 					//check if value exist
 					if ($txtArea.val()!="")  {
 						$iFrameBody.html(transformBBtoHTML($txtArea.val()));
@@ -796,12 +801,24 @@
 					});
 					
 					//clear html on paste from external editors
-					$iFrameBody.live('paste',function() {
-						var el = $(this);
-						setTimeout(function() {
-							sanitizeHTML(el);
-						}, 10);
+					$(iFrameDoc).live('keydown', function(e) {
+						if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
+							$(iFrameBody).removeAttr("contentEditable");
+							var tmpel = createElementFromString('<div></div>',iFrameDoc);
+							$(tmpel).attr('contenteditable', 'true').attr('class', 'paste').appendTo(iFrameBody).on('paste', function(e) {
+								setTimeout(function() {
+									var text = $(tmpel).text();
+									sanitizeHTML(tmpel);
+									var html = $(tmpel).html();
+									$(tmpel).remove();
+									$(iFrameBody).attr("contentEditable","true");
+									iFrameBody.focus();
+									selection.overrideWithNode("<span>"+html+"</span>",null);
+								}, 1);
+							}).focus();
+						}
 					});
+					
 					
 					
 					//init watching for txtArea
@@ -1035,6 +1052,7 @@
 							//open empty tag
 							$.log("open empty tag");
 							var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+							$(crnode).attr("wbb","true");
 							selection.overrideWithNode(crnode);
 							if ($(crnode).children().size()==0) {
 								selection.setSelection(null,crnode,0,0);
@@ -1067,6 +1085,7 @@
 							}else{
 								selection.overrideWithNode(reshtml,null);
 							}
+							$(iFrameDoc).attr("wbb","true");
 						}
 					}
 					
@@ -1474,7 +1493,6 @@
 			
 			html = html.replace(/\</g,"&lt;");
 			html = html.replace(/\>/g,"&gt;");
-			$.log(bbtext);
 			for (var i=0; i<options.smileList.length; i++) {
 				var repl = options.smileList[i];
 				var smbb = repl.bbcode;
@@ -1730,35 +1748,25 @@
 			}
 		}
 		function sanitizeHTML(rootEl) {
-			$(rootEl).children().each(function() {
+			$(rootEl).find("*").filter(function() {
 				var elname = $(this)[0].tagName.toLowerCase();
-				
-				if ($.inArray(elname,options.validTags)!=-1) {
+				if ($.inArray(elname,options.validTags)==-1) {
+					$(this).after(this.innerHTML);
+					return true;
+				}else{
+					var tag=this;
 					var attributes = $.map(this.attributes, function(item) {
 						return item.name;
 					});
-					var tag = $(this);
 					$.each(attributes, function(i, item) {
-						//if ((elname.toLowerCase()=="a" && item!="href") && (elname.toLowerCase()=="img" && item!="src")) {
 						if (item!="href" && item!="src" && item!="class") {
-							tag.removeAttr(item);
+							$(tag).removeAttr(item);
 						}
 					});
-					$(this).html(sanitizeHTML($(this)));
-				}else{
-					var txt = $(this).children();
-					if (txt.size()>0) {
-						$(this).after(sanitizeHTML($(this)));
-					}else{
-						
-						var eltext = $(this).text();
-							eltext = eltext.replace(/\n+/g,"")
-						$(this).after(eltext);
-					}
-					$(this).remove();
 				}
-			});
-			return $(rootEl).html();
+				return false;
+			}).remove();
+			
 		}
 		function smileAutoDetect() {
 			var smList=new Array();
@@ -2028,7 +2036,9 @@
 		this.getBBCode = function () {
 			return (bbmode) ? $txtArea.val():transformHTMLtoBB(iFrameBody);
 		}
-		
+		this.pasteEvent = function(el,evt) {
+			$.log(evt);
+		}
 		init();
 		
 		function wbbStringFormat(template, data) {
