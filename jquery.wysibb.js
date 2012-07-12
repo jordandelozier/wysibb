@@ -17,6 +17,7 @@
 			bbmode:				false,
 			watchTxtArea:		true,
 			smileAutoDetect:	true,
+			tabInsert:			true,
 			themeName:			'default',
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
@@ -268,8 +269,8 @@
 					bbToHTML: {'[color=[[\"\']]?(.*?)[[\"\']]?](.*?)[/color]':'<font color="$1">$2</font>'}
 				},
 				'wbbConvertation': {
-					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
-					bbToHTML: {'[table](.*?)[/table]':'<table>$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>','\n':'<br/>'}
+					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]','span.tab':"\t%(this).html()%"},
+					bbToHTML: {'[table](.*?)[/table]':'<table>$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>','\n':'<br/>','\t+':'<span class="tab">\uFEFF</span>'}
 				}
 			},
 			selectOptions: {
@@ -723,7 +724,7 @@
 					var curSmile = options.smileList[i];
 					
 					curSmile.img = wbbStringFormat(curSmile.img,options);
-					var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{img}</div>',curSmile));
+					var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{img}</div>',curSmile),document));
 					$bottomBar.append($btn);
 					var controller = new CommandController(new smileCommand(), $btn,curSmile);		
 				}
@@ -799,10 +800,21 @@
 							updateToolbar();
 						}
 					});
+					if (options.tabInsert==true) {
+						//tab insert
+						$(iFrameDoc).live('keydown', function(e) {
+							if (e.which == 9) {
+								//insert tab
+								if (e.preventDefault) {e.preventDefault();}
+								selection.overrideWithNode('<span class="tab">\uFEFF</span>',null);
+							}
+						});
+					}
 					
 					//clear html on paste from external editors
 					$(iFrameDoc).live('keydown', function(e) {
 						if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
+							selection.saveRange();
 							$(iFrameBody).removeAttr("contentEditable");
 							var tmpel = createElementFromString('<div></div>',iFrameDoc);
 							$(tmpel).attr('contenteditable', 'true').attr('class', 'paste').appendTo(iFrameBody).on('paste', function(e) {
@@ -813,7 +825,7 @@
 									$(tmpel).remove();
 									$(iFrameBody).attr("contentEditable","true");
 									iFrameBody.focus();
-									selection.overrideWithNode("<span>"+html+"</span>",null);
+									selection.overrideWithNode("<span>"+html+"</span>",selection.getSavedRange());
 								}, 1);
 							}).focus();
 						}
@@ -1285,6 +1297,7 @@
 					setBBCode(opt,null);
 				}else{
 					iFrameBody.focus();
+					$.log(opt);
 					selection.overrideWithNode(wbbStringFormat(opt.img,options));
 				}
 			};
