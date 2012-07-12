@@ -19,7 +19,7 @@
 			smileAutoDetect:	true,
 			themeName:			'default',
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
-			validTags:			["a","b","i","s","u","div","img","ul","li","br","p","q","strike","blockquote","table","tr","td"],
+			validTags:			["a","b","i","s","u","div","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
 			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
