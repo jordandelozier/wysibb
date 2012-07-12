@@ -1471,6 +1471,10 @@
 		function transformBBtoHTML(bbtext) {
 			var html=bbtext;
 			//check for smiles
+			
+			html = html.replace(/\</g,"&lt;");
+			html = html.replace(/\>/g,"&gt;");
+			$.log(bbtext);
 			for (var i=0; i<options.smileList.length; i++) {
 				var repl = options.smileList[i];
 				var smbb = repl.bbcode;
@@ -1728,21 +1732,6 @@
 		function sanitizeHTML(rootEl) {
 			$(rootEl).children().each(function() {
 				var elname = $(this)[0].tagName.toLowerCase();
-				//replace p and div with br
-				if (elname=="p" || elname=="div") {
-					var emptyel = false;
-					if ($(this).children().size()<=1) {
-						var txt = $(this).text().replace(/\s+/g,"");
-						txt = txt.replace(/\&nbsp;/g,"");
-						if (txt=="") {emptyel=true;}
-					}
-					if (!emptyel) { //check for empty p and div
-						$(this).before(sanitizeHTML($(this))).replaceWith("<br/><br/>");
-					}else{
-						$(this).remove();
-					}
-					return true;
-				}
 				
 				if ($.inArray(elname,options.validTags)!=-1) {
 					var attributes = $.map(this.attributes, function(item) {
