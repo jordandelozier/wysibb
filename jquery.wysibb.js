@@ -1,14 +1,17 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.5.7
+	Version: 0.6.0
 */
 
 (function($) {
-	$.fn.wysibb = function(settings, extraSettings) {
+	'use strict';
+	$.wysibb = function(txtArea,settings) {
+	
+
 		var options,isMobile,IE6,IE7;
-		var version = "0.5.7";
 		var options = {
+			version:			"0.6.0",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -567,7 +570,7 @@
 			var propt = presets[settings.preset] || {};
 			$.extend(true,options, propt);
 		}
-		$.extend(options, settings, extraSettings);
+		$.extend(options, settings);
 
 		//init css prefix, if not set
 		if (!options.themePrefix) {
@@ -583,1441 +586,1443 @@
 		IE6 = (navigator.userAgent.toLowerCase().indexOf('msie 6') != -1) && (navigator.userAgent.toLowerCase().indexOf('msie 7') == -1);
 		IE7 = (navigator.userAgent.toLowerCase().indexOf('msie 7') != -1);
 		//$.log(navigator.userAgent.toLowerCase());
-		return this.each(function() {
-			var txtArea,bbmode,updateListeners,selection,enabledButtons,txtAreaSync;
-			$.log("Init WysiBB");
-			
-			var $txtArea = $(this);
-			var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc,$iFrameBody;
-			txtArea = this;
-			bbmode=options.bbmode;
-			updateListeners=[];
-			enabledButtons=['wbbConvertation'];
-			
-			function init() {
-				if (options.smileAutoDetect) {
-					smileAutoDetect();
-				}
 
-				//create wbb editor
-				buildEditor();
-				
-				//init selection object
-				selection = new initSelection();
-				
-				//init form submit
-				initFormSubmit();
-
-				return;
-				
+		var bbmode,updateListeners,selection,enabledButtons,txtAreaSync;
+		$.log("Init WysiBB");
+		
+		var $txtArea = $(txtArea);
+		$txtArea.data("wbb",this);
+		
+		var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc,$iFrameBody;
+		//txtArea = this;
+		bbmode=options.bbmode;
+		updateListeners=[];
+		enabledButtons=['wbbConvertation'];
+		
+		function init() {
+			if (options.smileAutoDetect) {
+				smileAutoDetect();
 			}
-			function buildEditor() {
-				$txtArea.css("border","0").css("outline","none");
-				$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css" />',options));
-				
-				$txtArea.wrap('<div class="wysibb"></div>');
-				
-				//init toolbar
-				var activeButtons = options.buttons.split(",");
-				if (activeButtons && activeButtons.length>0) {
-					$.extend(true,options.allButtons,options.extraButtons);
-					delete options.extraButtons;
-					$.log("Create toolbar. Active buttons: "+activeButtons.length);
-					var $topBar = $txtArea.before('<div class="wysibb-toolbar"></div>').prev();
-					for (var i=0; i<activeButtons.length; i++) {
-						var btnname = $.trim(activeButtons[i].toLowerCase());
-						if (btnname=="|") {
-							//create separator
-							$topBar.append('<div class="wysibb-toolbar-vert"></div>');
-							continue;
-						}else if (btnname=="-") {
-							//create line break
-							$topBar.append('<div class="wysibb-toolbar-linebreak"></div>');
-							continue;
-						}
-						var btnopt = options.allButtons[btnname];
-						if (btnopt) {
-							var type = btnopt.type;
-							if (type && type=="select") { //select box
-								//create select box
-								var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-select" title="{title}"><div class="select-wrap"><span class="sel-value">{title}</span><div class="select-list"></div></div><span class="select-arrow"><span></span></span></div>',btnopt),document));
-								var $slistwrap = $btn.find(".select-wrap");
-								var $arrow = $btn.find(".select-arrow");
-								var $slist = $btn.find(".select-list").css("display","none");;
-								var optlist = (btnopt.options) ? btnopt.options.split(","):[];
-								//$.log(optlist);
-								var enoptions = [];
-								for (var j=0; j<optlist.length; j++) {
-									var oname = optlist[j];
-									var o = options.selectOptions[oname];
-									if (o) {
-										o.html = wbbStringFormat(o.htmlOpen+o.title+o.htmlClose);
-										var $option = $(createElementFromString(wbbStringFormat('<a href="javascript:void(0)" class="select-row isdefault-{isDefault}">{html}</a>',o),document));
-										$slist.append($option);
-										if (!o.isDefault) { //DEFAULT LISTENER OFF
-											$.extend(btnopt.htmlToBB,o.htmlToBB);
-											if (!o.bbToHTML) {
-												o.bbToHTML = {};
-												var bbkey = o.bbOpen+"(.*?)"+o.bbClose;
-												var bbval = o.htmlOpen+"$1"+o.htmlClose;
-												o.bbToHTML[bbkey] = bbval;
-												//$.log(o.bbToHTML);
-											}
-											$.extend(btnopt.bbToHTML,o.bbToHTML);
+
+			//create wbb editor
+			buildEditor();
+			
+			//init selection object
+			selection = new initSelection();
+			
+			//init form submit
+			initFormSubmit();
+
+			return;
+			
+		}
+		function buildEditor() {
+			$txtArea.css("border","0").css("outline","none");
+			$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',options));
+			
+			$txtArea.wrap('<div class="wysibb"></div>');
+			
+			//init toolbar
+			var activeButtons = options.buttons.split(",");
+			if (activeButtons && activeButtons.length>0) {
+				$.extend(true,options.allButtons,options.extraButtons);
+				delete options.extraButtons;
+				$.log("Create toolbar. Active buttons: "+activeButtons.length);
+				var $topBar = $txtArea.before('<div class="wysibb-toolbar"></div>').prev();
+				for (var i=0; i<activeButtons.length; i++) {
+					var btnname = $.trim(activeButtons[i].toLowerCase());
+					if (btnname=="|") {
+						//create separator
+						$topBar.append('<div class="wysibb-toolbar-vert"></div>');
+						continue;
+					}else if (btnname=="-") {
+						//create line break
+						$topBar.append('<div class="wysibb-toolbar-linebreak"></div>');
+						continue;
+					}
+					var btnopt = options.allButtons[btnname];
+					if (btnopt) {
+						var type = btnopt.type;
+						if (type && type=="select") { //select box
+							//create select box
+							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-select" title="{title}"><div class="select-wrap"><span class="sel-value">{title}</span><div class="select-list"></div></div><span class="select-arrow"><span></span></span></div>',btnopt),document));
+							var $slistwrap = $btn.find(".select-wrap");
+							var $arrow = $btn.find(".select-arrow");
+							var $slist = $btn.find(".select-list").css("display","none");;
+							var optlist = (btnopt.options) ? btnopt.options.split(","):[];
+							//$.log(optlist);
+							var enoptions = [];
+							for (var j=0; j<optlist.length; j++) {
+								var oname = optlist[j];
+								var o = options.selectOptions[oname];
+								if (o) {
+									o.html = wbbStringFormat(o.htmlOpen+o.title+o.htmlClose);
+									var $option = $(createElementFromString(wbbStringFormat('<a href="javascript:void(0)" class="select-row isdefault-{isDefault}">{html}</a>',o),document));
+									$slist.append($option);
+									if (!o.isDefault) { //DEFAULT LISTENER OFF
+										$.extend(btnopt.htmlToBB,o.htmlToBB);
+										if (!o.bbToHTML) {
+											o.bbToHTML = {};
+											var bbkey = o.bbOpen+"(.*?)"+o.bbClose;
+											var bbval = o.htmlOpen+"$1"+o.htmlClose;
+											o.bbToHTML[bbkey] = bbval;
+											//$.log(o.bbToHTML);
 										}
-										enoptions.push({opt:o,el:$option,option: oname});
+										$.extend(btnopt.bbToHTML,o.bbToHTML);
 									}
+									enoptions.push({opt:o,el:$option,option: oname});
 								}
-								var controller = new SelectController(enoptions, $btn,btnopt);		
-								updateListeners.push(controller);
-								enabledButtons.push(btnname);
-								$topBar.append($btn);
-								$btn.live("click",selectBoxToggle);
-							}else if (type && type=="colorpicker") { //colorpicker
-								//create color picker
-								var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-colorpicker" title="{title}">{buttonHTML}<span class="cpicker-dropdown"></span><div class="clist"><div class="nocolor" title="Не выбран">Авто</div></div>',btnopt),document));
-								var $clist = $btn.find("div.clist");
-								var colorlist = (btnopt.colorList) ? btnopt.colorList.split(","):[];
-								for (var j=0; j<colorlist.length; j++) {
-									var oname = $.trim(colorlist[j]) || "";
-									colorlist[j]=oname;
-									if (oname=="-") {
-										//insert padding
-										$clist.append('<span class="pl"></span>');
-									}else{
-										$clist.append(wbbStringFormat('<div class="scolor" style="background:{color}" title="{color}"></div>',{color:oname}));
-									}
-								}
-								var controller = new ColorPickerController(colorlist, $btn,btnopt);		
-								updateListeners.push(controller);
-								enabledButtons.push(btnname);
-								$topBar.append($btn);
-								$btn.live("click",colorPickerToggle);
-							}else{
-								//create button
-								btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
-								var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt));
-								$topBar.append($btn);
-								var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
-								updateListeners.push(controller);
-								enabledButtons.push(btnname);
 							}
-						}
-					}
-					$topBar.append('<div class="wysibb-toolbar-btn btnModeSwitch" title="Показать BBcode" unselectable="on"><span class="ve-tlb-bbcode" unselectable="on"></span></div>');
-					$topBar.find(".btnModeSwitch").click(function() {
-						modeSwitch(this);
-					});
-					/* $topBar.append('<div style="clear:both"></div>'); */
-				}
-				
-				//init smilelist
-				if (options.smileList && options.smileList.length>0) {
-					var $bottomBar = $txtArea.after('<div class="wysibb-toolbar wysibb-bottom-toolbar"></div>').next();
-					for (var i=0; i<options.smileList.length; i++) {
-						var curSmile = options.smileList[i];
-						
-						curSmile.img = wbbStringFormat(curSmile.img,options);
-						var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{img}</div>',curSmile));
-						$bottomBar.append($btn);
-						var controller = new CommandController(new smileCommand(), $btn,curSmile);		
-					}
-					$bottomBar.append('<div class="wysibb-powered" title="Редактор BBcode" unselectable="on"><a href="http://www.wysibb.com" target="_blank">WysiBB</a></div>');
-				}
-				smileSort();
-				
-				
-				$txtArea.wrap('<div class="wysibb-text"></div>');
-				
-				//insert iframe if needed
-				if (options.onlyBBmode!==true) {
-					var frameWidth = $txtArea.width();
-					var frameHeight = $txtArea.outerHeight();
-					
-					//$txtArea.parents(".wysibb").css("width",frameWidth+"px").css("max-width","100%");
-					$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0").css("max-width","100%");
-					
-					$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:100%;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
-					
-					
-					//$txtArea.css("height",(frameHeight - $txtArea.parent().prev(".wysibb-toolbar").height() - $txtArea.parent().next(".wysibb-bottom-toolbar").height())+"px");
-					
-					$iFrame.bind('load',function() {
-						iFrame = $iFrame.get(0);
-						iFrameWindow=iFrame.contentWindow;
-						iFrameDoc = iFrame.contentWindow.document;
-						iFrameBody=iFrame.contentWindow.document.body;
-						$iFrameBody = $(iFrameBody);
-						var iFrameHead=iFrameDoc.getElementsByTagName('head')[0];
-						
-						//set styles from main page
-						$(document.getElementsByTagName('head')[0]).find("link[rel='stylesheet']").each(function(idx,el) {
-							$(iFrameHead).append($(el).clone());
-						});
-						
-						$(document.body).find("link[rel='stylesheet']").each(function(idx,el) {
-							$(iFrameHead).append($(el).clone());
-						});
-						
-						//set default styles for body
-						$iFrameBody.css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
-						
-						if (('contentEditable' in iFrameBody) && !isMobile) {
-							iFrameBody.contentEditable=true;
-							try{
-								//fix for mfirefox
-								iFrameDoc.execCommand('StyleWithCSS', false, false);
-							}catch(e) {}
+							var controller = new SelectController(enoptions, $btn,btnopt);		
+							updateListeners.push(controller);
+							enabledButtons.push(btnname);
+							$topBar.append($btn);
+							$btn.live("click",selectBoxToggle);
+						}else if (type && type=="colorpicker") { //colorpicker
+							//create color picker
+							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-colorpicker" title="{title}">{buttonHTML}<span class="cpicker-dropdown"></span><div class="clist"><div class="nocolor" title="Не выбран">Авто</div></div>',btnopt),document));
+							var $clist = $btn.find("div.clist");
+							var colorlist = (btnopt.colorList) ? btnopt.colorList.split(","):[];
+							for (var j=0; j<colorlist.length; j++) {
+								var oname = $.trim(colorlist[j]) || "";
+								colorlist[j]=oname;
+								if (oname=="-") {
+									//insert padding
+									$clist.append('<span class="pl"></span>');
+								}else{
+									$clist.append(wbbStringFormat('<div class="scolor" style="background:{color}" title="{color}"></div>',{color:oname}));
+								}
+							}
+							var controller = new ColorPickerController(colorlist, $btn,btnopt);		
+							updateListeners.push(controller);
+							enabledButtons.push(btnname);
+							$topBar.append($btn);
+							$btn.live("click",colorPickerToggle);
 						}else{
-							//HTML5 contentEditable not supported, use bbmode
-							options.onlyBBmode=true;
-							bbmode=true;
+							//create button
+							btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
+							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt),document));
+							$topBar.append($btn);
+							var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
+							updateListeners.push(controller);
+							enabledButtons.push(btnname);
 						}
-						
-						//check if value exist
-						if ($txtArea.val()!="")  {
-							$iFrameBody.html(transformBBtoHTML($txtArea.val()));
-							$txtArea.val("");
-							checkForBR();
+					}
+				}
+				$topBar.append('<div class="wysibb-toolbar-btn btnModeSwitch" title="Показать BBcode" unselectable="on"><span class="ve-tlb-bbcode" unselectable="on"></span></div>');
+				$topBar.find(".btnModeSwitch").click(function() {
+					modeSwitch(this);
+				});
+				/* $topBar.append('<div style="clear:both"></div>'); */
+			}
+			
+			//init smilelist
+			if (options.smileList && options.smileList.length>0) {
+				var $bottomBar = $txtArea.after('<div class="wysibb-toolbar wysibb-bottom-toolbar"></div>').next();
+				for (var i=0; i<options.smileList.length; i++) {
+					var curSmile = options.smileList[i];
+					
+					curSmile.img = wbbStringFormat(curSmile.img,options);
+					var $btn = $(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{img}</div>',curSmile));
+					$bottomBar.append($btn);
+					var controller = new CommandController(new smileCommand(), $btn,curSmile);		
+				}
+				$bottomBar.append('<div class="wysibb-powered" title="Редактор BBcode" unselectable="on"><a href="http://www.wysibb.com" target="_blank">WysiBB</a></div>');
+			}
+			smileSort();
+			
+			
+			$txtArea.wrap('<div class="wysibb-text"></div>');
+			
+			//insert iframe if needed
+			if (options.onlyBBmode!==true) {
+				var frameWidth = $txtArea.width();
+				var frameHeight = $txtArea.outerHeight();
+				
+				//$txtArea.parents(".wysibb").css("width",frameWidth+"px").css("max-width","100%");
+				$txtArea.css("width",(frameWidth-12)+"px").css("margin","0").css("font-size","14px").css("padding","0").css("max-width","100%");
+				
+				$iFrame = $(wbbStringFormat('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="margin:0;width:100%;height:{height}px;max-width:100%"></iframe>',{width:frameWidth,height:frameHeight}));
+				
+				
+				//$txtArea.css("height",(frameHeight - $txtArea.parent().prev(".wysibb-toolbar").height() - $txtArea.parent().next(".wysibb-bottom-toolbar").height())+"px");
+				
+				$iFrame.bind('load',function() {
+					iFrame = $iFrame.get(0);
+					iFrameWindow=iFrame.contentWindow;
+					iFrameDoc = iFrame.contentWindow.document;
+					iFrameBody=iFrame.contentWindow.document.body;
+					$iFrameBody = $(iFrameBody);
+					var iFrameHead=iFrameDoc.getElementsByTagName('head')[0];
+					
+					//set styles from main page
+					$(document.getElementsByTagName('head')[0]).find("link[rel='stylesheet']").each(function(idx,el) {
+						$(iFrameHead).append($(el).clone());
+					});
+					
+					$(document.body).find("link[rel='stylesheet']").each(function(idx,el) {
+						$(iFrameHead).append($(el).clone());
+					});
+					
+					//set default styles for body
+					$iFrameBody.css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
+					
+					if (('contentEditable' in iFrameBody) && !isMobile) {
+						iFrameBody.contentEditable=true;
+						try{
+							//fix for mfirefox
+							iFrameDoc.execCommand('StyleWithCSS', false, false);
+						}catch(e) {}
+					}else{
+						//HTML5 contentEditable not supported, use bbmode
+						options.onlyBBmode=true;
+						bbmode=true;
+					}
+					
+					//check if value exist
+					if ($txtArea.val()!="")  {
+						$iFrameBody.html(transformBBtoHTML($txtArea.val()));
+						$txtArea.val("");
+						checkForBR();
+					}
+					
+					//set listener for keyup and mouse up for iframe
+					$(iFrameDoc).live("click", updateToolbar);
+					
+					$(iFrameDoc).live("keyup", function(evt) {
+						if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
+							updateToolbar();
 						}
-						
-						//set listener for keyup and mouse up for iframe
-						$(iFrameDoc).live("click", updateToolbar);
-						
-						$(iFrameDoc).live("keyup", function(evt) {
-							if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
-								updateToolbar();
-							}
-						});
-						
-						//clear html on paste from external editors
-						$iFrameBody.live('paste',function() {
-							var el = $(this);
-							setTimeout(function() {
-								sanitizeHTML(el);
-							}, 10);
-						});
-						
-						
-						//init watching for txtArea
-						if (options.watchTxtArea===true) {
-							$(document).live('click',function(evt) {
-								//$.log(evt);
-								if (!bbmode) {
-									if ($(evt.target).parents(".wysibb").size()==0 ) {
-										if ($txtArea.data("prevVal")!=$txtArea.val()) {
-											$.log("txtArea has changed");
-											selection.overrideWithNode(transformBBtoHTML($txtArea.val()),null,null,true,true);
-											$txtArea.val("");
-											$txtArea.data("prevVal","");
-											checkForBR();
-										}
+					});
+					
+					//clear html on paste from external editors
+					$iFrameBody.live('paste',function() {
+						var el = $(this);
+						setTimeout(function() {
+							sanitizeHTML(el);
+						}, 10);
+					});
+					
+					
+					//init watching for txtArea
+					if (options.watchTxtArea===true) {
+						$(document).live('click',function(evt) {
+							//$.log(evt);
+							if (!bbmode) {
+								if ($(evt.target).parents(".wysibb").size()==0 ) {
+									if ($txtArea.data("prevVal")!=$txtArea.val()) {
+										$.log("txtArea has changed");
+										selection.overrideWithNode(transformBBtoHTML($txtArea.val()),null,null,true,true);
+										$txtArea.val("");
+										$txtArea.data("prevVal","");
+										checkForBR();
 									}
 								}
-							})
-							$txtArea.data("prevVal",$txtArea.val());
-						}
-						
-						//onEnter event, insert br
-						$iFrameBody.live("keydown",function(event) {
-							var parentLI = getContaining("li");
-							if (event.which == 13 && !parentLI) {
-								event.preventDefault();
-								iFrameBody.focus();
-								var snode = selection.getNode();
-								if ((snode.tagName=="DIV" || snode.tagName=="BODY") && snode.lastChild.nodeName.toLowerCase()!="br") {
-									$(snode).append("<br/>");
-								}
-								var elem = iFrameWindow.document.createElement("BR");
-								selection.overrideWithNode(elem,null);
 							}
-						});
-						
-					})
+						})
+						$txtArea.data("prevVal",$txtArea.val());
+					}
 					
-					$txtArea.after($iFrame);
-					$txtArea.hide();
+					//onEnter event, insert br
+					$iFrameBody.live("keydown",function(event) {
+						var parentLI = getContaining("li");
+						if (event.which == 13 && !parentLI) {
+							event.preventDefault();
+							iFrameBody.focus();
+							var snode = selection.getNode();
+							if ((snode.tagName=="DIV" || snode.tagName=="BODY") && snode.lastChild.nodeName.toLowerCase()!="br") {
+								$(snode).append("<br/>");
+							}
+							var elem = iFrameWindow.document.createElement("BR");
+							selection.overrideWithNode(elem,null);
+						}
+					});
 					
-				}
+				})
 				
-				if (bbmode) {
-					$(iFrame).hide();
-					$(txtArea).show();
-				}
+				$txtArea.after($iFrame);
+				$txtArea.hide();
 				
-				//set listener for keyup and mouse up for txtarea
-				$txtArea.live("keyup mouseup", updateToolbar);
 			}
-			function CommandController(command, el, opt) {
-				this.updateUI = function() {
+			
+			if (bbmode) {
+				$(iFrame).hide();
+				$(txtArea).show();
+			}
+			
+			//set listener for keyup and mouse up for txtarea
+			$txtArea.live("keyup mouseup", updateToolbar);
+		}
+		function CommandController(command, el, opt) {
+			this.updateUI = function() {
+				var state = command.queryState(opt);
+				if (state) {$(el).addClass("on")}
+				else{$(el).removeClass("on")}
+			}
+			
+			$(el).attr("unselectable","on");
+			$(el).find("*").attr("unselectable","on");
+			$(el).live("mousedown", function(event) { 
+				if (event.preventDefault) event.preventDefault();
+			});		
+			
+			$(el).live('click',function(evt) {
+				command.execute(opt);
+				updateToolbar();
+				checkForBR();
+			});
+		}
+		function SelectController(optlist, el,sopt) {
+			//el - select box
+			var commandList=[];
+			this.updateUI = function() {
+				$(el).find(".sel-value").html(sopt.title);
+				$(optlist).each(function(idx,e) {
+					var command = commandList[e.option].cmd;
+					var opt = commandList[e.option].opt;
 					var state = command.queryState(opt);
-					if (state) {$(el).addClass("on")}
-					else{$(el).removeClass("on")}
+					if (state===true && !opt.isDefault) {
+						$(el).find(".sel-value").html(opt.title);
+						return false;
+					}
+				});
+			}
+			
+			$(el).attr("unselectable","on");
+			$(el).find("*").attr("unselectable","on");
+			$(el).live("mousedown", function(event) { 
+				if (event.preventDefault) event.preventDefault();
+			});		
+			
+			if (optlist.length>0) {
+				
+				for (var i=0; i<optlist.length; i++) {
+					var optrow = optlist[i].opt;
+					var elrow = optlist[i].el;
+					var optname = optlist[i].option
+					commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
+					$(elrow).attr("optname",optname).live('click',function() {
+						var oname = $(this).attr("optname");
+						commandList[oname].cmd.execute(commandList[oname].opt);
+						$(el).find(".sel-value").html(commandList[oname].opt.title);
+					});
 				}
+			}
+			
+		}
+		function ColorPickerController(colorlist, el,sopt) {
+			//el - colorpicker
+			var commandList=[];
+			this.updateUI = function() {
+				$(el).find(".val-line").css("background-color","#000000");
+				$(colorlist).each(function(idx,color) {
+					var command = commandList[color].cmd;
+					var state = command.queryState(commandList[color].opt);
+					if (state===true) {
+						$(el).find(".val-line").css("background-color",color);
+						return false;
+					}
+				});
 				
-				$(el).attr("unselectable","on");
-				$(el).find("*").attr("unselectable","on");
-				$(el).live("mousedown", function(event) { 
-					if (event.preventDefault) event.preventDefault();
-				});		
-				
-				$(el).click(function(evt) {
-					command.execute(opt);
+			}
+			
+			$(el).attr("unselectable","on");
+			$(el).find("*").attr("unselectable","on");
+			$(el).live("mousedown", function(event) { 
+				if (event.preventDefault) event.preventDefault();
+			});		
+			
+			if (colorlist.length>0) {
+				for (var i=0; i<colorlist.length; i++) {
+					var colorname = colorlist[i];
+					commandList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
+				}
+				$(el).find("div.scolor").live("click",function() {
+					var colorname = $(this).attr("title");
+					commandList[colorname].cmd.execute(commandList[colorname].opt);
 					updateToolbar();
-					checkForBR();
+				});
+				
+				$(el).find("div.nocolor").live("click",function() {
+					var colorname = "#000000";
+					commandList[colorname].cmd.execute(commandList[colorname].opt);
+					updateToolbar();
 				});
 			}
-			function SelectController(optlist, el,sopt) {
-				//el - select box
-				var commandList=[];
-				this.updateUI = function() {
-					$(el).find(".sel-value").html(sopt.title);
-					$(optlist).each(function(idx,e) {
-						var command = commandList[e.option].cmd;
-						var opt = commandList[e.option].opt;
-						var state = command.queryState(opt);
-						if (state===true && !opt.isDefault) {
-							$(el).find(".sel-value").html(opt.title);
-							return false;
-						}
-					});
-				}
-				
-				$(el).attr("unselectable","on");
-				$(el).find("*").attr("unselectable","on");
-				$(el).live("mousedown", function(event) { 
-					if (event.preventDefault) event.preventDefault();
-				});		
-				
-				if (optlist.length>0) {
-					
-					for (var i=0; i<optlist.length; i++) {
-						var optrow = optlist[i].opt;
-						var elrow = optlist[i].el;
-						var optname = optlist[i].option
-						commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
-						$(elrow).attr("optname",optname).live('click',function() {
-							var oname = $(this).attr("optname");
-							commandList[oname].cmd.execute(commandList[oname].opt);
-							$(el).find(".sel-value").html(commandList[oname].opt.title);
-							//$(el).removeClass("on");
-						});
-					}
-				}
-				
-			}
-			function ColorPickerController(colorlist, el,sopt) {
-				//el - colorpicker
-				var commandList=[];
-				this.updateUI = function() {
-					$(el).find(".val-line").css("background-color","#000000");
-					$(colorlist).each(function(idx,color) {
-						var command = commandList[color].cmd;
-						var state = command.queryState(commandList[color].opt);
-						if (state===true) {
-							$(el).find(".val-line").css("background-color",color);
-							return false;
-						}
-					});
-					
-				}
-				
-				$(el).attr("unselectable","on");
-				$(el).find("*").attr("unselectable","on");
-				$(el).live("mousedown", function(event) { 
-					if (event.preventDefault) event.preventDefault();
-				});		
-				
-				if (colorlist.length>0) {
-					for (var i=0; i<colorlist.length; i++) {
-						var colorname = colorlist[i];
-						commandList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
-					}
-					$(el).find("div.scolor").live("click",function() {
-						var colorname = $(this).attr("title");
-						commandList[colorname].cmd.execute(commandList[colorname].opt);
-						updateToolbar();
-					});
-					
-					$(el).find("div.nocolor").live("click",function() {
-						var colorname = "#000000";
-						commandList[colorname].cmd.execute(commandList[colorname].opt);
-						updateToolbar();
-					});
-				}
-				
-			}
-			function updateToolbar() {
-				$(updateListeners).each(function(idx,controller){
-					controller.updateUI();
-				});
-			}
-			function NativeCommand(command,param) {
-				if (!param) {param=null;}
-				this.execute = function(opt) {
-					if (bbmode) {
-						var bbcode = opt.bbName;
-						txtArea.focus();
-						if (checkBBContain(bbcode)) {
-							//remove bb
-							removeBBCode(bbcode);
-						}else{
-							setBBCode(opt,null);
-						}
-					}else{
-						iFrameBody.focus();
-						iFrameDoc.execCommand(command, false, param); 
-					}
-				};
-				this.queryState = function(opt) {
-					//highlite if active tag
+			
+		}
+		function updateToolbar() {
+			$(updateListeners).each(function(idx,controller){
+				controller.updateUI();
+			});
+		}
+		function NativeCommand(command,param) {
+			if (!param) {param=null;}
+			this.execute = function(opt) {
+				if (bbmode) {
 					var bbcode = opt.bbName;
-					if (param) {
-						var cval = iFrameDoc.queryCommandValue(command)+"";
-						cval = cval.replace(/\'/g,"");
-						if (command=="foreColor") {
-							cval = colorToHex(cval);
-						}
-						return (cval==param);
-					}
-					return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
-				};
-			}
-			function CustomCommand(command) {
-				this.execute = function(opt) {
-					var tagfilter = opt.rootNode;
-					if (bbmode) {
-						txtArea.focus();
-						var bbcode = opt.bbName;
-						if (checkBBContain(bbcode)) {
-							//remove bb
-							removeBBCode(bbcode);
-						}else{
-							setBBCode(opt,null);
-						}
+					txtArea.focus();
+					if (checkBBContain(bbcode)) {
+						//remove bb
+						removeBBCode(bbcode);
 					}else{
-						iFrameBody.focus();
-						var quoteBlock = getContaining(tagfilter);
-						if (quoteBlock) {
-							$quoteBlock = $(quoteBlock);
-							if ($quoteBlock.is("span,font")) {
-								//is is text, multievents
-								var selHTML = selection.getHTML();
-								if (selHTML=="") {
-									//close cur tag, set selectio after this node;
-									var snode = selection.getNode();
-									var txtnode = createElementFromString("<span>\uFEFF</span>");
-									$(snode).after(txtnode);
-									selection.setSelection(null,txtnode,0,0);
-								}else{
-									tagKnife(quoteBlock,opt.rootNode);
-								}
-							}else{
-								//it is block, remove all
-								$.log("it is block, remove all");
-								if (opt.contentSelector) {
-									var remRules = opt.contentSelector;
-									remRules = remRules.replace(/rootNode/g,"quoteBlock");
-									//$.log(remRules);
-									$quoteBlock.replaceWith(eval(remRules));
-								}
-							}
-						}else{
-							//insert
+						setBBCode(opt,null);
+					}
+				}else{
+					iFrameBody.focus();
+					iFrameDoc.execCommand(command, false, param); 
+				}
+			};
+			this.queryState = function(opt) {
+				//highlite if active tag
+				var bbcode = opt.bbName;
+				if (param) {
+					var cval = iFrameDoc.queryCommandValue(command)+"";
+					cval = cval.replace(/\'/g,"");
+					if (command=="foreColor") {
+						cval = colorToHex(cval);
+					}
+					return (cval==param);
+				}
+				return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
+			};
+		}
+		function CustomCommand(command) {
+			this.execute = function(opt) {
+				var tagfilter = opt.rootNode;
+				if (bbmode) {
+					txtArea.focus();
+					var bbcode = opt.bbName;
+					if (checkBBContain(bbcode)) {
+						//remove bb
+						removeBBCode(bbcode);
+					}else{
+						setBBCode(opt,null);
+					}
+				}else{
+					iFrameBody.focus();
+					var quoteBlock = getContaining(tagfilter);
+					if (quoteBlock) {
+						var $quoteBlock = $(quoteBlock);
+						
+						if ($quoteBlock.is("span,font")) {
+							//is is text, multievents
 							var selHTML = selection.getHTML();
-							
 							if (selHTML=="") {
-								//open empty tag
-								$.log("open empty tag");
-								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
-								selection.overrideWithNode(crnode);
-								if ($(crnode).children().size()==0) {
-									selection.setSelection(null,crnode,0,0);
-								}
-							}else{
-							
+								//close cur tag, set selectio after this node;
 								var snode = selection.getNode();
-								var replaceNode=false;
-								while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
-									selHTML = snode.outerHTML;
-									replaceNode=snode;
-									//selection.setSelection(null,snode);
-									snode = snode.parentNode;
-								}
-								
-								//clear selHTML
-								var el = iFrameDoc.createElement("SPAN");
-								el.innerHTML = selHTML;
-								if (opt.contentSelector) {
-									var remRules = opt.contentSelector;
-									remRules = remRules.replace(/rootNode/g,"el");
-									$(el).find(opt.rootNode).each(function(idx,el) {$.log(el); $(el).replaceWith(eval(remRules))});
-								}
-								//end clear
-								
-								selHTML = el.innerHTML;
-								var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
-								if (replaceNode) {
-									$(replaceNode).replaceWith(reshtml);
-								}else{
-									selection.overrideWithNode(reshtml,null);
-								}
+								var txtnode = createElementFromString("<span>\uFEFF</span>");
+								$(snode).after(txtnode);
+								selection.setSelection(null,txtnode,0,0);
+							}else{
+								tagKnife(quoteBlock,opt.rootNode);
 							}
-						}
-						
-					}
-				};
-				this.queryState = function(opt) {
-					var bbcode = opt.bbName;
-					var tagfilter = opt.rootNode;
-					return isContaining(tagfilter,bbcode,selection.getNode());
-				}
-			}
-			function linkCommand() {
-				//var bbcode="url";
-				this.execute = function(opt) {
-					if (bbmode) {
-						txtArea.focus();
-						var bbcode = opt.bbName;
-						if (checkBBContain(bbcode)) {
-							//remove bb
-							removeBBCode(bbcode);
 						}else{
-							var initialUrl = "http://";
-							var url = window.prompt("Введите адрес ссылки:", initialUrl);
-							if (url===null) return;
-							if (url!="") {
-								setBBCode(opt,{href:url});
-							}
-						}
-					}else{
-						iFrameBody.focus();
-						var a = getContaining("a");
-						var saveButton = (a) ? "Обновить ссылку":"Вставить ссылку";
-						var removeStyle= a ? "":"display:none";
-						var adata = a ? $(a).text():selection.getText();
-						
-						selection.saveRange(); //save current range status
-						
-						var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="right"><label class="tbl-label">Отображаемый текст</label></td><td><input type="text" id="veditor_atitle" style="width:300px" value="{atext}" /></td></tr><tr><td class="right"><label class="tbl-label">URL ссылки</label></td><td><input type="text" style="width:300px" id="veditor_ahref" value="{ahref}" placeholder="http://"  /></td></tr><tr><td></td><td><div class=""><button class="wbb-okbtn" style="padding:3px 15px;float:left;margin-right:15px;"  unselectable="on">{saveButton}</button><button class="wbb-redbtn" style="padding:3px 15px;float:left;{removeStyle}" unselectable="on">Убрать ссылку</button></div></td></tr></table>',{saveButton:saveButton,removeStyle:removeStyle,atext:adata,ahref:$(a).attr("href")}));
-						
-						
-						
-						$ahtml.find("button.wbb-okbtn").click(function() {
-							//submit link event
-							var $atitle = $ahtml.find("#veditor_atitle");
-							var $ahref = $ahtml.find("#veditor_ahref")
-							$ahtml.find("span.inperr").remove();
-							if ($atitle.val()=="") {
-								$atitle.after('<span class="inperr">Текст ссылки не может быть пустым.</span>');
-								$atitle.focus();
-								return;
-							}
-							if (!$ahref.val().match(/https*\:\/\//g)) {
-								$ahref.after('<span class="inperr">Неправильный формат ссылки.<br/> <span style="color:#666">Пример: http://www.wysibb.com</span></span>');
-								$ahref.focus();
-								return;
-							}
-							//iFrameBody.focus();
-							
-							var elem = iFrameDoc.createElement("A");
-							elem.setAttribute("href",$ahref.val());
-							elem.innerHTML = $atitle.val();
-							
-							selection.overrideWithNode(elem,selection.getSavedRange(),"a");
-							
-							$(document).unbind("mousedown");
-							$ahtml.find("#veditor_ahref").unbind("keyup change");
-							
-							$("#wbbModalWindow").hide();
-							iFrameBody.focus();
-						})
-						$ahtml.find("button.wbb-redbtn").click(function() {
-							//remove link event
-							var a = selection.getNodeByRange(selection.getSavedRange());
-							selection.overrideWithNode($(a).html(),selection.getSavedRange(),"a");
-							$("#wbbModalWindow").hide();
-							iFrameBody.focus();
-						})
-						
-						showModalWindow("Вставка ссылки",$ahtml);
-						
-						$ahtml.find("#veditor_ahref").bind("keyup change",function() {
-							if ($(this).val()=='' || (($(this).val().indexOf($('#veditor_atitle').val())!=-1 || $('#veditor_atitle').val().indexOf($(this).val())!=-1) && $(this).val().length>$('#veditor_atitle').val().length)) {
-								$('#veditor_atitle').val($(this).val());
-							}
-						}).focus();
-						
-					}
-				};
-				this.queryState = function(opt) {
-					var bbcode = opt.bbName;
-					return isContaining("a",bbcode,selection.getNode());
-				};
-			}
-			function imgCommand() {
-				this.execute = function(opt) {
-					if (bbmode) {
-						txtArea.focus();
-						var bbcode = opt.bbName;
-						if (checkBBContain(bbcode)) {
-							//remove bb
-							removeBBCode(bbcode);
-						}else{
-							var initialUrl = "http://";
-							var url = window.prompt("Введите адрес изображения:", initialUrl);
-							if (url===null) return;
-							if (url!="") {
-								setBBCode(opt,{src:url});
-							}
-						}
-					}else{
-						iFrameBody.focus();
-						var img = getContaining("img");
-						var imgpreview = img ? $(img).attr("src"):wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
-						var saveButton= img ? "Обновить изображение":"Вставить изображение";
-						
-						selection.saveRange();
-						
-						var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:$(img).attr("src")}));
-						
-						$ahtml.find("button.wbb-okbtn").click(function() {
-							//submit image
-							iFrameBody.focus();
-							$ahtml.find("span.inperr").remove();
-							var $imgsrc = $ahtml.find("#veditor_img");
-							if (!$imgsrc.val().match(/https*\:\/\//g)) {
-								$imgsrc.after('<br/><span style="color:red;font-size:0.9em">Неправильный формат адреса изображения.</span>');
-								return;
-							}
-							
-							var elem = iFrameDoc.createElement("IMG");
-							elem.setAttribute("src",$imgsrc.val());
-							
-							//selection.overrideWithNode(elem,selection.lastRange,null);
-							selection.overrideWithNode(elem,selection.getSavedRange());
-							
-							$("#wbbModalWindow").hide();
-							$(document).unbind("mousedown");
-							$ahtml.find("#veditor_img").unbind("keyup change");
-							
-						});
-						
-						showModalWindow("Вставить изображение",$ahtml);
-						
-						$ahtml.find("#veditor_img").bind("keyup change",function() {
-							$('#imgpreview').attr("src",($(this).val()));
-						}).focus();
-						
-					}
-				};
-				this.queryState = function(opt) {
-					if (bbmode) {
-						//highlite img only in bbmode
-						return checkBBContain("img");
-					}
-					return false;
-				};
-			}
-			function quoteCommand() {
-				this.execute = function(opt) {
-					if (bbmode) {
-						txtArea.focus();
-						var bbcode = opt.bbName;
-						var tagfilter = opt.rootNode;
-						if (checkBBContain(bbcode)) {
-							//remove bb
-							removeBBCode(bbcode);
-						}else{
-							setBBCode(bbcode,null);
-						}
-					}else{
-						iFrameBody.focus();
-						var quoteBlock = getContaining(tagfilter);
-						if (quoteBlock) {
-							//remove quote
-							$(quoteBlock).replaceWith($(quoteBlock).html());
-						}else{
-							//insert quote
-							var selText = selection.getHTML();
-							
-							selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}</div><br/>",{txt:selText}),null,null);
-							
-							//selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}{</div><p></p>",{txt:selText}),null);
-						}
-						
-					}
-				};
-				this.queryState = function(opt) {
-					var bbcode = opt.bbName;
-					var tagfilter = opt.rootNode;
-					return isContaining(tagfilter,bbcode,selection.getNode());
-				};
-			}
-			function smileCommand() {
-				this.execute = function(opt) {
-					if (bbmode) {
-						txtArea.focus();
-						setBBCode(opt,null);
-					}else{
-						iFrameBody.focus();
-						selection.overrideWithNode(wbbStringFormat(opt.img,options));
-					}
-				};
-				this.queryState = function() {
-					return false;
-				};
-			}
-			function justifyCommand() {
-				this.execute = function(opt) {
-					if (bbmode) {
-						txtArea.focus();
-						setBBCode(opt,null);
-					}else{
-						iFrameBody.focus();
-						var curContain = getContaining(opt.rootNode);
-						if (curContain) {
+							//it is block, remove all
+							$.log("it is block, remove all");
 							if (opt.contentSelector) {
 								var remRules = opt.contentSelector;
-								remRules = remRules.replace(/rootNode/g,"curContain");
-								$(curContain).replaceWith(eval(remRules));
+								remRules = remRules.replace(/rootNode/g,"quoteBlock");
+								//$.log(remRules);
+								$quoteBlock.replaceWith(eval(remRules));
+							}
+						}
+					}else{
+						//insert
+						var selHTML = selection.getHTML();
+						
+						if (selHTML=="") {
+							//open empty tag
+							$.log("open empty tag");
+							var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+							selection.overrideWithNode(crnode);
+							if ($(crnode).children().size()==0) {
+								selection.setSelection(null,crnode,0,0);
 							}
 						}else{
-							var pblock = getContaining(".wbb-left,.wbb-center,.wbb-right");
-							var sHTML = selection.getHTML();
-							var crnode;
-							if (pblock) {
-								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
-								$(pblock).replaceWith(crnode);
+						
+							var snode = selection.getNode();
+							var replaceNode=false;
+							while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
+								selHTML = snode.outerHTML;
+								replaceNode=snode;
+								//selection.setSelection(null,snode);
+								snode = snode.parentNode;
+							}
+							
+							//clear selHTML
+							var el = iFrameDoc.createElement("SPAN");
+							el.innerHTML = selHTML;
+							if (opt.contentSelector) {
+								var remRules = opt.contentSelector;
+								remRules = remRules.replace(/rootNode/g,"el");
+								$(el).find(opt.rootNode).each(function(idx,el) {$.log(el); $(el).replaceWith(eval(remRules))});
+							}
+							//end clear
+							
+							selHTML = el.innerHTML;
+							var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
+							if (replaceNode) {
+								$(replaceNode).replaceWith(reshtml);
 							}else{
-								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
-								selection.overrideWithNode(crnode);
+								selection.overrideWithNode(reshtml,null);
 							}
-							selection.setSelection(null,crnode,0,0);
 						}
 					}
-				};
-				this.queryState = function(opt) {
-					return isContaining(opt.rootNode,opt.bbName,selection.getNode());
-				};
-			}
-			function setBBCode(opt,params) {
-				var cursel = selection.getTextWithInfo();
-				var bbOpen = (opt.bbOpen) ? opt.bbOpen:"";
-				var bbClose = (opt.bbClose) ? opt.bbClose:"";
-				var bbcode = (opt.bbcode) ? opt.bbcode:"";
-				
-				if (opt.skipSelectRange===true) {cursel.text="";}
-				var bbstring="";
-				if (bbcode!="") {
-					//smile bbcode
-					bbstring = bbcode;
-				}else{
-					bbstring = wbbStringFormat(bbOpen+cursel.text+bbClose,params);
-				}
-				txtArea.value = txtArea.value.substr(0,cursel.start)+bbstring+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
-				if (opt.bbName!="url" && opt.bbName!="img" && (!cursel || cursel.length==0)) {
-					selection.setRange(cursel.start + bbstring.length-(bbClose.length));
-				}
-			}
-			function checkBBContain(bbcode) {
-				var cursel = selection.getTextWithInfo();
-				var txtvalue = txtArea.value.substr(0,cursel.start);
-				var bbpattern = new RegExp("\\[(.*?)\\]","mgi");
-				var contain=0;
-				while (aMatch = bbpattern.exec(txtvalue)){
-					var bb = aMatch[1];
-						bb = bb.replace(/=.*/,"");
-					var isCloseBB = bb.substr(0,1)=="/";
-					var clearBB = bb.replace("/","");
-					if (clearBB.toLowerCase()==bbcode.toLowerCase()) {
-						if (!isCloseBB) {
-							contain++;
-						}else{
-							contain--;
-						}
-					}
-				}
-				return (contain>0);
-			}
-			function isContaining(parentsel,bbcode,el) {
-				if (bbmode) {
-					return checkBBContain(bbcode);
-				}else{
-					return ($(el).is(parentsel) || $(el).parents(parentsel).size()>0);
-				}
-			}
-			function getContaining(psel,rng) {
-				if (!rng) {
-					rng = selection.getRange();
-				}
-				var el = selection.getNodeByRange(rng);
-				while (el && el.tagName!="BODY") {
-					if ($(el).is(psel)) {return el};
-					if (el) {el = el.parentNode;}
-					else{return null;}
-				}
-				return null;
-			}
-			function removeBBCode(bbcode) {
-				var cursel = selection.getTextWithInfo();
-				var beforeTxt = txtArea.value.substr(0,cursel.start);
-				var afterTxt = txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
-				var bbpatternOpenBB = new RegExp("\\["+bbcode+"(?:\\=http.*?)*\\](.*?)$","i");
-				var bbpatternCloseBB = new RegExp("^(.*?)\\[\\/"+bbcode+"\\]","i");
-				
-				beforeTxt = beforeTxt.replace(bbpatternOpenBB,"$1");
-				afterTxt = afterTxt.replace(bbpatternCloseBB,"$1");
-				
-				txtArea.value = beforeTxt+cursel.text+afterTxt;
-			}
-			function modeSwitch(btn) {
-				if (bbmode) {
-					bbmode=false;
-					$iFrameBody.html(transformBBtoHTML($txtArea.val()));
-					$iFrame.show();
-					$txtArea.hide().val("");
-					$(btn).removeClass("on");
 					
+				}
+			};
+			this.queryState = function(opt) {
+				var bbcode = opt.bbName;
+				var tagfilter = opt.rootNode;
+				return isContaining(tagfilter,bbcode,selection.getNode());
+			}
+		}
+		function linkCommand() {
+			//var bbcode="url";
+			this.execute = function(opt) {
+				if (bbmode) {
+					txtArea.focus();
+					var bbcode = opt.bbName;
+					if (checkBBContain(bbcode)) {
+						//remove bb
+						removeBBCode(bbcode);
+					}else{
+						var initialUrl = "http://";
+						var url = window.prompt("Введите адрес ссылки:", initialUrl);
+						if (url===null) return;
+						if (url!="") {
+							setBBCode(opt,{href:url});
+						}
+					}
 				}else{
-					bbmode=true;
-					if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
-						$(iFrameBody.lastChild).remove();
-					}
-					$txtArea.val(transformHTMLtoBB(iFrameBody));
-					$iFrame.hide();
-					$txtArea.show();
-					$(btn).addClass("on");
-				}
-			}
-			function transformHTMLtoBB(rootel) {
-				var outbb="";
-				clearEmpty(iFrameBody);
-				var cloneObj = 	$(rootel).clone();
-				
-				//smileTransform
-				for (var i in options.smileList) {
-					var imgrow = options.smileList[i];
-					var bbcode = imgrow.bbcode; 
-					var imgdom = (imgrow && imgrow.img) ? imgrow.img:"";
-					var search_img = $(imgdom);
-					cloneObj.find("img").each(function() {
-						if ($(this).attr("src")==search_img.attr("src")) {
-							$(this).replaceWith(bbcode);
-						}
-					});
-				}
-				
-				//tagTransform
-				for (var i=0; i<enabledButtons.length; i++) {
-					var currow = options.allButtons[enabledButtons[i]];
-					var htmlToBB = currow.htmlToBB;
-					for (var matchel in htmlToBB) {
-						var bbrepl = htmlToBB[matchel];
-						//$.log("Match: '"+matchel+"' bb: '"+bbrepl+"'");
-						cloneObj.find(matchel).each(function(idx,el) {
-							var bbReplCopy = bbrepl;
-							bbReplCopy = bbReplCopy.replace(/\%(.*?)\%/g,function(rpl) {
-								rpl = rpl.substr(1,rpl.length-2);
-								rpl = rpl.replace("this","el");
-								try{
-									return eval(rpl);
-								}catch (e) {return $(el).html();}
-							});
-							$(el).replaceWith("<span>"+bbReplCopy+"</span>");
-						});
-					}
-				}
-				
-				//clear mustremoved
-				cloneObj.find("*[mustremoved='1']").remove();
-				
-				//br transform
- 				cloneObj.contents().each(function() {
-					if (this.nodeType===3) {
-						var addtext = $(this).text();
-						//addtext = addtext.replace(/\n+/g,"");
-
-						outbb+=addtext;
-					}else{
-						//fix problems with breakeline
-						if ($(this)[0].tagName) {
-							var elname = $(this)[0].tagName.toLowerCase();
-							if (elname=="br") {
-								outbb+="\n";
-								return true;
-							}
-							/* else if (elname=="p") {
-								if ($(this).prev()[0]) {
-									outbb+="\n"; 
-								}
-								outbb+=transformHTMLtoBB(this); //process text
-								outbb+="\n";  //after insert
-								return true;
-							} */
-							outbb+=transformHTMLtoBB(this);
-						}
-						
-					}
-		
-				});
-				return outbb;
-			}
-			function transformBBtoHTML(bbtext) {
-				var html=bbtext;
-				//check for smiles
-				for (var i=0; i<options.smileList.length; i++) {
-					var repl = options.smileList[i];
-					var smbb = repl.bbcode;
-					if (repl && repl.img) {
-						/* smbb = smbb.replace(/\[/g,"\\[");
-						smbb = smbb.replace(/\]/g,"\\]");
-						smbb = smbb.replace(/\)/g,"\\)");
-						smbb = smbb.replace(/\(/g,"\\("); */
-						smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
-						var bregexp = new RegExp(smbb,"mg");
-						html = html.replace(bregexp,repl.img);
-					}
-				}
-				for (var i=0; i<enabledButtons.length; i++) {
-					var currow = options.allButtons[enabledButtons[i]];
-					var bbToHTML = currow.bbToHTML;
-					if (!bbToHTML) {
-						bbToHTML = {};
-						var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
-						var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
-						bbToHTML[bbkey]=bbrepl;
-					}
-					for (var bbreg in bbToHTML) {
-						var repl = bbToHTML[bbreg];
-						bbreg = bbreg.replace(/\*\]/g,"\\*]");
-						bbreg = bbreg.replace(/\[/g,"\\[");
-						bbreg = bbreg.replace(/\]/g,"\\]");
-						bbreg = bbreg.replace(/\\\[\\\[/g,"[");
-						bbreg = bbreg.replace(/\\\]\\\]/g,"]");
-						
-						
-						
-						var bregexp = new RegExp(bbreg,"mi");
-						html = bbReplace(html,bregexp,repl);
-						//html = html.replace(bregexp,repl);
-					}
-				}
-				
-				//clear br's
-				var resobj = $("<div>"+html+"</div>");
-				resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
-					$(el).remove();
-				});
-				
-				return resobj.html();
-			}
-			function initSelection() {
-				this.getNode = function(withTextNodes) {
-					//get current selection node
-					if (bbmode) {txtArea.focus();return txtArea;
-					}else{
-						var elem=null;
-						if (window.getSelection) {
-							elem = this.getRange().commonAncestorContainer;
-						}else{
-							//IE
-							elem = this.getRange().parentElement();
-						}
-						elem = (!withTextNodes && elem.nodeType===3) ? elem.parentNode:elem;
-						return elem;
-					}
-				}
-				this.getNodeByRange = function (rng) {
-					var elem=null;
-					if (window.getSelection) {
-						elem = rng.commonAncestorContainer;
-					}else{
-						//IE
-						elem = rng.parentElement();
-					}
-					elem = (elem.nodeType===3) ? $(elem).parent().get(0):elem;
-					return elem;
-				}
-				this.getText = function() {
-					//get current selection text
-					if (bbmode) {
-						return this.getTextWithInfo().text;
-					}else{
-						if (window.getSelection) {
-							return this.getRange().toString();
-						}else{
-							return this.getRange().text;
-						}
-					}
-				}
-				this.getHTML = function () {
-					var userSelection;
-					if (iFrameWindow.getSelection) {
-						// W3C Ranges
-						userSelection = iFrameWindow.getSelection();
-						// Get the range:
-						var range;
-						if (userSelection.getRangeAt) {
-							range = userSelection.getRangeAt(0);
-						}else{
-							range = iFrameDoc.createRange();
-							range.setStart (userSelection.anchorNode, userSelection.anchorOffset);
-							range.setEnd (userSelection.focusNode, userSelection.focusOffset);
-						}
-						// And the HTML:
-						var clonedSelection = range.cloneContents();
-						var div = document.createElement ('div');
-						div.appendChild(clonedSelection);
-						return div.innerHTML;
-					} else if (iFrameDoc.selection) {
-					// Explorer selection, return the HTML
-						userSelection = iFrameDoc.selection.createRange();
-						return userSelection.htmlText;
-					} else {
-						return '';
-					}
-				}
-				this.getRange = function() {
-					//work in html mode
-					if (window.getSelection) {
-						iFrameBody.focus();
-						return iFrameWindow.getSelection().getRangeAt(0);
-					}else{
-						//IE
-						var range = iFrameWindow.document.selection.createRange();
-						if (range) {
-							return range;
-						}
-					}
-				}
-				this.getTextWithInfo = function() {
-					//get current selection text and info, work only in bbmode
-					if('selectionStart' in txtArea && bbmode) {
-						var l = txtArea.selectionEnd - txtArea.selectionStart;
-						return { start: txtArea.selectionStart, end: txtArea.selectionEnd, length: l, text: txtArea.value.substr(txtArea.selectionStart, l)};
-					}else if (document.selection && bbmode){
-						//IE
-						txtArea.focus();
-						var r = document.selection.createRange();
-						var tr = txtArea.createTextRange();
-						var tr2 = tr.duplicate();
-						tr2.moveToBookmark(r.getBookmark());
-						tr.setEndPoint('EndToStart',tr2);
-						if (r == null || tr == null) return { start: txtArea.value.length, end: txtArea.value.length, length: 0, text: '' };
-						var text_part = r.text.replace(/[\r\n]/g,'.'); //for some reason IE doesn't always count the \n and \r in the length
-						var text_whole = txtArea.value.replace(/[\r\n]/g,'.');
-						var the_start = text_whole.indexOf(text_part,tr.text.length);
-						return { start: the_start, end: the_start + text_part.length, length: text_part.length, text: r.text };
-					}else return { start: e.value.length, end: e.value.length, length: 0, text: '' };
-				};
-				this.setRange = function(pos) {
-					if (bbmode) {
-						if (window.getSelection) {
-							txtArea.selectionStart=pos;
-							txtArea.selectionEnd=pos;
-						}else{
-							var range = txtArea.createTextRange();
-							range.collapse(true);
-							//range.moveStart('character', pos);
-							//range.moveEnd('character', pos);
-							range.move('character', pos);
-							
-							range.select();
-						}
-					}
-				}
-				this.overrideWithNode = function(node,rng,removeSelector) {
-					if (!rng) {
-						rng = this.getRange();
-					}
 					iFrameBody.focus();
-					var w3c_selection = (window.getSelection) ? true:false;
-					var sel = selection.get();
-					var rootNode = this.getNodeByRange(rng);
+					var a = getContaining("a");
+					var saveButton = (a) ? "Обновить ссылку":"Вставить ссылку";
+					var removeStyle= a ? "":"display:none";
+					var adata = a ? $(a).text():selection.getText();
 					
-					//fix if node is text
-					if (typeof(node)=="string") {
-						node = createElementFromString(node);
-					}
-					var $wnode = $(node);
-					var wnode = $wnode.get(0);
-					if (removeSelector) {
-						//check for node override
-						var containNode = getContaining(removeSelector,rng);
-						if (containNode) {
-							$(containNode).remove();
+					selection.saveRange(); //save current range status
+					
+					var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="right"><label class="tbl-label">Отображаемый текст</label></td><td><input type="text" id="veditor_atitle" style="width:300px" value="{atext}" /></td></tr><tr><td class="right"><label class="tbl-label">URL ссылки</label></td><td><input type="text" style="width:300px" id="veditor_ahref" value="{ahref}" placeholder="http://"  /></td></tr><tr><td></td><td><div class=""><button class="wbb-okbtn" style="padding:3px 15px;float:left;margin-right:15px;"  unselectable="on">{saveButton}</button><button class="wbb-redbtn" style="padding:3px 15px;float:left;{removeStyle}" unselectable="on">Убрать ссылку</button></div></td></tr></table>',{saveButton:saveButton,removeStyle:removeStyle,atext:adata,ahref:$(a).attr("href")}));
+					
+					
+					
+					$ahtml.find("button.wbb-okbtn").click(function() {
+						//submit link event
+						var $atitle = $ahtml.find("#veditor_atitle");
+						var $ahref = $ahtml.find("#veditor_ahref")
+						$ahtml.find("span.inperr").remove();
+						if ($atitle.val()=="") {
+							$atitle.after('<span class="inperr">Текст ссылки не может быть пустым.</span>');
+							$atitle.focus();
+							return;
 						}
-					}
-					
-					if (w3c_selection) {
-						rng.deleteContents();
-					}
-					
-					if (w3c_selection) {
+						if (!$ahref.val().match(/https*\:\/\//g)) {
+							$ahref.after('<span class="inperr">Неправильный формат ссылки.<br/> <span style="color:#666">Пример: http://www.wysibb.com</span></span>');
+							$ahref.focus();
+							return;
+						}
+						//iFrameBody.focus();
 						
-						rng.insertNode(wnode);
-						rng.setStartAfter(wnode);
-						rng.setEndAfter(wnode);
+						var elem = iFrameDoc.createElement("A");
+						elem.setAttribute("href",$ahref.val());
+						elem.innerHTML = $atitle.val();
 						
-						sel.removeAllRanges();
-						sel.addRange(rng);
+						selection.overrideWithNode(elem,selection.getSavedRange(),"a");
 						
-					}else{
-						rng.pasteHTML(wnode.outerHTML);
-						rng.collapse();
-						rng.select();
-					}
-					
-					/* if ($wnode.is("div,blockquote,table")) {
-						$wnode.after("<br/>");
-					} */
-					
-					updateToolbar();
-					return wnode;
-				}
-				this.lastRange=null;
-				this.get = function() {
-					return (window.getSelection) ?  iFrameWindow.getSelection():iFrameWindow.document.selection;
-				}
-				this.saveRange = function() {
-					if (window.getSelection) {
-						this.lastRange=this.getRange().cloneRange();
-					}else{
-						this.lastRange=this.getRange();
-					}
-				}
-				this.getSavedRange = function() {
-					return this.lastRange;
-				}
-				this.setSelection = function(rng,node,start,stop) {
-					var sel = selection.get();
-					if (!rng) {
-						rng = this.getRange();
-					}
-					var w3c_selection = (window.getSelection) ? true:false;
-					if (w3c_selection) {
-						//rng.selectNodeContents(node);
-						if (start && stop) {
-							rng.setStart(node,start);
-							rng.setEnd(node,stop);
-						}else{
-							rng.selectNodeContents(node);
-						}
+						$(document).unbind("mousedown");
+						$ahtml.find("#veditor_ahref").unbind("keyup change");
 						
-						sel.removeAllRanges();
-						sel.addRange(rng);
-						
-					}else{
-						if (node) {
-							rng.moveToElementText(node);
-							if (start>=0 && stop>=0) {
-								rng.moveStart('character',start);
-								rng.moveEnd ('character',stop);
-							}
-							rng.select();
-						}
-					}
-				}
-			}
-			function sanitizeHTML(rootEl) {
-				$(rootEl).children().each(function() {
-					var elname = $(this)[0].tagName.toLowerCase();
-					//replace p and div with br
-					if (elname=="p" || elname=="div") {
-						var emptyel = false;
-						if ($(this).children().size()<=1) {
-							var txt = $(this).text().replace(/\s+/g,"");
-							txt = txt.replace(/\&nbsp;/g,"");
-							if (txt=="") {emptyel=true;}
-						}
-						if (!emptyel) { //check for empty p and div
-							$(this).before(sanitizeHTML($(this))).replaceWith("<br/><br/>");
-						}else{
-							$(this).remove();
-						}
-						return true;
-					}
-					
-					if ($.inArray(elname,options.validTags)!=-1) {
-						var attributes = $.map(this.attributes, function(item) {
-							return item.name;
-						});
-						var tag = $(this);
-						$.each(attributes, function(i, item) {
-							//if ((elname.toLowerCase()=="a" && item!="href") && (elname.toLowerCase()=="img" && item!="src")) {
-							if (item!="href" && item!="src" && item!="class") {
-								tag.removeAttr(item);
-							}
-						});
-						$(this).html(sanitizeHTML($(this)));
-					}else{
-						var txt = $(this).children();
-						if (txt.size()>0) {
-							$(this).after(sanitizeHTML($(this)));
-						}else{
-							
-							var eltext = $(this).text();
-								eltext = eltext.replace(/\n+/g,"")
-							$(this).after(eltext);
-						}
-						$(this).remove();
-					}
-				});
-				return $(rootEl).html();
-			}
-			function smileAutoDetect() {
-				var smList=new Array();
-				var $sm1 = $("img[alt=':)']");
-				var $sm2 = $("img[alt=';)']");
-				
-				if ($sm1.size()>0 && $sm2.size()>0) {
-					//find common parent
-					var commonParent;
-					var $sm2parents = $sm2.parents();
-					$sm1.parents().each(function(idx,el) {
-						$sm2parents.each(function(idx2,el2) {
-							if (el==el2) {
-								commonParent=el;
-								return false;
-							}
-						});
-						if (commonParent) {
-							return false;
-						}
+						$("#wbbModalWindow").hide();
+						iFrameBody.focus();
+					})
+					$ahtml.find("button.wbb-redbtn").click(function() {
+						//remove link event
+						var a = selection.getNodeByRange(selection.getSavedRange());
+						selection.overrideWithNode($(a).html(),selection.getSavedRange(),"a");
+						$("#wbbModalWindow").hide();
+						iFrameBody.focus();
 					})
 					
-					$(commonParent).find("img[alt!='']").each(function(idx,el) {
-						var title = $(el).attr("title");
-						var bbcode = $(el).attr("alt");
-						var imghtml = el.outerHTML;
-						if (title && bbcode) {
-							smList.push({title:title,img:imghtml,bbcode:bbcode});
+					showModalWindow("Вставка ссылки",$ahtml);
+					
+					$ahtml.find("#veditor_ahref").bind("keyup change",function() {
+						if ($(this).val()=='' || (($(this).val().indexOf($('#veditor_atitle').val())!=-1 || $('#veditor_atitle').val().indexOf($(this).val())!=-1) && $(this).val().length>$('#veditor_atitle').val().length)) {
+							$('#veditor_atitle').val($(this).val());
 						}
+					}).focus();
+					
+				}
+			};
+			this.queryState = function(opt) {
+				var bbcode = opt.bbName;
+				return isContaining("a",bbcode,selection.getNode());
+			};
+		}
+		function imgCommand() {
+			this.execute = function(opt) {
+				if (bbmode) {
+					txtArea.focus();
+					var bbcode = opt.bbName;
+					if (checkBBContain(bbcode)) {
+						//remove bb
+						removeBBCode(bbcode);
+					}else{
+						var initialUrl = "http://";
+						var url = window.prompt("Введите адрес изображения:", initialUrl);
+						if (url===null) return;
+						if (url!="") {
+							setBBCode(opt,{src:url});
+						}
+					}
+				}else{
+					iFrameBody.focus();
+					var img = getContaining("img");
+					var imgpreview = img ? $(img).attr("src"):wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
+					var saveButton= img ? "Обновить изображение":"Вставить изображение";
+					
+					selection.saveRange();
+					
+					var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:$(img).attr("src")}));
+					
+					$ahtml.find("button.wbb-okbtn").click(function() {
+						//submit image
+						iFrameBody.focus();
+						$ahtml.find("span.inperr").remove();
+						var $imgsrc = $ahtml.find("#veditor_img");
+						if (!$imgsrc.val().match(/https*\:\/\//g)) {
+							$imgsrc.after('<br/><span style="color:red;font-size:0.9em">Неправильный формат адреса изображения.</span>');
+							return;
+						}
+						
+						var elem = iFrameDoc.createElement("IMG");
+						elem.setAttribute("src",$imgsrc.val());
+						
+						//selection.overrideWithNode(elem,selection.lastRange,null);
+						selection.overrideWithNode(elem,selection.getSavedRange());
+						
+						$("#wbbModalWindow").hide();
+						$(document).unbind("mousedown");
+						$ahtml.find("#veditor_img").unbind("keyup change");
+						
+					});
+					
+					showModalWindow("Вставить изображение",$ahtml);
+					
+					$ahtml.find("#veditor_img").bind("keyup change",function() {
+						$('#imgpreview').attr("src",($(this).val()));
+					}).focus();
+					
+				}
+			};
+			this.queryState = function(opt) {
+				if (bbmode) {
+					//highlite img only in bbmode
+					return checkBBContain("img");
+				}
+				return false;
+			};
+		}
+		function quoteCommand() {
+			this.execute = function(opt) {
+				if (bbmode) {
+					txtArea.focus();
+					var bbcode = opt.bbName;
+					var tagfilter = opt.rootNode;
+					if (checkBBContain(bbcode)) {
+						//remove bb
+						removeBBCode(bbcode);
+					}else{
+						setBBCode(bbcode,null);
+					}
+				}else{
+					iFrameBody.focus();
+					var quoteBlock = getContaining(tagfilter);
+					if (quoteBlock) {
+						//remove quote
+						$(quoteBlock).replaceWith($(quoteBlock).html());
+					}else{
+						//insert quote
+						var selText = selection.getHTML();
+						
+						selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}</div><br/>",{txt:selText}),null,null);
+						
+						//selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}{</div><p></p>",{txt:selText}),null);
+					}
+					
+				}
+			};
+			this.queryState = function(opt) {
+				var bbcode = opt.bbName;
+				var tagfilter = opt.rootNode;
+				return isContaining(tagfilter,bbcode,selection.getNode());
+			};
+		}
+		function smileCommand() {
+			this.execute = function(opt) {
+				if (bbmode) {
+					txtArea.focus();
+					setBBCode(opt,null);
+				}else{
+					iFrameBody.focus();
+					selection.overrideWithNode(wbbStringFormat(opt.img,options));
+				}
+			};
+			this.queryState = function() {
+				return false;
+			};
+		}
+		function justifyCommand() {
+			this.execute = function(opt) {
+				if (bbmode) {
+					txtArea.focus();
+					setBBCode(opt,null);
+				}else{
+					iFrameBody.focus();
+					var curContain = getContaining(opt.rootNode);
+					if (curContain) {
+						if (opt.contentSelector) {
+							var remRules = opt.contentSelector;
+							remRules = remRules.replace(/rootNode/g,"curContain");
+							$(curContain).replaceWith(eval(remRules));
+						}
+					}else{
+						var pblock = getContaining(".wbb-left,.wbb-center,.wbb-right");
+						var sHTML = selection.getHTML();
+						var crnode;
+						if (pblock) {
+							crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
+							$(pblock).replaceWith(crnode);
+						}else{
+							crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
+							selection.overrideWithNode(crnode);
+						}
+						selection.setSelection(null,crnode,0,0);
+					}
+				}
+			};
+			this.queryState = function(opt) {
+				return isContaining(opt.rootNode,opt.bbName,selection.getNode());
+			};
+		}
+		function setBBCode(opt,params) {
+			var cursel = selection.getTextWithInfo();
+			var bbOpen = (opt.bbOpen) ? opt.bbOpen:"";
+			var bbClose = (opt.bbClose) ? opt.bbClose:"";
+			var bbcode = (opt.bbcode) ? opt.bbcode:"";
+			
+			if (opt.skipSelectRange===true) {cursel.text="";}
+			var bbstring="";
+			if (bbcode!="") {
+				//smile bbcode
+				bbstring = bbcode;
+			}else{
+				bbstring = wbbStringFormat(bbOpen+cursel.text+bbClose,params);
+			}
+			txtArea.value = txtArea.value.substr(0,cursel.start)+bbstring+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
+			if (opt.bbName!="url" && opt.bbName!="img" && (!cursel || cursel.length==0)) {
+				selection.setRange(cursel.start + bbstring.length-(bbClose.length));
+			}
+		}
+		function checkBBContain(bbcode) {
+			var cursel = selection.getTextWithInfo();
+			var txtvalue = txtArea.value.substr(0,cursel.start);
+			var bbpattern = new RegExp("\\[(.*?)\\]","mgi");
+			var contain=0;
+			while (aMatch = bbpattern.exec(txtvalue)){
+				var bb = aMatch[1];
+					bb = bb.replace(/=.*/,"");
+				var isCloseBB = bb.substr(0,1)=="/";
+				var clearBB = bb.replace("/","");
+				if (clearBB.toLowerCase()==bbcode.toLowerCase()) {
+					if (!isCloseBB) {
+						contain++;
+					}else{
+						contain--;
+					}
+				}
+			}
+			return (contain>0);
+		}
+		function isContaining(parentsel,bbcode,el) {
+			if (bbmode) {
+				return checkBBContain(bbcode);
+			}else{
+				return ($(el).is(parentsel) || $(el).parents(parentsel).size()>0);
+			}
+		}
+		function getContaining(psel,rng) {
+			if (!rng) {
+				rng = selection.getRange();
+			}
+			var el = selection.getNodeByRange(rng);
+			while (el && el.tagName!="BODY") {
+				if ($(el).is(psel)) {return el};
+				if (el) {el = el.parentNode;}
+				else{return null;}
+			}
+			return null;
+		}
+		function removeBBCode(bbcode) {
+			var cursel = selection.getTextWithInfo();
+			var beforeTxt = txtArea.value.substr(0,cursel.start);
+			var afterTxt = txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
+			var bbpatternOpenBB = new RegExp("\\["+bbcode+"(?:\\=http.*?)*\\](.*?)$","i");
+			var bbpatternCloseBB = new RegExp("^(.*?)\\[\\/"+bbcode+"\\]","i");
+			
+			beforeTxt = beforeTxt.replace(bbpatternOpenBB,"$1");
+			afterTxt = afterTxt.replace(bbpatternCloseBB,"$1");
+			
+			txtArea.value = beforeTxt+cursel.text+afterTxt;
+		}
+		function modeSwitch(btn) {
+			if (bbmode) {
+				bbmode=false;
+				$iFrameBody.html(transformBBtoHTML($txtArea.val()));
+				$iFrame.show();
+				$txtArea.hide().val("");
+				$(btn).removeClass("on");
+				
+			}else{
+				bbmode=true;
+				if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+					$(iFrameBody.lastChild).remove();
+				}
+				$txtArea.val(transformHTMLtoBB(iFrameBody));
+				$iFrame.hide();
+				$txtArea.show();
+				$(btn).addClass("on");
+			}
+		}
+		function transformHTMLtoBB(rootel) {
+			var outbb="";
+			clearEmpty(iFrameBody);
+			var cloneObj = 	$(rootel).clone();
+			
+			//smileTransform
+			for (var i in options.smileList) {
+				var imgrow = options.smileList[i];
+				var bbcode = imgrow.bbcode; 
+				var imgdom = (imgrow && imgrow.img) ? imgrow.img:"";
+				var search_img = $(imgdom);
+				cloneObj.find("img").each(function() {
+					if ($(this).attr("src")==search_img.attr("src")) {
+						$(this).replaceWith(bbcode);
+					}
+				});
+			}
+			
+			//tagTransform
+			for (var i=0; i<enabledButtons.length; i++) {
+				var currow = options.allButtons[enabledButtons[i]];
+				var htmlToBB = currow.htmlToBB;
+				for (var matchel in htmlToBB) {
+					var bbrepl = htmlToBB[matchel];
+					//$.log("Match: '"+matchel+"' bb: '"+bbrepl+"'");
+					cloneObj.find(matchel).each(function(idx,el) {
+						var bbReplCopy = bbrepl;
+						bbReplCopy = bbReplCopy.replace(/\%(.*?)\%/g,function(rpl) {
+							rpl = rpl.substr(1,rpl.length-2);
+							rpl = rpl.replace("this","el");
+							try{
+								return eval(rpl);
+							}catch (e) {return $(el).html();}
+						});
+						$(el).replaceWith("<span>"+bbReplCopy+"</span>");
 					});
 				}
+			}
 			
-				if (smList.length>5) {
-					options.smileList = smList;
-				}
-			}
-			function smileSort() {
-				var bblist = {};
-				var bbcodes=new Array();
-				for (var i=0; i<options.smileList.length; i++) {
-					var cursm=options.smileList[i];
-					
-					cursm.img = cursm.img.replace(cursm.bbcode,"");
-					bblist[cursm.bbcode] = cursm;
-					bbcodes.push(cursm.bbcode);
-				}
-				bbcodes.sort(function (a,b) {
-					return ((a.length > b.length) ? -1:1)
-				});
-				var newSmileList = new Array();
-				for (var i=0; i<bbcodes.length; i++) {
-					var bbcode = bbcodes[i];
-					newSmileList.push(bblist[bbcode]);
-				}
-				options.smileList = newSmileList;
-			}
-			function bbReplace(str,regexp,repl) {
-				while (str.match(regexp)) {
-					str=str.replace(regexp,repl);
-				}
-				return str;
-			}
-			function initFormSubmit() {
-				$.log("initFormSubmit");
-				$txtArea.parents("form").bind("submit",function() {
-					try {
-						if (!bbmode) {
-							if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
-								$(iFrameBody.lastChild).remove();
-							}
-							$txtArea.val(transformHTMLtoBB(iFrameBody));
+			//clear mustremoved
+			cloneObj.find("*[mustremoved='1']").remove();
+			
+			//br transform
+			cloneObj.contents().each(function() {
+				if (this.nodeType===3) {
+					var addtext = $(this).text();
+					//addtext = addtext.replace(/\n+/g,"");
+
+					outbb+=addtext;
+				}else{
+					//fix problems with breakeline
+					if ($(this)[0].tagName) {
+						var elname = $(this)[0].tagName.toLowerCase();
+						if (elname=="br") {
+							outbb+="\n";
+							return true;
 						}
-						return true;
-					}catch(e){
-						$iFrame.after('<div style="color:red;font-siz:10px;padding:10px;">Ошибка при формировании bbcode.</div>"')
+						/* else if (elname=="p") {
+							if ($(this).prev()[0]) {
+								outbb+="\n"; 
+							}
+							outbb+=transformHTMLtoBB(this); //process text
+							outbb+="\n";  //after insert
+							return true;
+						} */
+						outbb+=transformHTMLtoBB(this);
+					}
+					
+				}
+	
+			});
+			return outbb;
+		}
+		function transformBBtoHTML(bbtext) {
+			var html=bbtext;
+			//check for smiles
+			for (var i=0; i<options.smileList.length; i++) {
+				var repl = options.smileList[i];
+				var smbb = repl.bbcode;
+				if (repl && repl.img) {
+					/* smbb = smbb.replace(/\[/g,"\\[");
+					smbb = smbb.replace(/\]/g,"\\]");
+					smbb = smbb.replace(/\)/g,"\\)");
+					smbb = smbb.replace(/\(/g,"\\("); */
+					smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
+					var bregexp = new RegExp(smbb,"mg");
+					html = html.replace(bregexp,repl.img);
+				}
+			}
+			for (var i=0; i<enabledButtons.length; i++) {
+				var currow = options.allButtons[enabledButtons[i]];
+				var bbToHTML = currow.bbToHTML;
+				if (!bbToHTML) {
+					bbToHTML = {};
+					var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
+					var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
+					bbToHTML[bbkey]=bbrepl;
+				}
+				for (var bbreg in bbToHTML) {
+					var repl = bbToHTML[bbreg];
+					bbreg = bbreg.replace(/\*\]/g,"\\*]");
+					bbreg = bbreg.replace(/\[/g,"\\[");
+					bbreg = bbreg.replace(/\]/g,"\\]");
+					bbreg = bbreg.replace(/\\\[\\\[/g,"[");
+					bbreg = bbreg.replace(/\\\]\\\]/g,"]");
+					
+					
+					
+					var bregexp = new RegExp(bbreg,"mi");
+					html = bbReplace(html,bregexp,repl);
+					//html = html.replace(bregexp,repl);
+				}
+			}
+			
+			//clear br's
+			var resobj = $("<div>"+html+"</div>");
+			resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
+				$(el).remove();
+			});
+			
+			return resobj.html();
+		}
+		function initSelection() {
+			this.getNode = function(withTextNodes) {
+				//get current selection node
+				if (bbmode) {txtArea.focus();return txtArea;
+				}else{
+					var elem=null;
+					if (window.getSelection) {
+						elem = this.getRange().commonAncestorContainer;
+					}else{
+						//IE
+						elem = this.getRange().parentElement();
+					}
+					elem = (!withTextNodes && elem.nodeType===3) ? elem.parentNode:elem;
+					return elem;
+				}
+			}
+			this.getNodeByRange = function (rng) {
+				var elem=null;
+				if (window.getSelection) {
+					elem = rng.commonAncestorContainer;
+				}else{
+					//IE
+					elem = rng.parentElement();
+				}
+				elem = (elem.nodeType===3) ? $(elem).parent().get(0):elem;
+				return elem;
+			}
+			this.getText = function() {
+				//get current selection text
+				if (bbmode) {
+					return this.getTextWithInfo().text;
+				}else{
+					if (window.getSelection) {
+						return this.getRange().toString();
+					}else{
+						return this.getRange().text;
+					}
+				}
+			}
+			this.getHTML = function () {
+				var userSelection;
+				if (iFrameWindow.getSelection) {
+					// W3C Ranges
+					userSelection = iFrameWindow.getSelection();
+					// Get the range:
+					var range;
+					if (userSelection.getRangeAt) {
+						range = userSelection.getRangeAt(0);
+					}else{
+						range = iFrameDoc.createRange();
+						range.setStart (userSelection.anchorNode, userSelection.anchorOffset);
+						range.setEnd (userSelection.focusNode, userSelection.focusOffset);
+					}
+					// And the HTML:
+					var clonedSelection = range.cloneContents();
+					var div = document.createElement ('div');
+					div.appendChild(clonedSelection);
+					return div.innerHTML;
+				} else if (iFrameDoc.selection) {
+				// Explorer selection, return the HTML
+					userSelection = iFrameDoc.selection.createRange();
+					return userSelection.htmlText;
+				} else {
+					return '';
+				}
+			}
+			this.getRange = function() {
+				//work in html mode
+				if (window.getSelection) {
+					iFrameBody.focus();
+					return iFrameWindow.getSelection().getRangeAt(0);
+				}else{
+					//IE
+					var range = iFrameWindow.document.selection.createRange();
+					if (range) {
+						return range;
+					}
+				}
+			}
+			this.getTextWithInfo = function() {
+				//get current selection text and info, work only in bbmode
+				if('selectionStart' in txtArea && bbmode) {
+					var l = txtArea.selectionEnd - txtArea.selectionStart;
+					return { start: txtArea.selectionStart, end: txtArea.selectionEnd, length: l, text: txtArea.value.substr(txtArea.selectionStart, l)};
+				}else if (document.selection && bbmode){
+					//IE
+					txtArea.focus();
+					var r = document.selection.createRange();
+					var tr = txtArea.createTextRange();
+					var tr2 = tr.duplicate();
+					tr2.moveToBookmark(r.getBookmark());
+					tr.setEndPoint('EndToStart',tr2);
+					if (r == null || tr == null) return { start: txtArea.value.length, end: txtArea.value.length, length: 0, text: '' };
+					var text_part = r.text.replace(/[\r\n]/g,'.'); //for some reason IE doesn't always count the \n and \r in the length
+					var text_whole = txtArea.value.replace(/[\r\n]/g,'.');
+					var the_start = text_whole.indexOf(text_part,tr.text.length);
+					return { start: the_start, end: the_start + text_part.length, length: text_part.length, text: r.text };
+				}else return { start: e.value.length, end: e.value.length, length: 0, text: '' };
+			};
+			this.setRange = function(pos) {
+				if (bbmode) {
+					if (window.getSelection) {
+						txtArea.selectionStart=pos;
+						txtArea.selectionEnd=pos;
+					}else{
+						var range = txtArea.createTextRange();
+						range.collapse(true);
+						//range.moveStart('character', pos);
+						//range.moveEnd('character', pos);
+						range.move('character', pos);
+						
+						range.select();
+					}
+				}
+			}
+			this.overrideWithNode = function(node,rng,removeSelector) {
+				if (!rng) {
+					rng = this.getRange();
+				}
+				iFrameBody.focus();
+				var w3c_selection = (window.getSelection) ? true:false;
+				var sel = selection.get();
+				var rootNode = this.getNodeByRange(rng);
+				
+				//fix if node is text
+				if (typeof(node)=="string") {
+					node = createElementFromString(node);
+				}
+				var $wnode = $(node);
+				var wnode = $wnode.get(0);
+				if (removeSelector) {
+					//check for node override
+					var containNode = getContaining(removeSelector,rng);
+					if (containNode) {
+						$(containNode).remove();
+					}
+				}
+				
+				if (w3c_selection) {
+					rng.deleteContents();
+				}
+				
+				if (w3c_selection) {
+					
+					rng.insertNode(wnode);
+					rng.setStartAfter(wnode);
+					rng.setEndAfter(wnode);
+					
+					sel.removeAllRanges();
+					sel.addRange(rng);
+					
+				}else{
+					rng.pasteHTML(wnode.outerHTML);
+					rng.collapse();
+					rng.select();
+				}
+				
+				/* if ($wnode.is("div,blockquote,table")) {
+					$wnode.after("<br/>");
+				} */
+				
+				updateToolbar();
+				return wnode;
+			}
+			this.lastRange=null;
+			this.get = function() {
+				return (window.getSelection) ?  iFrameWindow.getSelection():iFrameWindow.document.selection;
+			}
+			this.saveRange = function() {
+				if (window.getSelection) {
+					this.lastRange=this.getRange().cloneRange();
+				}else{
+					this.lastRange=this.getRange();
+				}
+			}
+			this.getSavedRange = function() {
+				return this.lastRange;
+			}
+			this.setSelection = function(rng,node,start,stop) {
+				var sel = selection.get();
+				if (!rng) {
+					rng = this.getRange();
+				}
+				var w3c_selection = (window.getSelection) ? true:false;
+				if (w3c_selection) {
+					//rng.selectNodeContents(node);
+					if (start && stop) {
+						rng.setStart(node,start);
+						rng.setEnd(node,stop);
+					}else{
+						rng.selectNodeContents(node);
+					}
+					
+					sel.removeAllRanges();
+					sel.addRange(rng);
+					
+				}else{
+					if (node) {
+						rng.moveToElementText(node);
+						if (start>=0 && stop>=0) {
+							rng.moveStart('character',start);
+							rng.moveEnd ('character',stop);
+						}
+						rng.select();
+					}
+				}
+			}
+		}
+		function sanitizeHTML(rootEl) {
+			$(rootEl).children().each(function() {
+				var elname = $(this)[0].tagName.toLowerCase();
+				//replace p and div with br
+				if (elname=="p" || elname=="div") {
+					var emptyel = false;
+					if ($(this).children().size()<=1) {
+						var txt = $(this).text().replace(/\s+/g,"");
+						txt = txt.replace(/\&nbsp;/g,"");
+						if (txt=="") {emptyel=true;}
+					}
+					if (!emptyel) { //check for empty p and div
+						$(this).before(sanitizeHTML($(this))).replaceWith("<br/><br/>");
+					}else{
+						$(this).remove();
+					}
+					return true;
+				}
+				
+				if ($.inArray(elname,options.validTags)!=-1) {
+					var attributes = $.map(this.attributes, function(item) {
+						return item.name;
+					});
+					var tag = $(this);
+					$.each(attributes, function(i, item) {
+						//if ((elname.toLowerCase()=="a" && item!="href") && (elname.toLowerCase()=="img" && item!="src")) {
+						if (item!="href" && item!="src" && item!="class") {
+							tag.removeAttr(item);
+						}
+					});
+					$(this).html(sanitizeHTML($(this)));
+				}else{
+					var txt = $(this).children();
+					if (txt.size()>0) {
+						$(this).after(sanitizeHTML($(this)));
+					}else{
+						
+						var eltext = $(this).text();
+							eltext = eltext.replace(/\n+/g,"")
+						$(this).after(eltext);
+					}
+					$(this).remove();
+				}
+			});
+			return $(rootEl).html();
+		}
+		function smileAutoDetect() {
+			var smList=new Array();
+			var $sm1 = $("img[alt=':)']");
+			var $sm2 = $("img[alt=';)']");
+			
+			if ($sm1.size()>0 && $sm2.size()>0) {
+				//find common parent
+				var commonParent;
+				var $sm2parents = $sm2.parents();
+				$sm1.parents().each(function(idx,el) {
+					$sm2parents.each(function(idx2,el2) {
+						if (el==el2) {
+							commonParent=el;
+							return false;
+						}
+					});
+					if (commonParent) {
 						return false;
 					}
 				})
+				
+				$(commonParent).find("img[alt!='']").each(function(idx,el) {
+					var title = $(el).attr("title");
+					var bbcode = $(el).attr("alt");
+					var imghtml = el.outerHTML;
+					if (title && bbcode) {
+						smList.push({title:title,img:imghtml,bbcode:bbcode});
+					}
+				});
 			}
-			function tagKnife(tree,rootSelector) {
-				$.log("is is text, multievents");
-								
-				var nd = selection.getNode();
-				var ndHTML = selection.getHTML();
-				var $nd = $(nd);
+		
+			if (smList.length>5) {
+				options.smileList = smList;
+			}
+		}
+		function smileSort() {
+			var bblist = {};
+			var bbcodes=new Array();
+			for (var i=0; i<options.smileList.length; i++) {
+				var cursm=options.smileList[i];
+				
+				cursm.img = cursm.img.replace(cursm.bbcode,"");
+				bblist[cursm.bbcode] = cursm;
+				bbcodes.push(cursm.bbcode);
+			}
+			bbcodes.sort(function (a,b) {
+				return ((a.length > b.length) ? -1:1)
+			});
+			var newSmileList = new Array();
+			for (var i=0; i<bbcodes.length; i++) {
+				var bbcode = bbcodes[i];
+				newSmileList.push(bblist[bbcode]);
+			}
+			options.smileList = newSmileList;
+		}
+		function bbReplace(str,regexp,repl) {
+			while (str.match(regexp)) {
+				str=str.replace(regexp,repl);
+			}
+			return str;
+		}
+		function initFormSubmit() {
+			$.log("initFormSubmit");
+			$txtArea.parents("form").bind("submit",function() {
+				try {
+					if (!bbmode) {
+						if (iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()=="br") {
+							$(iFrameBody.lastChild).remove();
+						}
+						$txtArea.val(transformHTMLtoBB(iFrameBody));
+					}
+					return true;
+				}catch(e){
+					$iFrame.after('<div style="color:red;font-siz:10px;padding:10px;">Ошибка при формировании bbcode.</div>"')
+					return false;
+				}
+			})
+		}
+		function tagKnife(tree,rootSelector) {
+			$.log("is is text, multievents");
+							
+			var nd = selection.getNode();
+			var ndHTML = selection.getHTML();
+			var $nd = $(nd);
 
-				var rnd = Math.floor(Math.random(0,10000)*1000);
-				selection.overrideWithNode(wbbStringFormat("<span sl=\"{rnd}\"></span>",{rnd:rnd}));
-				
-				var $rootND = $nd.closest(rootSelector);
-				
-				$bf = $rootND.clone(true);
-				$af = $rootND.clone(true);
-				
-				if (ndHTML.indexOf(">")==-1 || ndHTML.indexOf("</")==-1) {
-					//it is plain text, check for parent tags
-					var txtNode = iFrameDoc.createTextNode(ndHTML);
-					$nd.parents().each(function() {
-						if (!$(this).is(rootSelector)) {
-							$.log("Parent: "+this.tagName);
-							var $p = $(this).clone().empty();
-							$p.append(txtNode);
-							txtNode = $p.get(0);
-						}else{
-							return false;
-						}
-					});
-					ndHTML = (txtNode.nodeType==3) ? txtNode.textContent:txtNode.outerHTML;
-					//$.log(ndHTML);
-				}else{
-					if (!$nd.is(rootSelector)) {
-						ndHTML = $nd.clone().empty().append(ndHTML).get(0).outerHTML;
-					}
-				}
-				
-				
-				var remove=false;
-				//before remove
-				$bf.contents().filter(filterCheckBefore).remove();
-				function filterCheckBefore(idx) {
-					if ($(this).attr("sl")==rnd) {
-						remove=true;
-						return true;
-					}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
-						$(this).contents().filter(filterCheckBefore).remove();
+			var rnd = Math.floor(Math.random(0,10000)*1000);
+			selection.overrideWithNode(wbbStringFormat("<span sl=\"{rnd}\"></span>",{rnd:rnd}));
+			
+			var $rootND = $nd.closest(rootSelector);
+			
+			$bf = $rootND.clone(true);
+			$af = $rootND.clone(true);
+			
+			if (ndHTML.indexOf(">")==-1 || ndHTML.indexOf("</")==-1) {
+				//it is plain text, check for parent tags
+				var txtNode = iFrameDoc.createTextNode(ndHTML);
+				$nd.parents().each(function() {
+					if (!$(this).is(rootSelector)) {
+						$.log("Parent: "+this.tagName);
+						var $p = $(this).clone().empty();
+						$p.append(txtNode);
+						txtNode = $p.get(0);
+					}else{
 						return false;
 					}
-					return remove;
+				});
+				ndHTML = (txtNode.nodeType==3) ? txtNode.textContent:txtNode.outerHTML;
+				//$.log(ndHTML);
+			}else{
+				if (!$nd.is(rootSelector)) {
+					ndHTML = $nd.clone().empty().append(ndHTML).get(0).outerHTML;
 				}
-				
-				remove=true;
-				//$af.contents().filter(filterCheckAfter).remove().end().find("*").contents().filter(filterCheckAfter).remove();
-				$af.contents().filter(filterCheckAfter).remove();
-				function filterCheckAfter(idx) {
-					//$.log(this);
-					if ($(this).attr("sl")==rnd) {
-						//$.log("Find node: "+this);
-						remove=false;
+			}
+			
+			
+			var remove=false;
+			//before remove
+			$bf.contents().filter(filterCheckBefore).remove();
+			function filterCheckBefore(idx) {
+				if ($(this).attr("sl")==rnd) {
+					remove=true;
+					return true;
+				}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
+					$(this).contents().filter(filterCheckBefore).remove();
+					return false;
+				}
+				return remove;
+			}
+			
+			remove=true;
+			//$af.contents().filter(filterCheckAfter).remove().end().find("*").contents().filter(filterCheckAfter).remove();
+			$af.contents().filter(filterCheckAfter).remove();
+			function filterCheckAfter(idx) {
+				//$.log(this);
+				if ($(this).attr("sl")==rnd) {
+					//$.log("Find node: "+this);
+					remove=false;
+					return true;
+				}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
+					//$.log("Find parent [after]:"+this);
+					$(this).contents().filter(filterCheckAfter).remove();
+					return false;
+				}
+				return remove;
+			}
+			
+			$rootND.before($bf).after($af).replaceWith(ndHTML);
+			//selection.setSelectionAfterNode($af.get(0));
+			/* $.log($bf.get(0));
+			$.log($rootND.get(0));
+			$.log($af.get(0)); */
+			clearEmpty(iFrameBody);
+		}
+		function clearEmpty(root) {
+			$(root).children().filter(emptyFilter).remove();
+			function emptyFilter(idx) {
+				if (!$(this).is("span,font")) {
+					//clear empty only for span,font
+					return false;
+				}
+				if ($(this).html().length==0) {
+					return true;
+				}else if ($(this).children().size()>0) {
+					$(this).children().filter(emptyFilter).remove();
+					if ($(this).html().length==0 && this.tagName!="BODY") {
 						return true;
-					}else if ($(this).find('*[sl="'+rnd+'"]').size()!=0) {
-						//$.log("Find parent [after]:"+this);
-						$(this).contents().filter(filterCheckAfter).remove();
-						return false;
-					}
-					return remove;
-				}
-				
-				$rootND.before($bf).after($af).replaceWith(ndHTML);
-				//selection.setSelectionAfterNode($af.get(0));
-				/* $.log($bf.get(0));
-				$.log($rootND.get(0));
-				$.log($af.get(0)); */
-				clearEmpty(iFrameBody);
-			}
-			function clearEmpty(root) {
-				$(root).children().filter(emptyFilter).remove();
-				function emptyFilter(idx) {
-					if (!$(this).is("span,font")) {
-						//clear empty only for span,font
-						return false;
-					}
-					if ($(this).html().length==0) {
-						return true;
-					}else if ($(this).children().size()>0) {
-						$(this).children().filter(emptyFilter).remove();
-						if ($(this).html().length==0 && this.tagName!="BODY") {
-							return true;
-						}
 					}
 				}
 			}
-			function createElementFromString(nodestr,doc) {
-				if (!doc) {
-					doc = iFrameDoc;
-				}
-				if (nodestr.indexOf("<")!=-1) {
-					var el = doc.createElement("SPAN");
-					el.innerHTML = nodestr;
-					return $(el).children().unwrap().get(0);
-				}else{
-					var el = doc.createTextNode(nodestr);
-					return el;
-				}
+		}
+		function createElementFromString(nodestr,doc) {
+			if (!doc) {
+				doc = iFrameDoc;
 			}
-			function selectBoxToggle(evt) {
-				var $el = $(this);
-				if ($el.hasClass("on")) {
-					//hide block
-					$el.removeClass("on");
-					$el.find(".select-list").hide();
-					$(document).die("mousedown",selectBoxHideEvent);
-					$iFrameBody.die('mousedown',selectBoxHideEvent);
-				}else{
-					//show block
-					$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-					$el.addClass("on");
-					$el.find(".select-list").show();
-					$(document).live("mousedown",selectBoxHideEvent);
-					$iFrameBody.live('mousedown',selectBoxHideEvent);
-				}
+			if (nodestr.indexOf("<")!=-1) {
+				var el = doc.createElement("SPAN");
+				el.innerHTML = nodestr;
+				return $(el).children().unwrap().get(0);
+			}else{
+				var el = doc.createTextNode(nodestr);
+				return el;
 			}
-			function selectBoxHideEvent(e) {
-				if ($(e.target).parents(".wysibb-toolbar-select").size()==0) {
-					$(window.parent.document.body).find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-					$(document).die('mousedown',selectBoxHideEvent);
-					$iFrameBody.die('mousedown',selectBoxHideEvent);
-				}
+		}
+		function selectBoxToggle(evt) {
+			var $el = $(this);
+			if ($el.hasClass("on")) {
+				//hide block
+				$el.removeClass("on");
+				$el.find(".select-list").hide();
+				$(document).die("mousedown",selectBoxHideEvent);
+				$iFrameBody.die('mousedown',selectBoxHideEvent);
+			}else{
+				//show block
+				$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+				$el.addClass("on");
+				$el.find(".select-list").show();
+				$(document).live("mousedown",selectBoxHideEvent);
+				$iFrameBody.live('mousedown',selectBoxHideEvent);
 			}
-			function colorPickerToggle(evt) {
-				var $el = $(this);
-				if ($el.hasClass("on")) {
-					//hide block
-					$el.attr("title","Цвет текста");
-					$el.removeClass("on");
-					$el.find(".clist").hide();
-					$(document).die("mousedown",colorPickerHideEvent);
-					$iFrameBody.die('mousedown',colorPickerHideEvent);
-				}else{
-					//show block
-					$el.removeAttr("title",false);
-					$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-					$el.addClass("on");
-					$el.find(".clist").show();
-					$(document).live("mousedown",colorPickerHideEvent);
-					$iFrameBody.live('mousedown',colorPickerHideEvent);
-				}
+		}
+		function selectBoxHideEvent(e) {
+			if ($(e.target).parents(".wysibb-toolbar-select").size()==0) {
+				$(window.parent.document.body).find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+				$(document).die('mousedown',selectBoxHideEvent);
+				$iFrameBody.die('mousedown',selectBoxHideEvent);
 			}
-			function colorPickerHideEvent(e) {
-				if ($(e.target).parents(".wysibb-toolbar-colorpicker").size()==0) {
-					$(window.parent.document.body).find(".wysibb-toolbar-colorpicker").removeClass("on").find(".clist").hide();
-					$(document).die('mousedown',selectBoxHideEvent);
-					$iFrameBody.die('mousedown',selectBoxHideEvent);
-				}
+		}
+		function colorPickerToggle(evt) {
+			var $el = $(this);
+			if ($el.hasClass("on")) {
+				//hide block
+				$el.attr("title","Цвет текста");
+				$el.removeClass("on");
+				$el.find(".clist").hide();
+				$(document).die("mousedown",colorPickerHideEvent);
+				$iFrameBody.die('mousedown',colorPickerHideEvent);
+			}else{
+				//show block
+				$el.removeAttr("title",false);
+				$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
+				$el.addClass("on");
+				$el.find(".clist").show();
+				$(document).live("mousedown",colorPickerHideEvent);
+				$iFrameBody.live('mousedown',colorPickerHideEvent);
 			}
-			function checkForBR() {
-				if (!bbmode && iFrameBody.lastChild.nodeName.toLowerCase()!="br") { //fix br
-					$iFrameBody.append("<br/>");
-				}
+		}
+		function colorPickerHideEvent(e) {
+			if ($(e.target).parents(".wysibb-toolbar-colorpicker").size()==0) {
+				$(window.parent.document.body).find(".wysibb-toolbar-colorpicker").removeClass("on").find(".clist").hide();
+				$(document).die('mousedown',selectBoxHideEvent);
+				$iFrameBody.die('mousedown',selectBoxHideEvent);
 			}
-			function colorToHex(color) {
-				
-				if (color.substr(0, 1) === '#') {
-					return color;
-				}
-				if (color.indexOf("rgb")==-1) {
-					//ie
-					color = parseInt(color);
-					color = ((color & 0x0000ff) << 16) | (color & 0x00ff00) | ((color & 0xff0000) >>> 16);
-					return '#'+color.toString(16);
-				}
-				
-				var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
-				
+		}
+		function checkForBR() {
+			if (!bbmode && iFrameBody && iFrameBody.lastChild && iFrameBody.lastChild.nodeName.toLowerCase()!="br") { //fix br
+				$iFrameBody.append("<br/>");
+			}
+		}
+		function colorToHex(color) {
+			
+			if (color.substr(0, 1) === '#') {
+				return color;
+			}
+			if (color.indexOf("rgb")==-1) {
+				//ie
+				color = parseInt(color);
+				color = ((color & 0x0000ff) << 16) | (color & 0x00ff00) | ((color & 0xff0000) >>> 16);
+				return '#'+color.toString(16);
+			}
+			
+			var digits = /(.*?)rgb\((\d+), (\d+), (\d+)\)/.exec(color);
+			if (digits) {
 				var red = parseInt(digits[2]);
 				var green = parseInt(digits[3]);
 				var blue = parseInt(digits[4]);
@@ -2028,8 +2033,14 @@
 				if (r.length<6) {r="000000"+r;r=r.substr(r.length-6,6);}
 				return '#' + r;
 			}
-			init();
-		});
+		};
+		
+		//shared functions
+		this.getBBCode = function () {
+			return (bbmode) ? $txtArea.val():transformHTMLtoBB(iFrameBody);
+		}
+		
+		init();
 		
 		function wbbStringFormat(template, data) {
 			return template.replace(/\{([\w\.]*)\}/g, function (str, key) {var keys = key.split("."), value = data[keys.shift()];$.each(keys, function () { value = value[this]; });return (value === null || value === undefined) ? "" : value;});
@@ -2067,11 +2078,6 @@
 				$(document).unbind("mousedown",documentClickEventHandler);
 			}
 		}
-		/* function wbbLog(msg) {
-			if (options.debug && typeof(console)!="undefined") {
-				console.log(msg);
-			}
-		} */
 	}
 	$.fn.skipWBB = function(){
 		return $(this).attr("mustremoved","1");
@@ -2080,5 +2086,10 @@
 		if (typeof(console)!="undefined") {
 			console.log(msg);
 		}
+	}
+	$.fn.wysibb = function(settings) {
+		return this.each(function() {
+			(new $.wysibb(this, settings));
+		});
 	}
 })(jQuery);
