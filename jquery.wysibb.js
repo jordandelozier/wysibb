@@ -1191,7 +1191,41 @@
 				return isContaining("a",bbcode,selection.getNode());
 			};
 		}
-		function imgCommand() {
+		function promptImageBrowser(opt) {
+			var initialUrl = "http://";
+			var url = window.prompt("Введите адрес изображения:", initialUrl);
+			if (url===null) return;
+			opt.callback({ url: url })
+		}
+		function niceImageBrowser(opt) {
+			var imgpreview = opt.url ?opt.url:wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
+			var saveButton= opt.url ?"Обновить изображение":"Вставить изображение";
+
+			var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
+			
+			$ahtml.find("button.wbb-okbtn").click(function() {
+				//submit image
+				iFrameBody.focus();
+				$ahtml.find("span.inperr").remove();
+				var $imgsrc = $ahtml.find("#veditor_img");
+				if (!$imgsrc.val().match(/https*\:\/\//g)) {
+					$imgsrc.after('<br/><span style="color:red;font-size:0.9em">Неправильный формат адреса изображения.</span>');
+					return;
+				}
+				// callback call
+				opt.callback({ url: $imgsrc.val() });
+				$("#wbbModalWindow").hide();
+				$(document).unbind("mousedown");
+				$ahtml.find("#veditor_img").unbind("keyup change");
+			});
+			
+			showModalWindow("Вставить изображение",$ahtml);
+			
+			$ahtml.find("#veditor_img").bind("keyup change",function() {
+				$('#imgpreview').attr("src",($(this).val()));
+			}).focus();
+		}
+		function imgCommand(imgBrowser) {
 			this.execute = function(opt) {
 				if (bbmode) {
 					txtArea.focus();
@@ -1200,51 +1234,30 @@
 						//remove bb
 						removeBBCode(bbcode);
 					}else{
-						var initialUrl = "http://";
-						var url = window.prompt("Введите адрес изображения:", initialUrl);
-						if (url===null) return;
-						if (url!="") {
-							setBBCode(opt,{src:url});
+						if (!$.isFunction(imgBrowser)) {
+							imgBrowser = promptImageBrowser;
 						}
+						var callback = function(img) {
+							setBBCode(opt,{src:img.url}) 
+						}
+						imgBrowser({ callback: callback });
 					}
 				}else{
 					iFrameBody.focus();
 					var img = getContaining("img");
-					var imgpreview = img ? $(img).attr("src"):wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
-					var saveButton= img ? "Обновить изображение":"Вставить изображение";
 					
 					selection.saveRange();
-					
-					var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:$(img).attr("src")}));
-					
-					$ahtml.find("button.wbb-okbtn").click(function() {
-						//submit image
-						iFrameBody.focus();
-						$ahtml.find("span.inperr").remove();
-						var $imgsrc = $ahtml.find("#veditor_img");
-						if (!$imgsrc.val().match(/https*\:\/\//g)) {
-							$imgsrc.after('<br/><span style="color:red;font-size:0.9em">Неправильный формат адреса изображения.</span>');
-							return;
-						}
-						
+
+					if (!$.isFunction(imgBrowser)) {
+						imgBrowser = niceImageBrowser;
+					}
+					var callback = function(img) {
 						var elem = iFrameDoc.createElement("IMG");
-						elem.setAttribute("src",$imgsrc.val());
-						
+						elem.setAttribute("src", img.url);
 						//selection.overrideWithNode(elem,selection.lastRange,null);
 						selection.overrideWithNode(elem,selection.getSavedRange());
-						
-						$("#wbbModalWindow").hide();
-						$(document).unbind("mousedown");
-						$ahtml.find("#veditor_img").unbind("keyup change");
-						
-					});
-					
-					showModalWindow("Вставить изображение",$ahtml);
-					
-					$ahtml.find("#veditor_img").bind("keyup change",function() {
-						$('#imgpreview').attr("src",($(this).val()));
-					}).focus();
-					
+					}
+					imgBrowser({ callback: callback, url: $(img).attr('src') })
 				}
 			};
 			this.queryState = function(opt) {
@@ -1362,6 +1375,7 @@
 			var txtvalue = txtArea.value.substr(0,cursel.start);
 			var bbpattern = new RegExp("\\[(.*?)\\]","mgi");
 			var contain=0;
+			var aMatch;
 			while (aMatch = bbpattern.exec(txtvalue)){
 				var bb = aMatch[1];
 					bb = bb.replace(/=.*/,"");
