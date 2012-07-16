@@ -67,6 +67,18 @@ html{height:100% !important;}
 .wysibb-toolbar-colorpicker .clist .scolor:hover{border:1px solid #333;margin:0 0 1px 1px;box-shadow:0px 0px 3px #aaa;}
 /* END COLOR PICKER */
 
+/* TABLE SELECT */
+.wysibb-toolbar-table{display: inline-block;*display:inline;zoom:1;outline:none;vertical-align: top;overflow:visible;height:24px;border-radius:3px;padding:1px 8px 1px 1px;position:relative;cursor:pointer;margin:5px;font-size:14px;}
+.wysibb-toolbar-table:hover{box-shadow:0px 0px 3px #aaa;border:1px solid #aaa;padding:0 7px 0 0}
+.wysibb-toolbar-table.on{box-shadow:inset 0px 0px 3px #aaa;background:#ddd;z-index:10;}
+.wysibb-toolbar-table .cpicker-dropdown{position:absolute;right:1px;top:0px;width:10px;height:24px;border-radius: 0 3px 3px 0;background:url(./img/icons.png) -6px -398px;}
+.wysibb-toolbar-table .val{width:20px;height:20px;background:url(./img/icons.png) 0px -460px;position:relative;margin:2px;}
+.wysibb-toolbar-table .clist{position:absolute;left:-1px;top:24px;width:190px;background:#fff;padding:5px;border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;cursor:default;display:none}
+.wysibb-toolbar-table .clist .tbl-sel{width:15px;height:15px;border:1px solid #ddd;position:absolute;cursor:pointer}
+.wysibb-toolbar-table .clist .tbl-sel:hover{background:#f4f4f4}
+/* END TABLE SELECT */
+
+
 
 .wysibb .wysibb-text{border:1px solid #ddd;padding:5px;background:#fff;font-size:0.9em;margin:0;}
 
@@ -182,3 +194,4 @@ html{height:100% !important;}
 .hidemain{background: #FAFCFE;border: 1px dotted black;border-left: 4px solid #8394B2;border-top: 0;color: #465584;padding: 4px;margin: 0 auto 8px auto;}
 
 .blockquote{border:1px solid #ccc;border-left:4px solid #ccc;padding:10px 15px;font-size:10px;}
+.wbbtable td{border:1px dashed #ddd;margin:5px;padding:3px;min-width:5px;min-height:15px;}
