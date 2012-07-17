@@ -1642,7 +1642,7 @@
 						var bbReplCopy = bbrepl;
 						bbReplCopy = bbReplCopy.replace(/\%(.*?)\%/g,function(rpl) {
 							rpl = rpl.substr(1,rpl.length-2);
-							rpl = rpl.replace("this","el");
+							rpl = rpl.replace(/this/g,"el");
 							try{
 								return eval(rpl);
 							}catch (e) {return $(el).html();}
