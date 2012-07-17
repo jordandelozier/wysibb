@@ -1,7 +1,7 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.6.1
+	Version: 0.6.2
 */
 
 (function($) {
@@ -11,7 +11,7 @@
 
 		var options,isMobile,IE6,IE7;
 		var options = {
-			version:			"0.6.1",
+			version:			"0.6.2",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -83,7 +83,16 @@
 					bbClose:"[/img]",
 					skipSelectRange: true,
 					htmlToBB: {'img': '[img]%$(this).attr("src")%[/img]'},
-					bbToHTML: {'[img](.*?)[/img]':'<img src="$1" />'}
+					bbToHTML: {'[img](.*?)[/img]':'<img src="$1" />'},
+					uploader: {
+						enable:			true,
+						defaultType:	1,
+						maxwidth:		600,
+						maxheight:		600,
+						useThumb:		true,
+						transload_url:	false,
+						uploadurl:		"{themePrefix}/imgupload.php"
+					}
 				},
 				"bullist": {
 					title:"Вставить список",
@@ -581,8 +590,16 @@
 			var propt = presets[settings.preset] || {};
 			$.extend(true,options, propt);
 		}
-		$.extend(options, settings);
-
+		$.extend(true,options, settings);
+		
+		// compatibility check, thx damnUploader
+		$.extend($.support, {
+			fileSelecting: (window.File != null) && (window.FileList != null),
+			fileReading: (window.FileReader != null),
+			fileSending: (window.FormData != null)
+		});
+		
+		
 		//init css prefix, if not set
 		if (!options.themePrefix) {
 			$('script').each(function(idx, el) {
@@ -603,6 +620,8 @@
 		
 		var $txtArea = $(txtArea);
 		$txtArea.data("wbb",this);
+		var idarea = $txtArea.attr("id");
+		if (!idarea) {idarea = "id"+Math.floor(Math.random(0,10000)*1000); $txtArea.attr("id",idarea)}
 		
 		var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc,$iFrameBody;
 		//txtArea = this;
@@ -1261,12 +1280,42 @@
 			opt.callback({ url: url })
 		}
 		function niceImageBrowser(opt) {
-			var imgpreview = opt.url ?opt.url:wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
+			var imgpreview = opt.url ? opt.url:wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
 			var saveButton= opt.url ?"Обновить изображение":"Вставить изображение";
-
-			var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
+			var uploadurl = wbbStringFormat(opt.uploader.uploadurl,options);
 			
-			$ahtml.find("button.wbb-okbtn").click(function() {
+			var op = {
+				"url": { 
+					"class": (opt.uploader.defaultType==1 || !opt.uploader.enable) ? "active":"",
+					"style": (opt.uploader.defaultType==1 || !opt.uploader.enable) ? "":"display:none"
+				},
+				"upload": { 
+					"class": (opt.uploader.defaultType==2 && opt.uploader.enable) ? "active":"",
+					"listyle": (!opt.uploader.enable) ? "display:none":"",
+					"style": (opt.uploader.defaultType==2 && opt.uploader.enable) ? "":"display:none"
+				}
+				
+			}
+			
+			var defaultType = opt.uploader.defaultType;
+			if (!opt.uploader.enable) {defaultType=1;}
+
+			//var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
+			
+			
+			var $ahtml = $(createElementFromString(wbbStringFormat('<div><ul class="wbb-imagemenu"><li  class="{op.url.class}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').show().next(\'.local-img\').hide();"><span>Ввести URL</span></li><li class="{op.upload.class}" style="{op.upload.listyle}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').hide().next(\'.local-img\').show()"><span>Загрузить файл</span></li> </ul> <div class="url-image" style="{op.url.style}"> <table class="veditor-addlink-window" cellpadding="0" cellspacing="10"> <tbody> <tr> <td class="center"> <table cellpadding="0" cellspacing="0" class="imgpreview"> <tbody> <tr> <td> <img id="imgpreview" src="{imgpreview}" /> </td> </tr> </tbody> </table> </td> <td> <label class="tbl-label" style="display:block">URL изображения</label> <input type="text" id="veditor_img" style="width:300px" value="{img}" /> <div> <button id="save1" class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button> </div> </td> </tr> </tbody> </table> </div>  <div style="{op.upload.style}" class="local-img"> <form id="fupform" class="upload" action="{uploadurl}" method="post" enctype="multipart/form-data" target="fupload"><input type="hidden" name="iframe" value="1"/><input type="hidden" name="idarea" value="{idarea}" /><div class="p">Перетащите изображение сюда</div> <div class="p2">или</div> <div class="fileupload"> <input id="fileupl" class="file" type="file" name="img" /><span  id="nicebtn" class="wbb-okbtn">Выберите изображение для загрузки</span> </div> </form> </div><iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe></div>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url,uploadurl:uploadurl,op:op,idarea:idarea}),document));
+			
+			/* var iframe = document.createElement("<iframe name=\"fupload\">"); //<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>
+				//iframe.setAttribute("name","fupload");
+				iframe.setAttribute("frameborder","0");
+				iframe.setAttribute("style","width:0px;height:0px;display:non"); */
+			//$ahtml.append('<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>');
+			//var iframe = createElementFromString('<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>',document);
+			//$(document.body).append('<iframe id="fupload" src="about:blank" name="fupload" frameborder="1" style="width:300px;height:50px;"></iframe>'); 
+			
+			
+			showModalWindow("Вставить изображение",$ahtml);
+			$ahtml.find("#save1").click(function() {
 				//submit image
 				iFrameBody.focus();
 				$ahtml.find("span.inperr").remove();
@@ -1282,7 +1331,68 @@
 				$ahtml.find("#veditor_img").unbind("keyup change");
 			});
 			
-			showModalWindow("Вставить изображение",$ahtml);
+			//init drag&drop iamge upload
+			if (typeof(window.FileReader) == 'undefined') {
+				$.log('Drag&Drop не поддерживается браузером!');
+				$ahtml.find(".local-img .p, .local-img .p2").hide();
+				$ahtml.find(".fileupload").css("margin-top","30px");
+			}else{
+				var $dropZone = $ahtml.find('.local-img');
+				$dropZone[0].ondragover = function() {
+					$dropZone.addClass('hover');
+					return false;
+				};
+				$dropZone[0].ondragleave = function() {
+					$dropZone.removeClass('hover');
+					return false;
+				};
+				
+				$dropZone[0].ondrop = function(e) {
+					e.preventDefault();
+					$dropZone.removeClass('hover');
+					
+					var file = e.dataTransfer.files[0];
+					if (file) {
+						if (file.name.match(/\.(jpg|png|jpeg|gif)$/)) {
+							//ok,submit img
+							var err = function() {
+								$dropZone.addClass('droperr');
+								$ahtml.find(".local-img .err").remove();
+								$ahtml.find(".local-img").append('<span class="err">Во время загрузки изображения произошла ошибка.</span>')
+							}
+							fileUpload(uploadurl,file,opt,err);
+							
+							$ahtml.find(".local-img").html(wbbStringFormat('<div class="loader"><img src="{themePrefix}/{themeName}/img/loader.gif" /><br/>Загрузка файла</div>',options));
+							
+						}else{
+							$ahtml.find(".local-img .err").remove();
+							$ahtml.find(".local-img").append('<span class="err">Можно загружать только файлы с расширением jpg,png,gif.</span>');
+							$dropZone.addClass('droperr');
+						}
+					}else{
+						$dropZone.addClass('droperr');
+						$ahtml.find(".local-img .err").remove();
+						$ahtml.find(".local-img").append('<span class="err">Файл не выбран.</span>');
+					}
+				};
+			}
+			if ($.browser.msie) {
+				//msie not posting form, by security reason. show default input field
+				$ahtml.find("#nicebtn").hide();
+				$ahtml.find("#fileupl").css("opacity","1");
+			}
+			$ahtml.find("#fileupl").bind("change",function() {
+				$("#fupform").submit();
+			});
+			
+			$ahtml.find("form.upload").bind("submit",function() {
+				//submit event
+				$ahtml.find(".local-img").hide().after(wbbStringFormat('<div class="local-img"><div class="loader"><img src="{themePrefix}/{themeName}/img/loader.gif" /><br/>Загрузка файла</div></div>',options));
+				return true;
+
+			});
+
+			
 			
 			$ahtml.find("#veditor_img").bind("keyup change",function() {
 				$('#imgpreview').attr("src",($(this).val()));
@@ -1314,13 +1424,16 @@
 					if (!$.isFunction(imgBrowser)) {
 						imgBrowser = niceImageBrowser;
 					}
-					var callback = function(img) {
-						var elem = iFrameDoc.createElement("IMG");
-						elem.setAttribute("src", img.url);
-						//selection.overrideWithNode(elem,selection.lastRange,null);
+					var callback = function(r) {
+						var elem;
+						if (r.thumb && opt.uploader.useThumb) {
+							elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',r),iFrameDoc);
+						}else{
+							elem = createElementFromString(wbbStringFormat('<img src="{img}" />',r),iFrameDoc);
+						}
 						selection.overrideWithNode(elem,selection.getSavedRange());
 					}
-					imgBrowser({ callback: callback, url: $(img).attr('src') })
+					imgBrowser({ callback: callback, url: $(img).attr('src'),uploader:opt.uploader})
 				}
 			};
 			this.queryState = function(opt) {
@@ -2089,6 +2202,53 @@
 				return '#' + r;
 			}
 		};
+		function fileUpload(url,file,opt,err) {
+			var xhr = new XMLHttpRequest(); 
+			xhr.open("POST", url);
+			
+			xhr.onreadystatechange = function () {
+				if (this.readyState == 4) {
+					if(this.status == 200) {
+						$.log("Post image: OK");
+						var res = $.parseJSON(this.responseText);
+						if (res && res.status==1) {
+							//file upload sucess;
+							$("#wbbModalWindow").hide();
+							opt.callback({img: res.image_link, thumb: res.thumb_link});
+							updateToolbar();
+						}else{
+							err.call;
+						}
+					}else{
+						$.log("Post ERROR");
+						err.call;
+					}
+				}
+			}
+			if($.support.fileSending) {
+				// W3C (Chrome, Safari, Firefox 4+)
+				$.log("Use formData");
+				var formData = new FormData();
+				formData.append('img', file);
+				formData.append('maxwidth', opt.maxwidth);
+				formData.append('maxheight', opt.maxheight);
+				xhr.send(formData);
+			} else if($.support.fileReading && xhr.sendAsBinary) {
+				// firefox < 4      
+				$.log("Use custom post");
+				var boundary = "xxxxxxxxx";
+				xhr.setRequestHeader("Content-Type", "multipart/form-data, boundary="+boundary);
+				xhr.setRequestHeader("Cache-Control", "no-cache");						
+				xhr.setRequestHeader("Content-Length", file.size);
+				var body = "--" + boundary + "\r\n";
+				filename = unescape(encodeURIComponent(file.name));
+				body += "Content-Disposition: form-data; name='img'; filename='" + filename + "'\r\n";
+				body += "Content-Type: application/octet-stream\r\n\r\n";
+				body += (file.getAsBinary ? file.getAsBinary() : file.readAsBinary()) + "\r\n";
+				body += "--" + boundary + "--";			
+				xhr.sendAsBinary(body);
+			}
+		}
 		
 		//shared functions
 		this.getBBCode = function () {
@@ -2096,6 +2256,27 @@
 		}
 		this.pasteEvent = function(el,evt) {
 			$.log(evt);
+		}
+		this.insertImgWithThumb = function(img,thumb) {
+			$("#wbbModalWindow").hide();
+			if (bbmode) {
+				if (thumb && options.allButtons["img"].uploader.useThumb) {
+					bbcode = "[url="+img+"][img]"+thumb+"[/img][/url]";
+				}else{
+					bbcode = "[img]"+img+"[/img]";
+				}
+				var cursel = selection.getTextWithInfo();
+				txtArea.value = txtArea.value.substr(0,cursel.start)+bbstring+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
+			}else{
+				var elem;
+				if (thumb && options.allButtons["img"].uploader.useThumb) {
+					elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',{img:img,thumb:thumb}),iFrameDoc);
+				}else{
+					elem = createElementFromString(wbbStringFormat('<img src="{img}" />',{img:img,thumb:thumb}),iFrameDoc);
+				}
+				selection.overrideWithNode(elem,selection.getSavedRange());
+			}
+			updateToolbar();
 		}
 		init();
 		
