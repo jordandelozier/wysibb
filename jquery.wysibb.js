@@ -19,9 +19,11 @@
 			smileAutoDetect:	true,
 			tabInsert:			true,
 			themeName:			'default',
+			maxheight:			800,
+			skipBodyTransform:	["code"],
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
-			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,-,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -552,8 +554,9 @@
 					'quote': {
 						htmlOpen: '<blockquote class="uncited"><div>',
 						htmlClose: '</div></blockquote>',
-						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]'},
-						rootNode: 'blockquote.uncited'
+						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]','blockquote':'[quote=%$(this).children("div").children("cite").skipWBB().text().replace(" писал(а):","")%]%$(this).children("div").html()%[/quote]'},
+						bbToHTML: {'[quote](.*?)[/quote]': '<blockquote class="uncited"><div>$1</div></blockquote>','[quote=\"?(.*?)\"?](.*?)[/quote]':'<blockquote><div><cite>$1 писал(а):</cite>$2</div></blockquote>'},
+						rootNode: 'blockquote'
 					},
 					'code': {
 						htmlOpen: '<dl class="codebox"><dt>Код: <a href="#">Выделить всё</a></dt><dd><code>',
@@ -591,7 +594,7 @@
 			$.extend(true,options, propt);
 		}
 		$.extend(true,options, settings);
-		
+		//$.log(options);
 		// compatibility check, thx damnUploader
 		$.extend($.support, {
 			fileSelecting: (window.File != null) && (window.FileList != null),
@@ -925,6 +928,9 @@
 							selection.overrideWithNode(elem,null);
 						}
 					});
+					
+					//autoresize
+					$iFrameBody.live('keydown mouseup',function() {autoResize();});
 					
 				})
 				
@@ -1305,14 +1311,7 @@
 			
 			var $ahtml = $(createElementFromString(wbbStringFormat('<div><ul class="wbb-imagemenu"><li  class="{op.url.class}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').show().next(\'.local-img\').hide();"><span>Ввести URL</span></li><li class="{op.upload.class}" style="{op.upload.listyle}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').hide().next(\'.local-img\').show()"><span>Загрузить файл</span></li> </ul> <div class="url-image" style="{op.url.style}"> <table class="veditor-addlink-window" cellpadding="0" cellspacing="10"> <tbody> <tr> <td class="center"> <table cellpadding="0" cellspacing="0" class="imgpreview"> <tbody> <tr> <td> <img id="imgpreview" src="{imgpreview}" /> </td> </tr> </tbody> </table> </td> <td> <label class="tbl-label" style="display:block">URL изображения</label> <input type="text" id="veditor_img" style="width:300px" value="{img}" /> <div> <button id="save1" class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button> </div> </td> </tr> </tbody> </table> </div>  <div style="{op.upload.style}" class="local-img"> <form id="fupform" class="upload" action="{uploadurl}" method="post" enctype="multipart/form-data" target="fupload"><input type="hidden" name="iframe" value="1"/><input type="hidden" name="idarea" value="{idarea}" /><div class="p">Перетащите изображение сюда</div> <div class="p2">или</div> <div class="fileupload"> <input id="fileupl" class="file" type="file" name="img" /><span  id="nicebtn" class="wbb-okbtn">Выберите изображение для загрузки</span> </div> </form> </div><iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe></div>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url,uploadurl:uploadurl,op:op,idarea:idarea}),document));
 			
-			/* var iframe = document.createElement("<iframe name=\"fupload\">"); //<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>
-				//iframe.setAttribute("name","fupload");
-				iframe.setAttribute("frameborder","0");
-				iframe.setAttribute("style","width:0px;height:0px;display:non"); */
-			//$ahtml.append('<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>');
-			//var iframe = createElementFromString('<iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe>',document);
-			//$(document.body).append('<iframe id="fupload" src="about:blank" name="fupload" frameborder="1" style="width:300px;height:50px;"></iframe>'); 
-			
+		
 			
 			showModalWindow("Вставить изображение",$ahtml);
 			$ahtml.find("#save1").click(function() {
@@ -1686,18 +1685,28 @@
 		}
 		function transformBBtoHTML(bbtext) {
 			var html=bbtext;
-			//check for smiles
 			
+			//check for skip body transform for bbcodes in skipBodyTransform
+			if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
+				for (var i=0; i<options.skipBodyTransform.length; i++) {
+					var trbb = options.skipBodyTransform[i];
+					var xp = new RegExp('(\\['+trbb+'.*?\\])(.*?)(\\[\\/'+trbb+'\\])',"mgi");
+					html = html.replace(xp,function(l,pre,text,post) {
+						text = text.replace(/\[/g,"&#91;")
+								.replace(/\]/g,"&#93;");
+						return pre+text+post	;
+					});
+				}
+			}
+			
+			
+			//check for smiles
 			html = html.replace(/\</g,"&lt;");
 			html = html.replace(/\>/g,"&gt;");
 			for (var i=0; i<options.smileList.length; i++) {
 				var repl = options.smileList[i];
 				var smbb = repl.bbcode;
 				if (repl && repl.img) {
-					/* smbb = smbb.replace(/\[/g,"\\[");
-					smbb = smbb.replace(/\]/g,"\\]");
-					smbb = smbb.replace(/\)/g,"\\)");
-					smbb = smbb.replace(/\(/g,"\\("); */
 					smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
 					var bregexp = new RegExp(smbb,"mg");
 					html = html.replace(bregexp,repl.img);
@@ -1706,12 +1715,15 @@
 			for (var i=0; i<enabledButtons.length; i++) {
 				var currow = options.allButtons[enabledButtons[i]];
 				var bbToHTML = currow.bbToHTML;
+
 				if (!bbToHTML) {
+					$.log("Create bbtHTML");
 					bbToHTML = {};
 					var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
 					var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
 					bbToHTML[bbkey]=bbrepl;
 				}
+
 				for (var bbreg in bbToHTML) {
 					
 					var repl = bbToHTML[bbreg];
@@ -2248,6 +2260,10 @@
 				body += "--" + boundary + "--";			
 				xhr.sendAsBinary(body);
 			}
+		}
+		function autoResize() {
+			var h = $iFrame.contents().height();
+			$iFrame.height((h>options.maxheight) ? options.maxheight:h);
 		}
 		
 		//shared functions
