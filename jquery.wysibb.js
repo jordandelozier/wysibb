@@ -18,8 +18,9 @@
 			watchTxtArea:		true,
 			smileAutoDetect:	true,
 			tabInsert:			true,
-			themeName:			'default',
+			autoResize:			true,
 			maxheight:			800,
+			themeName:			'default',
 			skipBodyTransform:	["code"],
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
@@ -127,14 +128,14 @@
 					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'}
 				},
 				"numlist2": {
-					title:"Вставить список",
+					title:"Вставить нумерованный список",
 					buttonHTML: '<span class="ve-tlb-list"></span>',
-					command: 'new NativeCommand("InsertUnorderedList")',
+					command: 'new NativeCommand("InsertOrderedList")',
 					bbName: "list=1", 
 					bbOpen:"[list=1]\n[*]",
 					bbClose:"[/*]\n[/list]",
-					htmlToBB: {'ul': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
-					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list=1](.*?)[/list]':'<ul>$1</ul>'}
+					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
+					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list=1](.*?)[/list]':'<ol>$1</ol>'}
 				},
 				"justifyleft": {
 					title:"Текст по левому краю",
@@ -930,7 +931,9 @@
 					});
 					
 					//autoresize
-					$iFrameBody.live('keydown mouseup',function() {autoResize();});
+					if (options.autoResize) {
+						$iFrameBody.live('keydown mouseup',function() {autoResize();});
+					}
 					
 				})
 				
@@ -1690,14 +1693,17 @@
 			if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
 				for (var i=0; i<options.skipBodyTransform.length; i++) {
 					var trbb = options.skipBodyTransform[i];
-					var xp = new RegExp('(\\['+trbb+'.*?\\])(.*?)(\\[\\/'+trbb+'\\])',"mgi");
+					$.log(trbb);
+					var xp = new RegExp('(\\['+trbb+'[\\s\\S]*?\\])([\\s\\S]*?)(\\[\\/'+trbb+'\\])',"mgi");
 					html = html.replace(xp,function(l,pre,text,post) {
 						text = text.replace(/\[/g,"&#91;")
 								.replace(/\]/g,"&#93;");
-						return pre+text+post	;
+						$.log("Replace");
+						return pre+text+post;
 					});
 				}
 			}
+			
 			
 			
 			//check for smiles
@@ -2262,8 +2268,10 @@
 			}
 		}
 		function autoResize() {
-			var h = $iFrame.contents().height();
-			$iFrame.height((h>options.maxheight) ? options.maxheight:h);
+			if (options.autoResize) {
+				var h = $iFrame.contents().height();
+				$iFrame.height((h>options.maxheight) ? options.maxheight:h);
+			}
 		}
 		
 		//shared functions
