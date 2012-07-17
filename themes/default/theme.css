@@ -33,6 +33,25 @@ html{height:100% !important;}
 .ve-tlb-sub{background:url(./img/icons.png) 0 -360px no-repeat;width:20px;}
 .ve-tlb-sup{background:url(./img/icons.png) 0 -380px no-repeat;width:20px;}
 
+
+/* IMAGE UPLOADER */
+.wbb-imagemenu{list-style-type:none;margin:0 0 10px 0;padding:0}
+.wbb-imagemenu li{display:inline-block;*display:inline;zoom: 1;padding:5px 10px;color:#1e84cc;cursor:pointer;margin:0 10px 0 0;border:1px solid #ddd;border-radius:2px;}
+.wbb-imagemenu li:hover{border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;background:#fafafa;}
+.wbb-imagemenu li.active{border:1px solid #aaa;box-shadow:inset 0px 0px 3px #aaa;border-radius:2px;background:#ddd;color:#000;cursor:default}
+
+.local-img{border:3px dashed #ccc;min-height:120px;width:430px;text-align:center}
+.local-img .p{color:#aaa;font-size:2em;margin-top:15px;}
+.local-img .p2{color:#aaa;}
+.local-img .fileupload{margin:10px 0 15px 0;position:relative;}
+.local-img .fileupload .wbb-okbtn{float:none;margin:0 auto;padding:5px 0;height:auto;line-height:22px;width:300px;height:22px;}
+.local-img .fileupload input.file{opacity:0;filter: alpha(opacity=0);width:300px;height:32px !important;position:absolute;top:0px;left:50%;margin-left:-150px;display:block;}
+.local-img.hover{background:#ffffec}
+.local-img.droperr{border-color:red}
+.err{color:red;display:block;}
+.loader{margin: 30px auto;}
+/* END IMAGE UPLOADER */
+
 .tab{margin-left:30px;}
 
 /* SELECT BOX */
@@ -66,6 +85,18 @@ html{height:100% !important;}
 .wysibb-toolbar-colorpicker .clist .scolor{width:16px;height:16px;margin:1px 1px 2px 2px;display: inline-block;*display:inline;zoom:1;cursor:pointer;}
 .wysibb-toolbar-colorpicker .clist .scolor:hover{border:1px solid #333;margin:0 0 1px 1px;box-shadow:0px 0px 3px #aaa;}
 /* END COLOR PICKER */
+
+/* TABLE SELECT */
+.wysibb-toolbar-table{display: inline-block;*display:inline;zoom:1;outline:none;vertical-align: top;overflow:visible;height:24px;border-radius:3px;padding:1px 8px 1px 1px;position:relative;cursor:pointer;margin:5px;font-size:14px;}
+.wysibb-toolbar-table:hover{box-shadow:0px 0px 3px #aaa;border:1px solid #aaa;padding:0 7px 0 0}
+.wysibb-toolbar-table.on{box-shadow:inset 0px 0px 3px #aaa;background:#ddd;z-index:10;}
+.wysibb-toolbar-table .cpicker-dropdown{position:absolute;right:1px;top:0px;width:10px;height:24px;border-radius: 0 3px 3px 0;background:url(./img/icons.png) -6px -398px;}
+.wysibb-toolbar-table .val{width:20px;height:20px;background:url(./img/icons.png) 0px -460px;position:relative;margin:2px;}
+.wysibb-toolbar-table .clist{position:absolute;left:-1px;top:24px;width:190px;background:#fff;padding:5px;border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;cursor:default;display:none}
+.wysibb-toolbar-table .clist .tbl-sel{width:15px;height:15px;border:1px solid #ddd;position:absolute;cursor:pointer}
+.wysibb-toolbar-table .clist .tbl-sel:hover{background:#f4f4f4}
+/* END TABLE SELECT */
+
 
 
 .wysibb .wysibb-text{border:1px solid #ddd;padding:5px;background:#fff;font-size:0.9em;margin:0;}
@@ -182,3 +213,4 @@ html{height:100% !important;}
 .hidemain{background: #FAFCFE;border: 1px dotted black;border-left: 4px solid #8394B2;border-top: 0;color: #465584;padding: 4px;margin: 0 auto 8px auto;}
 
 .blockquote{border:1px solid #ccc;border-left:4px solid #ccc;padding:10px 15px;font-size:10px;}
+.wbbtable td{border:1px dashed #ddd;margin:5px;padding:3px;min-width:5px;min-height:15px;}

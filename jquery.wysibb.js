@@ -1,7 +1,7 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.6.0
+	Version: 0.6.2
 */
 
 (function($) {
@@ -11,17 +11,20 @@
 
 		var options,isMobile,IE6,IE7;
 		var options = {
-			version:			"0.6.0",
+			version:			"0.6.2",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
 			watchTxtArea:		true,
 			smileAutoDetect:	true,
 			tabInsert:			true,
+			autoResize:			true,
+			maxheight:			800,
 			themeName:			'default',
+			skipBodyTransform:	["code"],
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
-			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,-,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -83,7 +86,16 @@
 					bbClose:"[/img]",
 					skipSelectRange: true,
 					htmlToBB: {'img': '[img]%$(this).attr("src")%[/img]'},
-					bbToHTML: {'[img](.*?)[/img]':'<img src="$1" />'}
+					bbToHTML: {'[img](.*?)[/img]':'<img src="$1" />'},
+					uploader: {
+						enable:			true,
+						defaultType:	1,
+						maxwidth:		600,
+						maxheight:		600,
+						useThumb:		true,
+						transload_url:	false,
+						uploadurl:		"{themePrefix}/imgupload.php"
+					}
 				},
 				"bullist": {
 					title:"Вставить список",
@@ -116,14 +128,14 @@
 					bbToHTML: {'[*](.*?)(?=[)':'<li>$1</li>','[list\=1](.*?)[/list]':'<ol>$1</ol>'}
 				},
 				"numlist2": {
-					title:"Вставить список",
+					title:"Вставить нумерованный список",
 					buttonHTML: '<span class="ve-tlb-list"></span>',
-					command: 'new NativeCommand("InsertUnorderedList")',
+					command: 'new NativeCommand("InsertOrderedList")',
 					bbName: "list=1", 
 					bbOpen:"[list=1]\n[*]",
 					bbClose:"[/*]\n[/list]",
-					htmlToBB: {'ul': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
-					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list=1](.*?)[/list]':'<ul>$1</ul>'}
+					htmlToBB: {'ol': '[list=1]%$(this).html()%[/list]','li': "[*]%$(this).html()%[/*]"},
+					bbToHTML: {'[*](.*?)[/*]':'<li>$1</li>','[list=1](.*?)[/list]':'<ol>$1</ol>'}
 				},
 				"justifyleft": {
 					title:"Текст по левому краю",
@@ -268,9 +280,19 @@
 					htmlToBB: {'font[color*="#"]': '[color=%$(this).attr("color")%]%$(this).removeAttr("color").get(0).outerHTML%[/color]'},
 					bbToHTML: {'[color=[[\"\']]?(.*?)[[\"\']]?](.*?)[/color]':'<font color="$1">$2</font>'}
 				},
+				"table": {
+					title:		"Вставить таблицу",
+					type:		"table",
+					buttonHTML: '<div class="val"></div>',
+					rows:	10,
+					cols:	10,
+					tdwidth:	15,
+					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
+					bbToHTML: {'[table](.*?)[/table]':'<table class="wbbtable" cellpadding="0" cellspacing="5">$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>'}
+				},
 				'wbbConvertation': {
-					htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]','span.tab':"\t%(this).html()%"},
-					bbToHTML: {'[table](.*?)[/table]':'<table>$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>','\n':'<br/>','\t+':'<span class="tab">\uFEFF</span>'}
+					htmlToBB: {'span.tab':"\t%(this).html()%"},
+					bbToHTML: {'\n':'<br/>','\t+':'<span class="tab">\uFEFF</span>'}
 				}
 			},
 			selectOptions: {
@@ -348,7 +370,7 @@
 					bbName: "size=200", 
 					bbOpen:"[size=200]",
 					bbClose:"[/size]",
-					htmlToBB: {'font[size="200"]': '[size=200]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
+					htmlToBB: {'font[size="6"]': '[size=200]%$(this).removeAttr("size").get(0).outerHTML%[/size]'}
 				},
 				"fs1": {
 					title: "1 (8pt)",
@@ -533,8 +555,9 @@
 					'quote': {
 						htmlOpen: '<blockquote class="uncited"><div>',
 						htmlClose: '</div></blockquote>',
-						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]'},
-						rootNode: 'blockquote.uncited'
+						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]','blockquote':'[quote=%$(this).children("div").children("cite").skipWBB().text().replace(" писал(а):","")%]%$(this).children("div").html()%[/quote]'},
+						bbToHTML: {'[quote](.*?)[/quote]': '<blockquote class="uncited"><div>$1</div></blockquote>','[quote=\"?(.*?)\"?](.*?)[/quote]':'<blockquote><div><cite>$1 писал(а):</cite>$2</div></blockquote>'},
+						rootNode: 'blockquote'
 					},
 					'code': {
 						htmlOpen: '<dl class="codebox"><dt>Код: <a href="#">Выделить всё</a></dt><dd><code>',
@@ -571,8 +594,16 @@
 			var propt = presets[settings.preset] || {};
 			$.extend(true,options, propt);
 		}
-		$.extend(options, settings);
-
+		$.extend(true,options, settings);
+		//$.log(options);
+		// compatibility check, thx damnUploader
+		$.extend($.support, {
+			fileSelecting: (window.File != null) && (window.FileList != null),
+			fileReading: (window.FileReader != null),
+			fileSending: (window.FormData != null)
+		});
+		
+		
 		//init css prefix, if not set
 		if (!options.themePrefix) {
 			$('script').each(function(idx, el) {
@@ -593,6 +624,8 @@
 		
 		var $txtArea = $(txtArea);
 		$txtArea.data("wbb",this);
+		var idarea = $txtArea.attr("id");
+		if (!idarea) {idarea = "id"+Math.floor(Math.random(0,10000)*1000); $txtArea.attr("id",idarea)}
 		
 		var $iFrame,iFrame,iFrameWindow,iFrameBody,iFrameDoc,$iFrameBody;
 		//txtArea = this;
@@ -664,21 +697,26 @@
 										$.extend(btnopt.htmlToBB,o.htmlToBB);
 										if (!o.bbToHTML) {
 											o.bbToHTML = {};
-											var bbkey = o.bbOpen+"(.*?)"+o.bbClose;
+											var bbkey = o.bbOpen.replace(/\s+/,"\\s")+"(.*?)"+o.bbClose.replace(/\s+/,"\\s");
 											var bbval = o.htmlOpen+"$1"+o.htmlClose;
 											o.bbToHTML[bbkey] = bbval;
-											//$.log(o.bbToHTML);
 										}
+										if (!btnopt.bbToHTML) {btnopt.bbToHTML={};}
 										$.extend(btnopt.bbToHTML,o.bbToHTML);
 									}
 									enoptions.push({opt:o,el:$option,option: oname});
 								}
 							}
+							options.allButtons[btnname] = btnopt;
 							var controller = new SelectController(enoptions, $btn,btnopt);		
 							updateListeners.push(controller);
 							enabledButtons.push(btnname);
 							$topBar.append($btn);
-							$btn.live("click",selectBoxToggle);
+							/* $btn.live("click",selectBoxToggle); */
+							
+							$btn.live("click",function(e) {
+								btnToggle(".wysibb-toolbar-select",".select-list",e);
+							});
 						}else if (type && type=="colorpicker") { //colorpicker
 							//create color picker
 							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-colorpicker" title="{title}">{buttonHTML}<span class="cpicker-dropdown"></span><div class="clist"><div class="nocolor" title="Не выбран">Авто</div></div>',btnopt),document));
@@ -698,7 +736,31 @@
 							updateListeners.push(controller);
 							enabledButtons.push(btnname);
 							$topBar.append($btn);
-							$btn.live("click",colorPickerToggle);
+							
+							$btn.live("click",function(e) {
+								btnToggle(".wysibb-toolbar-colorpicker",".clist",e);
+							});
+							
+						}else if (type && type=="table") { //table
+							//create table
+							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-table" title="{title}">{buttonHTML}<span class="cpicker-dropdown"></span><div class="clist"></div>',btnopt),document));
+							var $clist = $btn.find("div.clist");
+							var rows = btnopt.rows || 10;
+							var cols = btnopt.cols || 10;
+							var allcount = rows*cols;
+							$clist.css("width",(cols*btnopt.tdwidth+2)+"px").css("height",(rows*btnopt.tdwidth+2)+"px");
+							for (var j=1; j<=cols; j++) {
+								for (var h=1; h<=rows; h++) {
+									$clist.append(wbbStringFormat('<div class="tbl-sel" style="width:{width}px;height:{height}px;z-index:{zindex}" title="{row},{col}"></div>',{width: (j*btnopt.tdwidth),height: (h*btnopt.tdwidth),zindex: --allcount,row:h,col:j}));
+								}
+							}
+							var controller = new TableController($btn,btnopt);		
+							updateListeners.push(controller);
+							enabledButtons.push(btnname);
+							$topBar.append($btn);
+							$btn.live("click",function(e) {
+								btnToggle(".wysibb-toolbar-table",".clist",e);
+							});
 						}else{
 							//create button
 							btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
@@ -798,6 +860,7 @@
 					$(iFrameDoc).live("keyup", function(evt) {
 						if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
 							updateToolbar();
+							checkForBR();
 						}
 					});
 					if (options.tabInsert==true) {
@@ -866,6 +929,11 @@
 							selection.overrideWithNode(elem,null);
 						}
 					});
+					
+					//autoresize
+					if (options.autoResize) {
+						$iFrameBody.live('keydown mouseup',function() {autoResize();});
+					}
 					
 				})
 				
@@ -979,6 +1047,29 @@
 				});
 			}
 			
+		}
+		function TableController(el, opt) {
+			var command = new TableCommand();
+			this.updateUI = function() {
+				var state = command.queryState(opt);
+				if (state) {$(el).addClass("on")}
+				else{$(el).removeClass("on")}
+			}
+			
+			$(el).attr("unselectable","on");
+			$(el).find("*").attr("unselectable","on");
+			$(el).live("mousedown", function(event) { 
+				if (event.preventDefault) event.preventDefault();
+			});		
+			
+			$(el).find(".tbl-sel").live('click',function(evt) {
+				var t = $(this).attr("title");
+				var rl = t.split(",");
+				iFrameBody.focus();
+				command.execute(rl[0],rl[1]);
+				updateToolbar();
+				checkForBR();
+			});
 		}
 		function updateToolbar() {
 			$(updateListeners).each(function(idx,controller){
@@ -1198,12 +1289,35 @@
 			opt.callback({ url: url })
 		}
 		function niceImageBrowser(opt) {
-			var imgpreview = opt.url ?opt.url:wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
+			var imgpreview = opt.url ? opt.url:wbbStringFormat("{themePrefix}{themeName}/img/imgpreview.png",options);
 			var saveButton= opt.url ?"Обновить изображение":"Вставить изображение";
-
-			var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
+			var uploadurl = wbbStringFormat(opt.uploader.uploadurl,options);
 			
-			$ahtml.find("button.wbb-okbtn").click(function() {
+			var op = {
+				"url": { 
+					"class": (opt.uploader.defaultType==1 || !opt.uploader.enable) ? "active":"",
+					"style": (opt.uploader.defaultType==1 || !opt.uploader.enable) ? "":"display:none"
+				},
+				"upload": { 
+					"class": (opt.uploader.defaultType==2 && opt.uploader.enable) ? "active":"",
+					"listyle": (!opt.uploader.enable) ? "display:none":"",
+					"style": (opt.uploader.defaultType==2 && opt.uploader.enable) ? "":"display:none"
+				}
+				
+			}
+			
+			var defaultType = opt.uploader.defaultType;
+			if (!opt.uploader.enable) {defaultType=1;}
+
+			//var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
+			
+			
+			var $ahtml = $(createElementFromString(wbbStringFormat('<div><ul class="wbb-imagemenu"><li  class="{op.url.class}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').show().next(\'.local-img\').hide();"><span>Ввести URL</span></li><li class="{op.upload.class}" style="{op.upload.listyle}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').hide().next(\'.local-img\').show()"><span>Загрузить файл</span></li> </ul> <div class="url-image" style="{op.url.style}"> <table class="veditor-addlink-window" cellpadding="0" cellspacing="10"> <tbody> <tr> <td class="center"> <table cellpadding="0" cellspacing="0" class="imgpreview"> <tbody> <tr> <td> <img id="imgpreview" src="{imgpreview}" /> </td> </tr> </tbody> </table> </td> <td> <label class="tbl-label" style="display:block">URL изображения</label> <input type="text" id="veditor_img" style="width:300px" value="{img}" /> <div> <button id="save1" class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button> </div> </td> </tr> </tbody> </table> </div>  <div style="{op.upload.style}" class="local-img"> <form id="fupform" class="upload" action="{uploadurl}" method="post" enctype="multipart/form-data" target="fupload"><input type="hidden" name="iframe" value="1"/><input type="hidden" name="idarea" value="{idarea}" /><div class="p">Перетащите изображение сюда</div> <div class="p2">или</div> <div class="fileupload"> <input id="fileupl" class="file" type="file" name="img" /><span  id="nicebtn" class="wbb-okbtn">Выберите изображение для загрузки</span> </div> </form> </div><iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe></div>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url,uploadurl:uploadurl,op:op,idarea:idarea}),document));
+			
+		
+			
+			showModalWindow("Вставить изображение",$ahtml);
+			$ahtml.find("#save1").click(function() {
 				//submit image
 				iFrameBody.focus();
 				$ahtml.find("span.inperr").remove();
@@ -1219,7 +1333,68 @@
 				$ahtml.find("#veditor_img").unbind("keyup change");
 			});
 			
-			showModalWindow("Вставить изображение",$ahtml);
+			//init drag&drop iamge upload
+			if (typeof(window.FileReader) == 'undefined') {
+				$.log('Drag&Drop не поддерживается браузером!');
+				$ahtml.find(".local-img .p, .local-img .p2").hide();
+				$ahtml.find(".fileupload").css("margin-top","30px");
+			}else{
+				var $dropZone = $ahtml.find('.local-img');
+				$dropZone[0].ondragover = function() {
+					$dropZone.addClass('hover');
+					return false;
+				};
+				$dropZone[0].ondragleave = function() {
+					$dropZone.removeClass('hover');
+					return false;
+				};
+				
+				$dropZone[0].ondrop = function(e) {
+					e.preventDefault();
+					$dropZone.removeClass('hover');
+					
+					var file = e.dataTransfer.files[0];
+					if (file) {
+						if (file.name.match(/\.(jpg|png|jpeg|gif)$/)) {
+							//ok,submit img
+							var err = function() {
+								$dropZone.addClass('droperr');
+								$ahtml.find(".local-img .err").remove();
+								$ahtml.find(".local-img").append('<span class="err">Во время загрузки изображения произошла ошибка.</span>')
+							}
+							fileUpload(uploadurl,file,opt,err);
+							
+							$ahtml.find(".local-img").html(wbbStringFormat('<div class="loader"><img src="{themePrefix}/{themeName}/img/loader.gif" /><br/>Загрузка файла</div>',options));
+							
+						}else{
+							$ahtml.find(".local-img .err").remove();
+							$ahtml.find(".local-img").append('<span class="err">Можно загружать только файлы с расширением jpg,png,gif.</span>');
+							$dropZone.addClass('droperr');
+						}
+					}else{
+						$dropZone.addClass('droperr');
+						$ahtml.find(".local-img .err").remove();
+						$ahtml.find(".local-img").append('<span class="err">Файл не выбран.</span>');
+					}
+				};
+			}
+			if ($.browser.msie) {
+				//msie not posting form, by security reason. show default input field
+				$ahtml.find("#nicebtn").hide();
+				$ahtml.find("#fileupl").css("opacity","1");
+			}
+			$ahtml.find("#fileupl").bind("change",function() {
+				$("#fupform").submit();
+			});
+			
+			$ahtml.find("form.upload").bind("submit",function() {
+				//submit event
+				$ahtml.find(".local-img").hide().after(wbbStringFormat('<div class="local-img"><div class="loader"><img src="{themePrefix}/{themeName}/img/loader.gif" /><br/>Загрузка файла</div></div>',options));
+				return true;
+
+			});
+
+			
 			
 			$ahtml.find("#veditor_img").bind("keyup change",function() {
 				$('#imgpreview').attr("src",($(this).val()));
@@ -1251,13 +1426,16 @@
 					if (!$.isFunction(imgBrowser)) {
 						imgBrowser = niceImageBrowser;
 					}
-					var callback = function(img) {
-						var elem = iFrameDoc.createElement("IMG");
-						elem.setAttribute("src", img.url);
-						//selection.overrideWithNode(elem,selection.lastRange,null);
+					var callback = function(r) {
+						var elem;
+						if (r.thumb && opt.uploader.useThumb) {
+							elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',r),iFrameDoc);
+						}else{
+							elem = createElementFromString(wbbStringFormat('<img src="{img}" />',r),iFrameDoc);
+						}
 						selection.overrideWithNode(elem,selection.getSavedRange());
 					}
-					imgBrowser({ callback: callback, url: $(img).attr('src') })
+					imgBrowser({ callback: callback, url: $(img).attr('src'),uploader:opt.uploader})
 				}
 			};
 			this.queryState = function(opt) {
@@ -1268,39 +1446,33 @@
 				return false;
 			};
 		}
-		function quoteCommand() {
-			this.execute = function(opt) {
+		function TableCommand() {
+			this.execute = function(rows,cols) {
 				if (bbmode) {
-					txtArea.focus();
-					var bbcode = opt.bbName;
-					var tagfilter = opt.rootNode;
-					if (checkBBContain(bbcode)) {
-						//remove bb
-						removeBBCode(bbcode);
-					}else{
-						setBBCode(bbcode,null);
+					var bbcode = "[table]\n";
+					for (var i=1; i<=rows; i++) {
+						bbcode+=" [tr]\n";
+						for (var j=1; j<=cols; j++) {
+							bbcode+="  [td][/td]\n";
+						}
+						bbcode+=" [/tr]\n";
 					}
+					bbcode+="[/table]";
+					var cursel = selection.getTextWithInfo();
+					txtArea.value = txtArea.value.substr(0,cursel.start)+bbcode+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
 				}else{
-					iFrameBody.focus();
-					var quoteBlock = getContaining(tagfilter);
-					if (quoteBlock) {
-						//remove quote
-						$(quoteBlock).replaceWith($(quoteBlock).html());
-					}else{
-						//insert quote
-						var selText = selection.getHTML();
-						
-						selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}</div><br/>",{txt:selText}),null,null);
-						
-						//selection.overrideWithNode(wbbStringFormat("<div class=\"blockquote\">{txt}{</div><p></p>",{txt:selText}),null);
+					var $tbl = $(createElementFromString(wbbStringFormat('<table class="wbbtable" cellpadding="0" cellspacing="5"></table>')));
+					for (var i=1; i<=rows; i++) {
+						var $tr = $("<tr></tr>").appendTo($tbl);
+						for (var j=1; j<=cols; j++) {
+							var $td = $("<td>\uFEFF</td>").appendTo($tr);
+						}
 					}
-					
+					selection.overrideWithNode($tbl.get(0),null);
 				}
 			};
 			this.queryState = function(opt) {
-				var bbcode = opt.bbName;
-				var tagfilter = opt.rootNode;
-				return isContaining(tagfilter,bbcode,selection.getNode());
+				return (bbmode) ? checkBBContain("table"):getContaining("table");
 			};
 		}
 		function smileCommand() {
@@ -1516,18 +1688,31 @@
 		}
 		function transformBBtoHTML(bbtext) {
 			var html=bbtext;
-			//check for smiles
 			
+			//check for skip body transform for bbcodes in skipBodyTransform
+			if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
+				for (var i=0; i<options.skipBodyTransform.length; i++) {
+					var trbb = options.skipBodyTransform[i];
+					$.log(trbb);
+					var xp = new RegExp('(\\['+trbb+'[\\s\\S]*?\\])([\\s\\S]*?)(\\[\\/'+trbb+'\\])',"mgi");
+					html = html.replace(xp,function(l,pre,text,post) {
+						text = text.replace(/\[/g,"&#91;")
+								.replace(/\]/g,"&#93;");
+						$.log("Replace");
+						return pre+text+post;
+					});
+				}
+			}
+			
+			
+			
+			//check for smiles
 			html = html.replace(/\</g,"&lt;");
 			html = html.replace(/\>/g,"&gt;");
 			for (var i=0; i<options.smileList.length; i++) {
 				var repl = options.smileList[i];
 				var smbb = repl.bbcode;
 				if (repl && repl.img) {
-					/* smbb = smbb.replace(/\[/g,"\\[");
-					smbb = smbb.replace(/\]/g,"\\]");
-					smbb = smbb.replace(/\)/g,"\\)");
-					smbb = smbb.replace(/\(/g,"\\("); */
 					smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
 					var bregexp = new RegExp(smbb,"mg");
 					html = html.replace(bregexp,repl.img);
@@ -1536,23 +1721,24 @@
 			for (var i=0; i<enabledButtons.length; i++) {
 				var currow = options.allButtons[enabledButtons[i]];
 				var bbToHTML = currow.bbToHTML;
+
 				if (!bbToHTML) {
+					$.log("Create bbtHTML");
 					bbToHTML = {};
 					var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
 					var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
 					bbToHTML[bbkey]=bbrepl;
 				}
+
 				for (var bbreg in bbToHTML) {
+					
 					var repl = bbToHTML[bbreg];
-					bbreg = bbreg.replace(/\*\]/g,"\\*]");
-					bbreg = bbreg.replace(/\[/g,"\\[");
-					bbreg = bbreg.replace(/\]/g,"\\]");
-					bbreg = bbreg.replace(/\\\[\\\[/g,"[");
-					bbreg = bbreg.replace(/\\\]\\\]/g,"]");
-					
-					
-					
-					var bregexp = new RegExp(bbreg,"mi");
+					bbreg = bbreg.replace(/\*\]/g,"\\*]")
+						.replace(/\[/g,"\\[")
+						.replace(/\]/g,"\\]")
+						.replace(/\\\[\\\[/g,"[")
+						.replace(/\\\]\\\]/g,"]");
+					var bregexp = new RegExp(bbreg,"gmi");
 					html = bbReplace(html,bregexp,repl);
 					//html = html.replace(bregexp,repl);
 				}
@@ -1978,54 +2164,30 @@
 				return el;
 			}
 		}
-		function selectBoxToggle(evt) {
-			var $el = $(this);
-			if ($el.hasClass("on")) {
+		function btnToggle(btnSelector,toggleSelector,evt) {
+			var $el = $(evt.target).closest(btnSelector);
+			if ($el.attr("wbshow")) {
 				//hide block
-				$el.removeClass("on");
-				$el.find(".select-list").hide();
-				$(document).die("mousedown",selectBoxHideEvent);
-				$iFrameBody.die('mousedown',selectBoxHideEvent);
+				$el.attr("title",$el.attr("titleoff")).removeAttr("titleoff");
+				$el.removeClass("on").removeAttr("wbshow");
+				$el.find(toggleSelector).hide();
+				$(document).die("mousedown",btnToggleHideEvent);
+				$iFrameBody.die('mousedown',btnToggleHideEvent);
 			}else{
 				//show block
-				$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-				$el.addClass("on");
-				$el.find(".select-list").show();
-				$(document).live("mousedown",selectBoxHideEvent);
-				$iFrameBody.live('mousedown',selectBoxHideEvent);
+				$el.attr("titleoff",$el.attr("title")).removeAttr("title");
+				$el.parent().find(btnSelector).removeClass("on").find(toggleSelector).hide();
+				$el.addClass("on").attr("wbshow","1");
+				$el.find(toggleSelector).show();
+				$(document).live("mousedown",function (e) {btnToggleHideEvent(btnSelector,toggleSelector,e);});
+				$iFrameBody.live("mousedown",function (e) {btnToggleHideEvent(btnSelector,toggleSelector,e);});
 			}
 		}
-		function selectBoxHideEvent(e) {
-			if ($(e.target).parents(".wysibb-toolbar-select").size()==0) {
-				$(window.parent.document.body).find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-				$(document).die('mousedown',selectBoxHideEvent);
-				$iFrameBody.die('mousedown',selectBoxHideEvent);
-			}
-		}
-		function colorPickerToggle(evt) {
-			var $el = $(this);
-			if ($el.hasClass("on")) {
-				//hide block
-				$el.attr("title","Цвет текста");
-				$el.removeClass("on");
-				$el.find(".clist").hide();
-				$(document).die("mousedown",colorPickerHideEvent);
-				$iFrameBody.die('mousedown',colorPickerHideEvent);
-			}else{
-				//show block
-				$el.removeAttr("title",false);
-				$el.parent().find(".wysibb-toolbar-select").removeClass("on").find(".select-list").hide();
-				$el.addClass("on");
-				$el.find(".clist").show();
-				$(document).live("mousedown",colorPickerHideEvent);
-				$iFrameBody.live('mousedown',colorPickerHideEvent);
-			}
-		}
-		function colorPickerHideEvent(e) {
-			if ($(e.target).parents(".wysibb-toolbar-colorpicker").size()==0) {
-				$(window.parent.document.body).find(".wysibb-toolbar-colorpicker").removeClass("on").find(".clist").hide();
-				$(document).die('mousedown',selectBoxHideEvent);
-				$iFrameBody.die('mousedown',selectBoxHideEvent);
+		function btnToggleHideEvent(btnSelector,toggleSelector,e) {
+			if ($(e.target).parents(btnSelector).size()==0) {
+				$(window.parent.document.body).find(btnSelector).removeClass("on").find(toggleSelector).hide();
+				$(document).die('mousedown',btnToggleHideEvent);
+				$iFrameBody.die('mousedown',btnToggleHideEvent);
 			}
 		}
 		function checkForBR() {
@@ -2058,6 +2220,59 @@
 				return '#' + r;
 			}
 		};
+		function fileUpload(url,file,opt,err) {
+			var xhr = new XMLHttpRequest(); 
+			xhr.open("POST", url);
+			
+			xhr.onreadystatechange = function () {
+				if (this.readyState == 4) {
+					if(this.status == 200) {
+						$.log("Post image: OK");
+						var res = $.parseJSON(this.responseText);
+						if (res && res.status==1) {
+							//file upload sucess;
+							$("#wbbModalWindow").hide();
+							opt.callback({img: res.image_link, thumb: res.thumb_link});
+							updateToolbar();
+						}else{
+							err.call;
+						}
+					}else{
+						$.log("Post ERROR");
+						err.call;
+					}
+				}
+			}
+			if($.support.fileSending) {
+				// W3C (Chrome, Safari, Firefox 4+)
+				$.log("Use formData");
+				var formData = new FormData();
+				formData.append('img', file);
+				formData.append('maxwidth', opt.maxwidth);
+				formData.append('maxheight', opt.maxheight);
+				xhr.send(formData);
+			} else if($.support.fileReading && xhr.sendAsBinary) {
+				// firefox < 4      
+				$.log("Use custom post");
+				var boundary = "xxxxxxxxx";
+				xhr.setRequestHeader("Content-Type", "multipart/form-data, boundary="+boundary);
+				xhr.setRequestHeader("Cache-Control", "no-cache");						
+				xhr.setRequestHeader("Content-Length", file.size);
+				var body = "--" + boundary + "\r\n";
+				filename = unescape(encodeURIComponent(file.name));
+				body += "Content-Disposition: form-data; name='img'; filename='" + filename + "'\r\n";
+				body += "Content-Type: application/octet-stream\r\n\r\n";
+				body += (file.getAsBinary ? file.getAsBinary() : file.readAsBinary()) + "\r\n";
+				body += "--" + boundary + "--";			
+				xhr.sendAsBinary(body);
+			}
+		}
+		function autoResize() {
+			if (options.autoResize) {
+				var h = $iFrame.contents().height();
+				$iFrame.height((h>options.maxheight) ? options.maxheight:h);
+			}
+		}
 		
 		//shared functions
 		this.getBBCode = function () {
@@ -2065,6 +2280,27 @@
 		}
 		this.pasteEvent = function(el,evt) {
 			$.log(evt);
+		}
+		this.insertImgWithThumb = function(img,thumb) {
+			$("#wbbModalWindow").hide();
+			if (bbmode) {
+				if (thumb && options.allButtons["img"].uploader.useThumb) {
+					bbcode = "[url="+img+"][img]"+thumb+"[/img][/url]";
+				}else{
+					bbcode = "[img]"+img+"[/img]";
+				}
+				var cursel = selection.getTextWithInfo();
+				txtArea.value = txtArea.value.substr(0,cursel.start)+bbstring+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
+			}else{
+				var elem;
+				if (thumb && options.allButtons["img"].uploader.useThumb) {
+					elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',{img:img,thumb:thumb}),iFrameDoc);
+				}else{
+					elem = createElementFromString(wbbStringFormat('<img src="{img}" />',{img:img,thumb:thumb}),iFrameDoc);
+				}
+				selection.overrideWithNode(elem,selection.getSavedRange());
+			}
+			updateToolbar();
 		}
 		init();
 		
