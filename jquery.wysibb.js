@@ -1,7 +1,7 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.6.2
+	Version: 0.6.3
 */
 
 (function($) {
@@ -11,7 +11,7 @@
 
 		var options,isMobile,IE6,IE7;
 		var options = {
-			version:			"0.6.2",
+			version:			"0.6.3",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -555,7 +555,7 @@
 					'quote': {
 						htmlOpen: '<blockquote class="uncited"><div>',
 						htmlClose: '</div></blockquote>',
-						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]','blockquote':'[quote=%$(this).children("div").children("cite").skipWBB().text().replace(" писал(а):","")%]%$(this).children("div").html()%[/quote]'},
+						htmlToBB: {'blockquote.uncited': '[quote]%$(this).html()%[/quote]','blockquote':'[quote="%$(this).children("div").children("cite").skipWBB().text().replace(" писал(а):","")%"]%$(this).children("div").html()%[/quote]'},
 						bbToHTML: {'[quote](.*?)[/quote]': '<blockquote class="uncited"><div>$1</div></blockquote>','[quote=\"?(.*?)\"?](.*?)[/quote]':'<blockquote><div><cite>$1 писал(а):</cite>$2</div></blockquote>'},
 						rootNode: 'blockquote'
 					},
@@ -594,6 +594,7 @@
 			var propt = presets[settings.preset] || {};
 			$.extend(true,options, propt);
 		}
+		if (settings && typeof(settings.smileList)!="undefined") {options.smileList=[];}
 		$.extend(true,options, settings);
 		//$.log(options);
 		// compatibility check, thx damnUploader
@@ -602,7 +603,6 @@
 			fileReading: (window.FileReader != null),
 			fileSending: (window.FormData != null)
 		});
-		
 		
 		//init css prefix, if not set
 		if (!options.themePrefix) {
@@ -858,7 +858,7 @@
 					$(iFrameDoc).live("click", updateToolbar);
 					
 					$(iFrameDoc).live("keyup", function(evt) {
-						if (evt.ctrlKey===true || evt.altKey===true || (evt.which>=37 && evt.which<=40)) { //watch not all key press, 37-40: arrow keys
+						if (evt.ctrlKey===true || ((evt.ctrlKey===true || evt.altKey===true) || (evt.which>=37 && evt.which<=40))) { //watch not all key press, 37-40: arrow keys
 							updateToolbar();
 							checkForBR();
 						}
@@ -972,6 +972,7 @@
 		function SelectController(optlist, el,sopt) {
 			//el - select box
 			var commandList=[];
+			var clearList = [];
 			this.updateUI = function() {
 				$(el).find(".sel-value").html(sopt.title);
 				$(optlist).each(function(idx,e) {
@@ -996,11 +997,13 @@
 				for (var i=0; i<optlist.length; i++) {
 					var optrow = optlist[i].opt;
 					var elrow = optlist[i].el;
-					var optname = optlist[i].option
+					var optname = optlist[i].option;
 					commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
+					clearList[clearList.length] = optrow;
 					$(elrow).attr("optname",optname).live('click',function() {
+						
 						var oname = $(this).attr("optname");
-						commandList[oname].cmd.execute(commandList[oname].opt);
+						commandList[oname].cmd.execute(commandList[oname].opt,clearList);
 						$(el).find(".sel-value").html(commandList[oname].opt.title);
 					});
 				}
@@ -1108,7 +1111,7 @@
 			};
 		}
 		function CustomCommand(command) {
-			this.execute = function(opt) {
+			this.execute = function(opt,clearList) {
 				var tagfilter = opt.rootNode;
 				if (bbmode) {
 					txtArea.focus();
@@ -1150,13 +1153,21 @@
 					}else{
 						//insert
 						var selHTML = selection.getHTML();
-						
+						//$.log(selHTML);
 						if (selHTML=="") {
 							//open empty tag
 							$.log("open empty tag");
 							var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
 							$(crnode).attr("wbb","true");
-							selection.overrideWithNode(crnode);
+							var snode = selection.getNode();
+							
+							//insert span after, if parent span
+							if ($(crnode).is("span,font") && $(snode).is("span,font")) {
+								$(snode).after(crnode);
+							}else{
+								selection.overrideWithNode(crnode);
+								
+							}
 							if ($(crnode).children().size()==0) {
 								selection.setSelection(null,crnode,0,0);
 							}
@@ -1173,11 +1184,24 @@
 							
 							//clear selHTML
 							var el = iFrameDoc.createElement("SPAN");
-							el.innerHTML = selHTML;
-							if (opt.contentSelector) {
-								var remRules = opt.contentSelector;
-								remRules = remRules.replace(/rootNode/g,"el");
-								$(el).find(opt.rootNode).each(function(idx,el) {$.log(el); $(el).replaceWith(eval(remRules))});
+								el.innerHTML = selHTML;
+							if (clearList && clearList.length>0) {
+								//it is selector list, clear all in list
+								for (var k=0; k<clearList.length; k++) {
+									var copt = clearList[k];
+									if (copt) {
+										var remRules = copt.contentSelector || "$(el).html()";
+										remRules = remRules.replace(/rootNode/g,"el");
+										$(el).find(copt.rootNode).each(function(idx,el) {$(el).replaceWith(eval(remRules))});
+									}
+								}
+							}else{
+								//it is not select list, clear one this
+								if (opt.contentSelector) {
+									var remRules = opt.contentSelector || "$(el).html()";
+									remRules = remRules.replace(/rootNode/g,"el");
+									$(el).find(opt.rootNode).each(function(idx,el) {$(el).replaceWith(eval(remRules))});
+								}
 							}
 							//end clear
 							
@@ -1327,7 +1351,7 @@
 					return;
 				}
 				// callback call
-				opt.callback({ url: $imgsrc.val() });
+				opt.callback({ img: $imgsrc.val() });
 				$("#wbbModalWindow").hide();
 				$(document).unbind("mousedown");
 				$ahtml.find("#veditor_img").unbind("keyup change");
@@ -1482,7 +1506,6 @@
 					setBBCode(opt,null);
 				}else{
 					iFrameBody.focus();
-					$.log(opt);
 					selection.overrideWithNode(wbbStringFormat(opt.img,options));
 				}
 			};
@@ -1693,12 +1716,10 @@
 			if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
 				for (var i=0; i<options.skipBodyTransform.length; i++) {
 					var trbb = options.skipBodyTransform[i];
-					$.log(trbb);
 					var xp = new RegExp('(\\['+trbb+'[\\s\\S]*?\\])([\\s\\S]*?)(\\[\\/'+trbb+'\\])',"mgi");
 					html = html.replace(xp,function(l,pre,text,post) {
 						text = text.replace(/\[/g,"&#91;")
 								.replace(/\]/g,"&#93;");
-						$.log("Replace");
 						return pre+text+post;
 					});
 				}
@@ -2065,14 +2086,14 @@
 			var nd = selection.getNode();
 			var ndHTML = selection.getHTML();
 			var $nd = $(nd);
-
+			
 			var rnd = Math.floor(Math.random(0,10000)*1000);
 			selection.overrideWithNode(wbbStringFormat("<span sl=\"{rnd}\"></span>",{rnd:rnd}));
 			
 			var $rootND = $nd.closest(rootSelector);
 			
-			$bf = $rootND.clone(true);
-			$af = $rootND.clone(true);
+			var $bf = $rootND.clone(true);
+			var $af = $rootND.clone(true);
 			
 			if (ndHTML.indexOf(">")==-1 || ndHTML.indexOf("</")==-1) {
 				//it is plain text, check for parent tags
