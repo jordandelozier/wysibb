@@ -1,5 +1,6 @@
 /* wysibb */
 html{height:100% !important;}
+ul,ol{padding:0 0 0 30px}
 .wysibb{margin:0;}
 .wysibb .wysibb-toolbar{/* height:35px; */border-top:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;border-bottom:0;background:#f5f5f5;padding:0 60px 0 10px;margin:0px;position:relative;}
 .wysibb .wysibb-bottom-toolbar{border-bottom:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;border-top:0;background:#f5f5f5;padding:0 10px;margin:0px;} 
@@ -36,8 +37,8 @@ html{height:100% !important;}
 
 /* IMAGE UPLOADER */
 .wbb-imagemenu{list-style-type:none;margin:0 0 10px 0;padding:0}
-.wbb-imagemenu li{display:inline-block;*display:inline;zoom: 1;padding:5px 10px;color:#1e84cc;cursor:pointer;margin:0 10px 0 0;border:1px solid #ddd;border-radius:2px;}
-.wbb-imagemenu li:hover{border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;background:#fafafa;}
+.wbb-imagemenu li{display:inline-block;*display:inline;zoom: 1;padding:5px 10px;color:#333;cursor:pointer;margin:0 10px 0 0;border:1px solid #ddd;border-radius:2px;background:#fafafa;}
+.wbb-imagemenu li:hover{border:1px solid #aaa;box-shadow:0px 0px 3px #aaa;background:#fff;}
 .wbb-imagemenu li.active{border:1px solid #aaa;box-shadow:inset 0px 0px 3px #aaa;border-radius:2px;background:#ddd;color:#000;cursor:default}
 
 .local-img{border:3px dashed #ccc;min-height:120px;width:430px;text-align:center}
@@ -205,6 +206,9 @@ html{height:100% !important;}
 
 
 /* DEFAULT STYLES */
+
+.wysibb-body{margin:0; padding:0; background:#ffffff; text-align:left; font-size:12px}
+
 .code{margin: 0 0 10px 0;}
 .codetop{background:#dedede;padding:3px 10px;}
 .codemain{padding:5px;border:1px dotted #ccc}

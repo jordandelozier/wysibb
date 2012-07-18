@@ -1,7 +1,7 @@
 /*
 	Autor: DVG
 	WysiBB - WYSIWYG BBcode editor
-	Version: 0.6.3
+	Version: 0.6.4
 */
 
 (function($) {
@@ -11,7 +11,7 @@
 
 		var options,isMobile,IE6,IE7;
 		var options = {
-			version:			"0.6.3",
+			version:			"0.6.4",
 			debug:				true,
 			onlyBBmode:			false,
 			bbmode:				false,
@@ -19,6 +19,7 @@
 			smileAutoDetect:	true,
 			tabInsert:			true,
 			autoResize:			true,
+			bodyClass:			"",
 			maxheight:			800,
 			themeName:			'default',
 			skipBodyTransform:	["code"],
@@ -291,10 +292,10 @@
 					bbToHTML: {'[table](.*?)[/table]':'<table class="wbbtable" cellpadding="0" cellspacing="5">$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>'}
 				},
 				'wbbConvertation': {
-					htmlToBB: {'span.tab':"\t%(this).html()%"},
-					bbToHTML: {'\n':'<br/>','\t+':'<span class="tab">\uFEFF</span>'}
+					htmlToBB: {'span.tab':"   %(this).html()%"},
+					bbToHTML: {'\n':'<br/>','\\s\\s\\s':'<span class="tab">\uFEFF</span>'}
 				}
-			},
+			}, 
 			selectOptions: {
 				"fontsizedefault": {
 					title: "Размер текста",
@@ -548,6 +549,7 @@
 		var presets = {
 			'phpbb3' : {
 				buttons: "bold,italic,underline,|,quote,code,bullist2,numlist,|,img,link,fontsizeselect",
+				bodyClass: "content",
 				allButtons : {
 					'fontsizeselect': {
 						options:	"fontsizedefault,fontverysmall,fontsmall,fontnormal,fontbig,fontverybig"
@@ -766,7 +768,14 @@
 							btnopt.buttonHTML = wbbStringFormat(btnopt.buttonHTML,options);
 							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt),document));
 							$topBar.append($btn);
-							var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
+							
+							var funcname = btnopt.command.replace(/new\s+(\w+)(.*)/i,"$1");
+							var args = btnopt.command.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
+							var c={};
+							commandList[funcname].apply(c,args);
+							var controller = new CommandController(c, $btn,btnopt);
+							
+							//var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
 							updateListeners.push(controller);
 							enabledButtons.push(btnname);
 						}
@@ -788,7 +797,7 @@
 					curSmile.img = wbbStringFormat(curSmile.img,options);
 					var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{img}</div>',curSmile),document));
 					$bottomBar.append($btn);
-					var controller = new CommandController(new smileCommand(), $btn,curSmile);		
+					var controller = new CommandController(new commandList["smileCommand"], $btn,curSmile);		
 				}
 				$bottomBar.append('<div class="wysibb-powered" title="Редактор BBcode" unselectable="on"><a href="http://www.wysibb.com" target="_blank">WysiBB</a></div>');
 			}
@@ -832,8 +841,7 @@
 					
 					
 					//set default styles for body
-					$iFrameBody.css("margin","0").css("padding","0").css("background","#ffffff").css("text-align","left").css("font-size","12px");
-					
+					$iFrameBody.addClass("wysibb-body").addClass(options.bodyClass);
 					if (('contentEditable' in iFrameBody) && !isMobile) {
 						iFrameBody.contentEditable=true;
 						try{
@@ -855,13 +863,17 @@
 					}
 					
 					//set listener for keyup and mouse up for iframe
-					$(iFrameDoc).live("click", updateToolbar);
+					if (isMobile) {
+						$(iFrameDoc).live("click", updateToolbar);
+					}else{
+						$(iFrameDoc).live("mouseup", updateToolbar);
+					}
 					
 					$(iFrameDoc).live("keyup", function(evt) {
-						if (evt.ctrlKey===true || ((evt.ctrlKey===true || evt.altKey===true) || (evt.which>=37 && evt.which<=40))) { //watch not all key press, 37-40: arrow keys
+						//if (evt.ctrlKey===true || ((evt.ctrlKey===true || evt.altKey===true) || (evt.which>=37 && evt.which<=40))) { //watch not all key press, 37-40: arrow keys
 							updateToolbar();
 							checkForBR();
-						}
+						//}
 					});
 					if (options.tabInsert==true) {
 						//tab insert
@@ -950,6 +962,362 @@
 			//set listener for keyup and mouse up for txtarea
 			$txtArea.live("keyup mouseup", updateToolbar);
 		}
+		
+		var commandList = {
+			"NativeCommand": function (command,param) {
+				if (!param) {param=null;}
+				this.getCommandName = function() {return command;}
+				this.getCommandParam = function() {return param;}
+				this.execute = function(opt) {
+					if (bbmode) {
+						var bbcode = opt.bbName;
+						txtArea.focus();
+						if (checkBBContain(bbcode)) {
+							//remove bb
+							removeBBCode(bbcode);
+						}else{
+							setBBCode(opt,null);
+						}
+					}else{
+						iFrameBody.focus();
+						iFrameDoc.execCommand(command, false, param); 
+					}
+				};
+				this.queryState = function(opt) {
+					//highlite if active tag
+					var bbcode = opt.bbName;
+					if (param) {
+						var cval = iFrameDoc.queryCommandValue(command)+"";
+						cval = cval.replace(/\'/g,"");
+						if (command=="foreColor") {
+							cval = colorToHex(cval);
+						}
+						return (cval==param);
+					}
+					return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
+				};
+			},
+			"CustomCommand": function (command) {
+				this.execute = function(opt,clearList) {
+					var tagfilter = opt.rootNode;
+					if (bbmode) {
+						txtArea.focus();
+						var bbcode = opt.bbName;
+						if (checkBBContain(bbcode)) {
+							//remove bb
+							removeBBCode(bbcode);
+						}else{
+							setBBCode(opt,null);
+						}
+					}else{
+						iFrameBody.focus();
+						var quoteBlock = getContaining(tagfilter);
+						if (quoteBlock) {
+							var $quoteBlock = $(quoteBlock);
+							
+							if ($quoteBlock.is("span,font")) {
+								//is is text, multievents
+								var selHTML = selection.getHTML();
+								if (selHTML=="") {
+									//close cur tag, set selectio after this node;
+									var snode = selection.getNode();
+									var txtnode = createElementFromString("<span>\uFEFF</span>");
+									$(snode).after(txtnode);
+									selection.setSelection(null,txtnode,0,0);
+								}else{
+									tagKnife(quoteBlock,opt.rootNode);
+								}
+							}else{
+								//it is block, remove all
+								$.log("it is block, remove all");
+								if (opt.contentSelector) {
+									var remRules = opt.contentSelector;
+									remRules = remRules.replace(/rootNode/g,"this").replace(/\$/g,"jQuery");
+									$quoteBlock.each(function() {$(this).replaceWith(eval(remRules));});
+								}
+							}
+						}else{
+							//insert
+							var selHTML = selection.getHTML();
+							//$.log(selHTML);
+							if (selHTML=="") {
+								//open empty tag
+								$.log("open empty tag");
+								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+								$(crnode).attr("wbb","true");
+								var snode = selection.getNode();
+								
+								//insert span after, if parent span
+								if ($(crnode).is("span,font") && $(snode).is("span,font")) {
+									$(snode).after(crnode);
+								}else{
+									selection.overrideWithNode(crnode);
+									
+								}
+								if ($(crnode).children().size()==0) {
+									selection.setSelection(null,crnode,0,0);
+								}
+							}else{
+							
+								var snode = selection.getNode();
+								var replaceNode=false;
+								while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
+									selHTML = snode.outerHTML;
+									replaceNode=snode;
+									//selection.setSelection(null,snode);
+									snode = snode.parentNode;
+								}
+								
+								//clear selHTML
+								var el = iFrameDoc.createElement("SPAN");
+									el.innerHTML = selHTML;
+								if (clearList && clearList.length>0) {
+									//it is selector list, clear all in list
+									for (var k=0; k<clearList.length; k++) {
+										var copt = clearList[k];
+										if (copt) {
+											var remRules = copt.contentSelector || "jQuery(this).contents()";
+											remRules = remRules.replace(/rootNode/g,"this");
+											$(el).find(copt.rootNode).each(function(){$(this).replaceWith(eval(remRules))});
+										}
+									}
+								}else{
+									//it is not select list, clear one this
+									if (opt.contentSelector) {
+										var remRules = opt.contentSelector || "jQuery(this).contents()";
+										remRules = remRules.replace(/rootNode/g,"this");
+										$(el).find(opt.rootNode).each(function() {$(this).replaceWith(eval(remRules))});
+									}
+								}
+								//end clear
+								
+								selHTML = el.innerHTML;
+								var resel = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML}));
+								
+								if (replaceNode) {
+									$(replaceNode).replaceWith(resel);
+								}else{
+									selection.overrideWithNode(resel,null);
+								}
+								$(iFrameDoc).attr("wbb","true");
+								
+								selection.setSelection(null,resel,0,0);
+								
+							}
+						}
+						
+					}
+				}
+				this.queryState = function(opt) {
+					var bbcode = opt.bbName;
+					var tagfilter = opt.rootNode;
+					return isContaining(tagfilter,bbcode,selection.getNode());
+				}
+			},
+			"linkCommand": function () {
+				//var bbcode="url";
+				this.execute = function(opt) {
+					if (bbmode) {
+						txtArea.focus();
+						var bbcode = opt.bbName;
+						if (checkBBContain(bbcode)) {
+							//remove bb
+							removeBBCode(bbcode);
+						}else{
+							var initialUrl = "http://";
+							var url = window.prompt("Введите адрес ссылки:", initialUrl);
+							if (url===null) return;
+							if (url!="") {
+								setBBCode(opt,{href:url});
+							}
+						}
+					}else{
+						iFrameBody.focus();
+						var a = getContaining("a");
+						var saveButton = (a) ? "Обновить ссылку":"Вставить ссылку";
+						var removeStyle= a ? "":"display:none";
+						var adata = a ? $(a).text():selection.getText();
+						
+						selection.saveRange(); //save current range status
+						
+						var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="right"><label class="tbl-label">Отображаемый текст</label></td><td><input type="text" id="veditor_atitle" style="width:300px" value="{atext}" /></td></tr><tr><td class="right"><label class="tbl-label">URL ссылки</label></td><td><input type="text" style="width:300px" id="veditor_ahref" value="{ahref}" placeholder="http://"  /></td></tr><tr><td></td><td><div class=""><button class="wbb-okbtn" style="padding:3px 15px;float:left;margin-right:15px;"  unselectable="on">{saveButton}</button><button class="wbb-redbtn" style="padding:3px 15px;float:left;{removeStyle}" unselectable="on">Убрать ссылку</button></div></td></tr></table>',{saveButton:saveButton,removeStyle:removeStyle,atext:adata,ahref:$(a).attr("href")}));
+						
+						
+						
+						$ahtml.find("button.wbb-okbtn").click(function() {
+							//submit link event
+							var $atitle = $ahtml.find("#veditor_atitle");
+							var $ahref = $ahtml.find("#veditor_ahref")
+							$ahtml.find("span.inperr").remove();
+							if ($atitle.val()=="") {
+								$atitle.after('<span class="inperr">Текст ссылки не может быть пустым.</span>');
+								$atitle.focus();
+								return;
+							}
+							if (!$ahref.val().match(/https*\:\/\//g)) {
+								$ahref.after('<span class="inperr">Неправильный формат ссылки.<br/> <span style="color:#666">Пример: http://www.wysibb.com</span></span>');
+								$ahref.focus();
+								return;
+							}
+							//iFrameBody.focus();
+							
+							var elem = iFrameDoc.createElement("A");
+							elem.setAttribute("href",$ahref.val());
+							elem.innerHTML = $atitle.val();
+							
+							selection.overrideWithNode(elem,selection.getSavedRange(),"a");
+							
+							$(document).unbind("mousedown");
+							$ahtml.find("#veditor_ahref").unbind("keyup change");
+							
+							$("#wbbModalWindow").hide();
+							iFrameBody.focus();
+						})
+						$ahtml.find("button.wbb-redbtn").click(function() {
+							//remove link event
+							var a = selection.getNodeByRange(selection.getSavedRange());
+							selection.overrideWithNode($(a).html(),selection.getSavedRange(),"a");
+							$("#wbbModalWindow").hide();
+							iFrameBody.focus();
+						})
+						
+						showModalWindow("Вставка ссылки",$ahtml);
+						
+						$ahtml.find("#veditor_ahref").bind("keyup change",function() {
+							if ($(this).val()=='' || (($(this).val().indexOf($('#veditor_atitle').val())!=-1 || $('#veditor_atitle').val().indexOf($(this).val())!=-1) && $(this).val().length>$('#veditor_atitle').val().length)) {
+								$('#veditor_atitle').val($(this).val());
+							}
+						}).focus();
+						
+					}
+				};
+				this.queryState = function(opt) {
+					var bbcode = opt.bbName;
+					return isContaining("a",bbcode,selection.getNode());
+				};
+			},
+			"imgCommand": function (imgBrowser) {
+				this.execute = function(opt) {
+					if (bbmode) {
+						txtArea.focus();
+						var bbcode = opt.bbName;
+						if (checkBBContain(bbcode)) {
+							//remove bb
+							removeBBCode(bbcode);
+						}else{
+							if (!$.isFunction(imgBrowser)) {
+								imgBrowser = promptImageBrowser;
+							}
+							var callback = function(img) {
+								setBBCode(opt,{src:img.url}) 
+							}
+							imgBrowser({ callback: callback });
+						}
+					}else{
+						iFrameBody.focus();
+						var img = getContaining("img");
+						
+						selection.saveRange();
+
+						if (!$.isFunction(imgBrowser)) {
+							imgBrowser = niceImageBrowser;
+						}
+						var callback = function(r) {
+							var elem;
+							if (r.thumb && opt.uploader.useThumb) {
+								elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',r),iFrameDoc);
+							}else{
+								elem = createElementFromString(wbbStringFormat('<img src="{img}" />',r),iFrameDoc);
+							}
+							selection.overrideWithNode(elem,selection.getSavedRange());
+						}
+						imgBrowser({ callback: callback, url: $(img).attr('src'),uploader:opt.uploader})
+					}
+				};
+				this.queryState = function(opt) {
+					if (bbmode) {
+						//highlite img only in bbmode
+						return checkBBContain("img");
+					}
+					return false;
+				};
+			},
+			"TableCommand": function () {
+				this.execute = function(rows,cols) {
+					if (bbmode) {
+						var bbcode = "[table]\n";
+						for (var i=1; i<=rows; i++) {
+							bbcode+=" [tr]\n";
+							for (var j=1; j<=cols; j++) {
+								bbcode+="  [td][/td]\n";
+							}
+							bbcode+=" [/tr]\n";
+						}
+						bbcode+="[/table]";
+						var cursel = selection.getTextWithInfo();
+						txtArea.value = txtArea.value.substr(0,cursel.start)+bbcode+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
+					}else{
+						var $tbl = $(createElementFromString(wbbStringFormat('<table class="wbbtable" cellpadding="0" cellspacing="5"></table>')));
+						for (var i=1; i<=rows; i++) {
+							var $tr = $("<tr></tr>").appendTo($tbl);
+							for (var j=1; j<=cols; j++) {
+								var $td = $("<td>\uFEFF</td>").appendTo($tr);
+							}
+						}
+						selection.overrideWithNode($tbl.get(0),null);
+					}
+				};
+				this.queryState = function(opt) {
+					return (bbmode) ? checkBBContain("table"):getContaining("table");
+				};
+			},
+			"smileCommand": function () {
+				this.execute = function(opt) {
+					if (bbmode) {
+						txtArea.focus();
+						setBBCode(opt,null);
+					}else{
+						iFrameBody.focus();
+						selection.overrideWithNode(wbbStringFormat(opt.img,options));
+					}
+				};
+				this.queryState = function() {
+					return false;
+				};
+			},
+			"justifyCommand": function () {
+				this.execute = function(opt) {
+					if (bbmode) {
+						txtArea.focus();
+						setBBCode(opt,null);
+					}else{
+						iFrameBody.focus();
+						var c = getContaining(opt.rootNode);
+						if (c) {
+							$(c).replaceWith($(c).html());
+							$(c).replaceWith($(c).html());
+						}else{
+							var pblock = getContaining(".wbb-left,.wbb-center,.wbb-right");
+							var sHTML = selection.getHTML();
+							var crnode;
+							if (pblock) {
+								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
+								$(pblock).replaceWith(crnode);
+							}else{
+								crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
+								selection.overrideWithNode(crnode);
+							}
+							selection.setSelection(null,crnode,0,0);
+						}
+					}
+				};
+				this.queryState = function(opt) {
+					return isContaining(opt.rootNode,opt.bbName,selection.getNode());
+				};
+			}
+		}
+		
+		
 		function CommandController(command, el, opt) {
 			this.updateUI = function() {
 				var state = command.queryState(opt);
@@ -971,13 +1339,13 @@
 		}
 		function SelectController(optlist, el,sopt) {
 			//el - select box
-			var commandList=[];
+			var cList=[];
 			var clearList = [];
 			this.updateUI = function() {
 				$(el).find(".sel-value").html(sopt.title);
 				$(optlist).each(function(idx,e) {
-					var command = commandList[e.option].cmd;
-					var opt = commandList[e.option].opt;
+					var command = cList[e.option].cmd;
+					var opt = cList[e.option].opt;
 					var state = command.queryState(opt);
 					if (state===true && !opt.isDefault) {
 						$(el).find(".sel-value").html(opt.title);
@@ -998,13 +1366,21 @@
 					var optrow = optlist[i].opt;
 					var elrow = optlist[i].el;
 					var optname = optlist[i].option;
-					commandList[optname] = {cmd:eval(optrow.command),opt:optrow};
+					
+					var funcname = optrow.command.replace(/new\s+(\w+)(.*)/i,"$1");
+					var args = optrow.command.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
+					var c={};
+					commandList[funcname].apply(c,args);
+					
+					cList[optname] = {cmd:c,opt:optrow};
+					
+					
 					clearList[clearList.length] = optrow;
 					$(elrow).attr("optname",optname).live('click',function() {
 						
 						var oname = $(this).attr("optname");
-						commandList[oname].cmd.execute(commandList[oname].opt,clearList);
-						$(el).find(".sel-value").html(commandList[oname].opt.title);
+						cList[oname].cmd.execute(cList[oname].opt,clearList);
+						$(el).find(".sel-value").html(cList[oname].opt.title);
 					});
 				}
 			}
@@ -1012,12 +1388,12 @@
 		}
 		function ColorPickerController(colorlist, el,sopt) {
 			//el - colorpicker
-			var commandList=[];
+			var cList=[];
 			this.updateUI = function() {
 				$(el).find(".val-line").css("background-color","#000000");
 				$(colorlist).each(function(idx,color) {
-					var command = commandList[color].cmd;
-					var state = command.queryState(commandList[color].opt);
+					var command = cList[color].cmd;
+					var state = command.queryState(cList[color].opt);
 					if (state===true) {
 						$(el).find(".val-line").css("background-color",color);
 						return false;
@@ -1035,24 +1411,32 @@
 			if (colorlist.length>0) {
 				for (var i=0; i<colorlist.length; i++) {
 					var colorname = colorlist[i];
-					commandList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
+					
+					
+					var cmd = wbbStringFormat(sopt.command,{color:colorname});
+					var funcname = cmd.replace(/new\s+(\w+)(.*)/i,"$1");
+					var args = cmd.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
+					var c={};
+					commandList[funcname].apply(c,args);
+					cList[colorname] = {cmd:c,opt:sopt};
+					//cList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
 				}
 				$(el).find("div.scolor").live("click",function() {
 					var colorname = $(this).attr("title");
-					commandList[colorname].cmd.execute(commandList[colorname].opt);
+					cList[colorname].cmd.execute(cList[colorname].opt);
 					updateToolbar();
 				});
 				
 				$(el).find("div.nocolor").live("click",function() {
 					var colorname = "#000000";
-					commandList[colorname].cmd.execute(commandList[colorname].opt);
+					cList[colorname].cmd.execute(cList[colorname].opt);
 					updateToolbar();
 				});
 			}
 			
 		}
 		function TableController(el, opt) {
-			var command = new TableCommand();
+			var command = new commandList["TableCommand"];
 			this.updateUI = function() {
 				var state = command.queryState(opt);
 				if (state) {$(el).addClass("on")}
@@ -1078,233 +1462,6 @@
 			$(updateListeners).each(function(idx,controller){
 				controller.updateUI();
 			});
-		}
-		function NativeCommand(command,param) {
-			if (!param) {param=null;}
-			this.execute = function(opt) {
-				if (bbmode) {
-					var bbcode = opt.bbName;
-					txtArea.focus();
-					if (checkBBContain(bbcode)) {
-						//remove bb
-						removeBBCode(bbcode);
-					}else{
-						setBBCode(opt,null);
-					}
-				}else{
-					iFrameBody.focus();
-					iFrameDoc.execCommand(command, false, param); 
-				}
-			};
-			this.queryState = function(opt) {
-				//highlite if active tag
-				var bbcode = opt.bbName;
-				if (param) {
-					var cval = iFrameDoc.queryCommandValue(command)+"";
-					cval = cval.replace(/\'/g,"");
-					if (command=="foreColor") {
-						cval = colorToHex(cval);
-					}
-					return (cval==param);
-				}
-				return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
-			};
-		}
-		function CustomCommand(command) {
-			this.execute = function(opt,clearList) {
-				var tagfilter = opt.rootNode;
-				if (bbmode) {
-					txtArea.focus();
-					var bbcode = opt.bbName;
-					if (checkBBContain(bbcode)) {
-						//remove bb
-						removeBBCode(bbcode);
-					}else{
-						setBBCode(opt,null);
-					}
-				}else{
-					iFrameBody.focus();
-					var quoteBlock = getContaining(tagfilter);
-					if (quoteBlock) {
-						var $quoteBlock = $(quoteBlock);
-						
-						if ($quoteBlock.is("span,font")) {
-							//is is text, multievents
-							var selHTML = selection.getHTML();
-							if (selHTML=="") {
-								//close cur tag, set selectio after this node;
-								var snode = selection.getNode();
-								var txtnode = createElementFromString("<span>\uFEFF</span>");
-								$(snode).after(txtnode);
-								selection.setSelection(null,txtnode,0,0);
-							}else{
-								tagKnife(quoteBlock,opt.rootNode);
-							}
-						}else{
-							//it is block, remove all
-							$.log("it is block, remove all");
-							if (opt.contentSelector) {
-								var remRules = opt.contentSelector;
-								remRules = remRules.replace(/rootNode/g,"quoteBlock");
-								//$.log(remRules);
-								$quoteBlock.replaceWith(eval(remRules));
-							}
-						}
-					}else{
-						//insert
-						var selHTML = selection.getHTML();
-						//$.log(selHTML);
-						if (selHTML=="") {
-							//open empty tag
-							$.log("open empty tag");
-							var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
-							$(crnode).attr("wbb","true");
-							var snode = selection.getNode();
-							
-							//insert span after, if parent span
-							if ($(crnode).is("span,font") && $(snode).is("span,font")) {
-								$(snode).after(crnode);
-							}else{
-								selection.overrideWithNode(crnode);
-								
-							}
-							if ($(crnode).children().size()==0) {
-								selection.setSelection(null,crnode,0,0);
-							}
-						}else{
-						
-							var snode = selection.getNode();
-							var replaceNode=false;
-							while (snode && snode.innerHTML==selHTML && $(snode).is("span,font")) {
-								selHTML = snode.outerHTML;
-								replaceNode=snode;
-								//selection.setSelection(null,snode);
-								snode = snode.parentNode;
-							}
-							
-							//clear selHTML
-							var el = iFrameDoc.createElement("SPAN");
-								el.innerHTML = selHTML;
-							if (clearList && clearList.length>0) {
-								//it is selector list, clear all in list
-								for (var k=0; k<clearList.length; k++) {
-									var copt = clearList[k];
-									if (copt) {
-										var remRules = copt.contentSelector || "$(el).html()";
-										remRules = remRules.replace(/rootNode/g,"el");
-										$(el).find(copt.rootNode).each(function(idx,el) {$(el).replaceWith(eval(remRules))});
-									}
-								}
-							}else{
-								//it is not select list, clear one this
-								if (opt.contentSelector) {
-									var remRules = opt.contentSelector || "$(el).html()";
-									remRules = remRules.replace(/rootNode/g,"el");
-									$(el).find(opt.rootNode).each(function(idx,el) {$(el).replaceWith(eval(remRules))});
-								}
-							}
-							//end clear
-							
-							selHTML = el.innerHTML;
-							var reshtml = wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML});
-							if (replaceNode) {
-								$(replaceNode).replaceWith(reshtml);
-							}else{
-								selection.overrideWithNode(reshtml,null);
-							}
-							$(iFrameDoc).attr("wbb","true");
-						}
-					}
-					
-				}
-			};
-			this.queryState = function(opt) {
-				var bbcode = opt.bbName;
-				var tagfilter = opt.rootNode;
-				return isContaining(tagfilter,bbcode,selection.getNode());
-			}
-		}
-		function linkCommand() {
-			//var bbcode="url";
-			this.execute = function(opt) {
-				if (bbmode) {
-					txtArea.focus();
-					var bbcode = opt.bbName;
-					if (checkBBContain(bbcode)) {
-						//remove bb
-						removeBBCode(bbcode);
-					}else{
-						var initialUrl = "http://";
-						var url = window.prompt("Введите адрес ссылки:", initialUrl);
-						if (url===null) return;
-						if (url!="") {
-							setBBCode(opt,{href:url});
-						}
-					}
-				}else{
-					iFrameBody.focus();
-					var a = getContaining("a");
-					var saveButton = (a) ? "Обновить ссылку":"Вставить ссылку";
-					var removeStyle= a ? "":"display:none";
-					var adata = a ? $(a).text():selection.getText();
-					
-					selection.saveRange(); //save current range status
-					
-					var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="right"><label class="tbl-label">Отображаемый текст</label></td><td><input type="text" id="veditor_atitle" style="width:300px" value="{atext}" /></td></tr><tr><td class="right"><label class="tbl-label">URL ссылки</label></td><td><input type="text" style="width:300px" id="veditor_ahref" value="{ahref}" placeholder="http://"  /></td></tr><tr><td></td><td><div class=""><button class="wbb-okbtn" style="padding:3px 15px;float:left;margin-right:15px;"  unselectable="on">{saveButton}</button><button class="wbb-redbtn" style="padding:3px 15px;float:left;{removeStyle}" unselectable="on">Убрать ссылку</button></div></td></tr></table>',{saveButton:saveButton,removeStyle:removeStyle,atext:adata,ahref:$(a).attr("href")}));
-					
-					
-					
-					$ahtml.find("button.wbb-okbtn").click(function() {
-						//submit link event
-						var $atitle = $ahtml.find("#veditor_atitle");
-						var $ahref = $ahtml.find("#veditor_ahref")
-						$ahtml.find("span.inperr").remove();
-						if ($atitle.val()=="") {
-							$atitle.after('<span class="inperr">Текст ссылки не может быть пустым.</span>');
-							$atitle.focus();
-							return;
-						}
-						if (!$ahref.val().match(/https*\:\/\//g)) {
-							$ahref.after('<span class="inperr">Неправильный формат ссылки.<br/> <span style="color:#666">Пример: http://www.wysibb.com</span></span>');
-							$ahref.focus();
-							return;
-						}
-						//iFrameBody.focus();
-						
-						var elem = iFrameDoc.createElement("A");
-						elem.setAttribute("href",$ahref.val());
-						elem.innerHTML = $atitle.val();
-						
-						selection.overrideWithNode(elem,selection.getSavedRange(),"a");
-						
-						$(document).unbind("mousedown");
-						$ahtml.find("#veditor_ahref").unbind("keyup change");
-						
-						$("#wbbModalWindow").hide();
-						iFrameBody.focus();
-					})
-					$ahtml.find("button.wbb-redbtn").click(function() {
-						//remove link event
-						var a = selection.getNodeByRange(selection.getSavedRange());
-						selection.overrideWithNode($(a).html(),selection.getSavedRange(),"a");
-						$("#wbbModalWindow").hide();
-						iFrameBody.focus();
-					})
-					
-					showModalWindow("Вставка ссылки",$ahtml);
-					
-					$ahtml.find("#veditor_ahref").bind("keyup change",function() {
-						if ($(this).val()=='' || (($(this).val().indexOf($('#veditor_atitle').val())!=-1 || $('#veditor_atitle').val().indexOf($(this).val())!=-1) && $(this).val().length>$('#veditor_atitle').val().length)) {
-							$('#veditor_atitle').val($(this).val());
-						}
-					}).focus();
-					
-				}
-			};
-			this.queryState = function(opt) {
-				var bbcode = opt.bbName;
-				return isContaining("a",bbcode,selection.getNode());
-			};
 		}
 		function promptImageBrowser(opt) {
 			var initialUrl = "http://";
@@ -1333,8 +1490,6 @@
 			var defaultType = opt.uploader.defaultType;
 			if (!opt.uploader.enable) {defaultType=1;}
 
-			//var $ahtml = $(wbbStringFormat('<table class="veditor-addlink-window" cellpadding="0" cellspacing="10"><tr><td class="center"><table cellpadding="0" cellspacing="0" class="imgpreview"><tr><td><img id="imgpreview" src="{imgpreview}" /></td></tr></table></td><td><label class="tbl-label" style="display:block">URL изображения</label><input type="text" id="veditor_img" style="width:300px" value="{img}" /><div><button class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button></div></td></tr></table>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url}));
-			
 			
 			var $ahtml = $(createElementFromString(wbbStringFormat('<div><ul class="wbb-imagemenu"><li  class="{op.url.class}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').show().next(\'.local-img\').hide();"><span>Ввести URL</span></li><li class="{op.upload.class}" style="{op.upload.listyle}" onClick="$(this).parent().find(\'li.active\').removeClass(\'active\');$(this).addClass(\'active\').parent().next(\'.url-image\').hide().next(\'.local-img\').show()"><span>Загрузить файл</span></li> </ul> <div class="url-image" style="{op.url.style}"> <table class="veditor-addlink-window" cellpadding="0" cellspacing="10"> <tbody> <tr> <td class="center"> <table cellpadding="0" cellspacing="0" class="imgpreview"> <tbody> <tr> <td> <img id="imgpreview" src="{imgpreview}" /> </td> </tr> </tbody> </table> </td> <td> <label class="tbl-label" style="display:block">URL изображения</label> <input type="text" id="veditor_img" style="width:300px" value="{img}" /> <div> <button id="save1" class="wbb-okbtn" style="padding:3px 15px;margin-top:15px;">{saveButton}</button> </div> </td> </tr> </tbody> </table> </div>  <div style="{op.upload.style}" class="local-img"> <form id="fupform" class="upload" action="{uploadurl}" method="post" enctype="multipart/form-data" target="fupload"><input type="hidden" name="iframe" value="1"/><input type="hidden" name="idarea" value="{idarea}" /><div class="p">Перетащите изображение сюда</div> <div class="p2">или</div> <div class="fileupload"> <input id="fileupl" class="file" type="file" name="img" /><span  id="nicebtn" class="wbb-okbtn">Выберите изображение для загрузки</span> </div> </form> </div><iframe id="fupload" name="fupload" src="about:blank" frameborder="0" style="width:0px;height:0px;display:none"></iframe></div>',{saveButton:saveButton,imgpreview:imgpreview,img:opt.url,uploadurl:uploadurl,op:op,idarea:idarea}),document));
 			
@@ -1423,128 +1578,6 @@
 			$ahtml.find("#veditor_img").bind("keyup change",function() {
 				$('#imgpreview').attr("src",($(this).val()));
 			}).focus();
-		}
-		function imgCommand(imgBrowser) {
-			this.execute = function(opt) {
-				if (bbmode) {
-					txtArea.focus();
-					var bbcode = opt.bbName;
-					if (checkBBContain(bbcode)) {
-						//remove bb
-						removeBBCode(bbcode);
-					}else{
-						if (!$.isFunction(imgBrowser)) {
-							imgBrowser = promptImageBrowser;
-						}
-						var callback = function(img) {
-							setBBCode(opt,{src:img.url}) 
-						}
-						imgBrowser({ callback: callback });
-					}
-				}else{
-					iFrameBody.focus();
-					var img = getContaining("img");
-					
-					selection.saveRange();
-
-					if (!$.isFunction(imgBrowser)) {
-						imgBrowser = niceImageBrowser;
-					}
-					var callback = function(r) {
-						var elem;
-						if (r.thumb && opt.uploader.useThumb) {
-							elem = createElementFromString(wbbStringFormat('<a href="{img}"><img src="{thumb}" /></a>',r),iFrameDoc);
-						}else{
-							elem = createElementFromString(wbbStringFormat('<img src="{img}" />',r),iFrameDoc);
-						}
-						selection.overrideWithNode(elem,selection.getSavedRange());
-					}
-					imgBrowser({ callback: callback, url: $(img).attr('src'),uploader:opt.uploader})
-				}
-			};
-			this.queryState = function(opt) {
-				if (bbmode) {
-					//highlite img only in bbmode
-					return checkBBContain("img");
-				}
-				return false;
-			};
-		}
-		function TableCommand() {
-			this.execute = function(rows,cols) {
-				if (bbmode) {
-					var bbcode = "[table]\n";
-					for (var i=1; i<=rows; i++) {
-						bbcode+=" [tr]\n";
-						for (var j=1; j<=cols; j++) {
-							bbcode+="  [td][/td]\n";
-						}
-						bbcode+=" [/tr]\n";
-					}
-					bbcode+="[/table]";
-					var cursel = selection.getTextWithInfo();
-					txtArea.value = txtArea.value.substr(0,cursel.start)+bbcode+txtArea.value.substr(cursel.end,(txtArea.value.length-cursel.end));
-				}else{
-					var $tbl = $(createElementFromString(wbbStringFormat('<table class="wbbtable" cellpadding="0" cellspacing="5"></table>')));
-					for (var i=1; i<=rows; i++) {
-						var $tr = $("<tr></tr>").appendTo($tbl);
-						for (var j=1; j<=cols; j++) {
-							var $td = $("<td>\uFEFF</td>").appendTo($tr);
-						}
-					}
-					selection.overrideWithNode($tbl.get(0),null);
-				}
-			};
-			this.queryState = function(opt) {
-				return (bbmode) ? checkBBContain("table"):getContaining("table");
-			};
-		}
-		function smileCommand() {
-			this.execute = function(opt) {
-				if (bbmode) {
-					txtArea.focus();
-					setBBCode(opt,null);
-				}else{
-					iFrameBody.focus();
-					selection.overrideWithNode(wbbStringFormat(opt.img,options));
-				}
-			};
-			this.queryState = function() {
-				return false;
-			};
-		}
-		function justifyCommand() {
-			this.execute = function(opt) {
-				if (bbmode) {
-					txtArea.focus();
-					setBBCode(opt,null);
-				}else{
-					iFrameBody.focus();
-					var curContain = getContaining(opt.rootNode);
-					if (curContain) {
-						if (opt.contentSelector) {
-							var remRules = opt.contentSelector;
-							remRules = remRules.replace(/rootNode/g,"curContain");
-							$(curContain).replaceWith(eval(remRules));
-						}
-					}else{
-						var pblock = getContaining(".wbb-left,.wbb-center,.wbb-right");
-						var sHTML = selection.getHTML();
-						var crnode;
-						if (pblock) {
-							crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:$(pblock).html()}));
-							$(pblock).replaceWith(crnode);
-						}else{
-							crnode = createElementFromString(wbbStringFormat("{htmlOpen}{txt}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:sHTML}));
-							selection.overrideWithNode(crnode);
-						}
-						selection.setSelection(null,crnode,0,0);
-					}
-				}
-			};
-			this.queryState = function(opt) {
-				return isContaining(opt.rootNode,opt.bbName,selection.getNode());
-			};
 		}
 		function setBBCode(opt,params) {
 			var cursel = selection.getTextWithInfo();
@@ -2004,8 +2037,8 @@
 		}
 		function smileAutoDetect() {
 			var smList=new Array();
-			var $sm1 = $("img[alt=':)']");
-			var $sm2 = $("img[alt=';)']");
+			var $sm1 = $("a img[alt=':)']");
+			var $sm2 = $("a img[alt=';)']");
 			
 			if ($sm1.size()>0 && $sm2.size()>0) {
 				//find common parent
@@ -2256,11 +2289,11 @@
 							opt.callback({img: res.image_link, thumb: res.thumb_link});
 							updateToolbar();
 						}else{
-							err.call;
+							err.call();
 						}
 					}else{
 						$.log("Post ERROR");
-						err.call;
+						err.call();
 					}
 				}
 			}
