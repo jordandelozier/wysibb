@@ -769,10 +769,7 @@
 							var $btn = $(createElementFromString(wbbStringFormat('<div class="wysibb-toolbar-btn" title="{title}" unselectable="on">{buttonHTML}</div>',btnopt),document));
 							$topBar.append($btn);
 							
-							var funcname = btnopt.command.replace(/new\s+(\w+)(.*)/i,"$1");
-							var args = btnopt.command.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
-							var c={};
-							commandList[funcname].apply(c,args);
+							var c = eval(btnopt.command.replace(/new\s+(\w+)(.*)/i, "new commandList['$1']$2"));
 							var controller = new CommandController(c, $btn,btnopt);
 							
 							//var controller = new CommandController(eval(btnopt.command), $btn,btnopt);		
@@ -997,8 +994,18 @@
 					return (bbmode) ? checkBBContain(bbcode):iFrameDoc.queryCommandState(command);
 				};
 			},
-			"CustomCommand": function (command) {
+			"CustomCommand": function (command, paramsProvider) {
 				this.execute = function(opt,clearList) {
+					if ($.isFunction(paramsProvider)) {
+						var callback = $.proxy(function(params) {
+							return this.executeWithParams(opt, clearList, params) 
+						}, this);
+						paramsProvider({ callback: callback });
+					}else{
+						return this.executeWithParams(opt,clearList,null);
+					}
+				}
+				this.executeWithParams = function(opt,clearList,params) {
 					var tagfilter = opt.rootNode;
 					if (bbmode) {
 						txtArea.focus();
@@ -1007,7 +1014,7 @@
 							//remove bb
 							removeBBCode(bbcode);
 						}else{
-							setBBCode(opt,null);
+							setBBCode(opt,params);
 						}
 					}else{
 						iFrameBody.focus();
@@ -1367,10 +1374,7 @@
 					var elrow = optlist[i].el;
 					var optname = optlist[i].option;
 					
-					var funcname = optrow.command.replace(/new\s+(\w+)(.*)/i,"$1");
-					var args = optrow.command.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
-					var c={};
-					commandList[funcname].apply(c,args);
+					var c = eval(optrow.command.replace(/new\s+(\w+)(.*)/i, "new commandList['$1']$2"));
 					
 					cList[optname] = {cmd:c,opt:optrow};
 					
@@ -1414,10 +1418,7 @@
 					
 					
 					var cmd = wbbStringFormat(sopt.command,{color:colorname});
-					var funcname = cmd.replace(/new\s+(\w+)(.*)/i,"$1");
-					var args = cmd.replace(/new\s+\w+\((.*)\)/i,"$1").replace(/\"/g,"").split(",");
-					var c={};
-					commandList[funcname].apply(c,args);
+					var c = eval(cmd.replace(/new\s+(\w+)(.*)/i, "new commandList['$1']$2"));
 					cList[colorname] = {cmd:c,opt:sopt};
 					//cList[colorname] = {cmd:eval(wbbStringFormat(sopt.command,{color:colorname})),opt:sopt};
 				}
