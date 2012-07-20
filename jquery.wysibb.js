@@ -1050,7 +1050,8 @@
 							if (selHTML=="") {
 								//open empty tag
 								$.log("open empty tag");
-								var crnode = createElementFromString(wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose}));
+								var crnodeTpl = wbbStringFormat("{htmlOpen}\uFEFF{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose})
+								var crnode = createElementFromString(wbbStringFormat(crnodeTpl, params));
 								$(crnode).attr("wbb","true");
 								var snode = selection.getNode();
 								
@@ -1099,7 +1100,8 @@
 								//end clear
 								
 								selHTML = el.innerHTML;
-								var resel = createElementFromString(wbbStringFormat("{htmlOpen}{txt}{htmlClose}",{htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose,txt:selHTML}));
+								var reselTpl = wbbStringFormat("{htmlOpen}{txt}{htmlClose}", {htmlOpen:opt.htmlOpen,htmlClose:opt.htmlClose});
+								var resel = createElementFromString(wbbStringFormat(reselTpl,$.extend({txt:selHTML}, params)));
 								
 								if (replaceNode) {
 									$(replaceNode).replaceWith(resel);
