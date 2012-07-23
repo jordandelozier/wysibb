@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>WysiBB example</title>
+</head>
+<body>
+    <div style="width: 960px; height: 300px; margin: 20px auto; border: 1px #111;">
+        <div id = "editContent">
+            [size=150][font=georgia,serif][color=#ff0000]Header[/color][/font][/size] [list][*][size=100][color=#38761d]Lorem ipsum dolor sit amet, consectetur adipiscing elit.[/color][/size][*][size=100][color=#1155cc]Suspendisse tempor tincidunt venenatis.[/color][/size][*][size=100]Duis interdum, velit eu semper sodales, tellus enim feugiat lorem, eu scelerisque felis massa eget diam. [/size][/list]Pellentesque vitae urna turpis, et hendrerit tortor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla lacus est, dictum sed pretium sit amet, cursus eget sem. Proin neque tortor, volutpat in hendrerit et, porttitor eget eros. Nulla facilisi. Etiam non mauris urna. [quote]Sed blandit molestie malesuada. Donec congue nisl vitae odio venenatis dignissim. Sed rhoncus urna eu velit ultrices venenatis. Donec scelerisque, eros varius rhoncus vehicula, lectus lorem auctor felis, id tempor sem metus quis arcu. Nulla ac justo sem, in bibendum enim. [/quote]:) Sed libero nibh, convallis eu molestie sit amet, dapibus vel odio.
+        </div>
+    </div>
+    <div style="width: 960px; height: 300px; margin: 20px auto; border: 1px #111;">
+        <div id = "viewContent">
+            [size=150][font=georgia,serif][color=#ff0000]Header[/color][/font][/size] [list][*][size=100][color=#38761d]Lorem ipsum dolor sit amet, consectetur adipiscing elit.[/color][/size][*][size=100][color=#1155cc]Suspendisse tempor tincidunt venenatis.[/color][/size][*][size=100]Duis interdum, velit eu semper sodales, tellus enim feugiat lorem, eu scelerisque felis massa eget diam. [/size][/list]Pellentesque vitae urna turpis, et hendrerit tortor. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla lacus est, dictum sed pretium sit amet, cursus eget sem. Proin neque tortor, volutpat in hendrerit et, porttitor eget eros. Nulla facilisi. Etiam non mauris urna. [quote]Sed blandit molestie malesuada. Donec congue nisl vitae odio venenatis dignissim. Sed rhoncus urna eu velit ultrices venenatis. Donec scelerisque, eros varius rhoncus vehicula, lectus lorem auctor felis, id tempor sem metus quis arcu. Nulla ac justo sem, in bibendum enim. [/quote]:) Sed libero nibh, convallis eu molestie sit amet, dapibus vel odio.
+        </div>
+    </div>
+    <script src="http://yandex.st/jquery/1.7.2/jquery.js" type="text/javascript"></script>
+    <script src="jquery.wysibb.js" type="text/javascript"></script>
+    <script>
+        var myOpt = {
+            debug: false,
+            watchTxtArea: false,
+            smileAutoDetect: false,
+            themeName: 'default',
+            themePrefix: 'themes/'
+        };
+        $(document).ready(function () {
+            $("#editContent").wysibb(myOpt);
+        });
+    </script>
+</body>
+</html>

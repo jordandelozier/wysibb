@@ -7,9 +7,7 @@
 (function($) {
 	'use strict';
 	$.wysibb = function(txtArea,settings) {
-	
-
-		var options,isMobile,IE6,IE7;
+	    var options,isMobile,IE6,IE7;
 		var options = {
 			version:			"0.6.4",
 			debug:				true,
@@ -25,7 +23,7 @@
 			skipBodyTransform:	["code"],
 			//themePrefix:		'http://www.wysibb.com/static/theme/',
 			validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
-			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,-,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
+			buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
 			allButtons:			{
 				"bold":	{
 					title:"Жирный",
@@ -249,6 +247,7 @@
 					bbOpen:"[quote]",
 					bbClose:"[/quote]",
 					htmlToBB: {'div.blockquote': '[quote]%$(this).html()%[/quote]'},
+                    bbToHTML: {},
 					rootNode: 'div.blockquote',
 					contentSelector: '$(rootNode).html()'
 				},
@@ -654,7 +653,8 @@
 		}
 		function buildEditor() {
 			$txtArea.css("border","0").css("outline","none");
-			$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',options));
+			//$txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',options));
+            $txtArea.after(wbbStringFormat('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css" />',options));
 			
 			$txtArea.wrap('<div class="wysibb"></div>');
 			
