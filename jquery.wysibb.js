@@ -534,15 +534,15 @@
 				}
 			},
 			smileList:			[
-				{title:"Улыбка",img: '<img src="{themePrefix}{themeName}/img/smiles/sm1.png" class="sm">',bbcode:":)"},
-				{title:"Огорчение",img: '<img src="{themePrefix}{themeName}/img/smiles/sm8.png" class="sm">',bbcode:":("},
-				{title:"Смех",img: '<img src="{themePrefix}{themeName}/img/smiles/sm2.png" class="sm">',bbcode:":D"},
-				{title:"Подмигивание",img: '<img src="{themePrefix}{themeName}/img/smiles/sm3.png" class="sm">',bbcode:";)"},
-				{title:"Спасибо, класс",img: '<img src="{themePrefix}{themeName}/img/smiles/sm4.png" class="sm">',bbcode:":up:"},
-				{title:"Ругаю",img: '<img src="{themePrefix}{themeName}/img/smiles/sm5.png" class="sm">',bbcode:":down:"},
-				{title:"Шок",img: '<img src="{themePrefix}{themeName}/img/smiles/sm6.png" class="sm">',bbcode:":shock:"},
-				{title:"Злой",img: '<img src="{themePrefix}{themeName}/img/smiles/sm7.png" class="sm">',bbcode:":angry:"},
-				{title:"Тошнит",img: '<img src="{themePrefix}{themeName}/img/smiles/sm9.png" class="sm">',bbcode:":sick:"}
+				{title:"Улыбка",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm1.png" class="sm">',bbcode:":)"},
+				{title:"Огорчение",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm8.png" class="sm">',bbcode:":("},
+				{title:"Смех",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm2.png" class="sm">',bbcode:":D"},
+				{title:"Подмигивание",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm3.png" class="sm">',bbcode:";)"},
+				{title:"Спасибо, класс",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm4.png" class="sm">',bbcode:":up:"},
+				{title:"Ругаю",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm5.png" class="sm">',bbcode:":down:"},
+				{title:"Шок",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm6.png" class="sm">',bbcode:":shock:"},
+				{title:"Злой",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm7.png" class="sm">',bbcode:":angry:"},
+				{title:"Тошнит",img: '<img src="{themePrefix}/{themeName}/img/smiles/sm9.png" class="sm">',bbcode:":sick:"}
 			] //default smileList
 		}
 		var presets = {
