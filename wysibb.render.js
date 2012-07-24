@@ -7,10 +7,10 @@
 
 var wysibb = wysibb || {};
 
-wysibb.render = function (bbtext){
+wysibb.render = function (bbtext, element) {
     "use strict";
     var currow, currowName, bbToHTML,
-        html=bbtext,
+        html = bbtext,
         options = wysibb.options,
         smileLen = options.smileList.length,
         allBtn = options.allButtons;
@@ -44,7 +44,7 @@ wysibb.render = function (bbtext){
         if (allBtn.hasOwnProperty(currowName)) {
             currow = options.allButtons[currowName];
             bbToHTML = currow.bbToHTML;
-            if (!bbToHTML) {
+            if (!bbToHTML || bbToHTML.isEmpty()) {
                 $.log("Create bbtHTML");
                 bbToHTML = {};
                 var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
@@ -62,10 +62,11 @@ wysibb.render = function (bbtext){
                     .replace(/\\\]\\\]/g,"]");
                 var bregexp = new RegExp(bbreg,"gmi");
                 html = wysibb.helpers.bbReplace(html,bregexp,repl);
+                html = wysibb.helpers.removeBreaks(html);
                 //html = html.replace(bregexp,repl);
             }
         }
-
+        element.html(html);
     }
 
     //clear br's

@@ -89,17 +89,18 @@
         var myOpt = {
                     debug: false,
                     watchTxtArea: false,
+                    autoResize: false,
                     smileAutoDetect: false,
                     themeName: 'default',
                     themePrefix: 'themes'
                 },
                 viewElement = $("#viewContent"),
                 bbCode = viewElement.text(),
-                htmlCode = wysibb.render(bbCode);
+                htmlCode = wysibb.render(bbCode, viewElement);
 
         $(document).ready(function () {
             $("#editContent").wysibb(myOpt);
-            viewElement.html(htmlCode);
+            //viewElement.html(htmlCode);
         });
     </script>
 </body>
