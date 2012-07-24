@@ -7,7 +7,7 @@
 <body>
     <div style="width: 960px; height: 350px; margin: 20px auto; border: 1px #111;">
         <textarea id = "editContent"  style="min-height: 250px; height: auto; width: 100%; display: block;">
-
+            :)
             [size=200]Test text of BB editor[/size]
 
             [size=100][b]Lorem ipsum dolor sit amet[/b], - BOLD
@@ -44,7 +44,7 @@
     </div>
     <div style="width: 960px; margin: 20px auto; border: 1px #111;">
         <div id = "viewContent">
-
+            :)
             [size=200]Test text of BB editor[/size]
 
             [size=100][b]Lorem ipsum dolor sit amet[/b], - BOLD
@@ -80,17 +80,26 @@
         </div>
     </div>
     <script src="http://yandex.st/jquery/1.7.2/jquery.js" type="text/javascript"></script>
+    <script src="wysibb.config.js" type="text/javascript"></script>
+    <script src="wysibb.presets.js" type="text/javascript"></script>
+    <script src="wysibb.helpers.js" type="text/javascript"></script>
+    <script src="wysibb.render.js" type="text/javascript"></script>
     <script src="jquery.wysibb.js" type="text/javascript"></script>
     <script>
         var myOpt = {
-            debug: false,
-            watchTxtArea: false,
-            smileAutoDetect: false,
-            themeName: 'default',
-            themePrefix: 'themes'
-        };
+                    debug: false,
+                    watchTxtArea: false,
+                    smileAutoDetect: false,
+                    themeName: 'default',
+                    themePrefix: 'themes'
+                },
+                viewElement = $("#viewContent"),
+                bbCode = viewElement.text(),
+                htmlCode = wysibb.render(bbCode);
+
         $(document).ready(function () {
             $("#editContent").wysibb(myOpt);
+            viewElement.html(htmlCode);
         });
     </script>
 </body>
