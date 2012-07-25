@@ -43,28 +43,14 @@ wysibb.render = function (bbtext, element) {
     for(currowName in allBtn) {
         if (allBtn.hasOwnProperty(currowName)) {
             currow = options.allButtons[currowName];
-            bbToHTML = currow.bbToHTML;
-            if (!bbToHTML || bbToHTML.isEmpty()) {
-                $.log("Create bbtHTML");
-                bbToHTML = {};
-                var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
-                var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
-                bbToHTML[bbkey]=bbrepl;
-            }
+            if (!currow.type || currow.type !== "select") {
+                wysibb.helpers.checkBBtoHTML(currow);
+                bbToHTML = currow.bbToHTML;
+                html = wysibb.helpers.replaceBBtoHTML(html, bbToHTML);
+            } else {
 
-            for (var bbreg in bbToHTML) {
-
-                var repl = bbToHTML[bbreg];
-                bbreg = bbreg.replace(/\*\]/g,"\\*]")
-                    .replace(/\[/g,"\\[")
-                    .replace(/\]/g,"\\]")
-                    .replace(/\\\[\\\[/g,"[")
-                    .replace(/\\\]\\\]/g,"]");
-                var bregexp = new RegExp(bbreg,"gmi");
-                html = wysibb.helpers.bbReplace(html,bregexp,repl);
-                html = wysibb.helpers.removeBreaks(html);
-                //html = html.replace(bregexp,repl);
             }
+            html = wysibb.helpers.removeBreaks(html);
         }
         element.html(html);
     }

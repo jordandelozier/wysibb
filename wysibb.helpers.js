@@ -27,6 +27,35 @@ wysibb.helpers = {
         };
         return template.replace(/\{([\w\.]*)\}/g, innerFunc);
     },
+    checkBBtoHTML: function (obj) {
+        "use strict";
+        var bbkey, bbrepl, bbToHTML = obj.bbToHTML;
+        if (!bbToHTML || bbToHTML.isEmpty()) {
+            bbToHTML = {};
+            bbkey = obj.bbOpen + "(.*?)" + obj.bbClose;
+            bbrepl = obj.htmlOpen + "$1" + obj.htmlClose;
+            bbToHTML[bbkey] = bbrepl;
+            obj.bbToHTML = bbToHTML;
+        }
+    },
+    replaceBBtoHTML: function (html, bbToHTML) {
+        "use strict";
+        var rexExpPattern, regExp, element;
+        for (element in bbToHTML) {
+            if (bbToHTML.hasOwnProperty(element)) {
+                rexExpPattern = bbToHTML[element];
+                element = element.replace(/\*\]/g, "\\*]")
+                    .replace(/\[/g, "\\[")
+                    .replace(/\]/g, "\\]")
+                    .replace(/\\\[\\\[/g, "[")
+                    .replace(/\\\]\\\]/g, "]");
+                regExp = new RegExp(element, "gmi");
+                html = wysibb.helpers.bbReplace(html, regExp, rexExpPattern);
+                //html = html.replace(bregexp,repl);
+            }
+        }
+        return html;
+    },
     removeBreaks: function (text) {
         "use strict";
         var pattern,
