@@ -7,59 +7,56 @@
 
 var wysibb = wysibb || {};
 
-wysibb.render = function (bbtext, element) {
+wysibb.render = function (bbtext) {
     "use strict";
-    var currow, currowName, bbToHTML,
+    var currow, currowName, //bbToHTML,
         html = bbtext,
         options = wysibb.options,
-        smileLen = options.smileList.length,
-        allBtn = options.allButtons;
-
-    //check for skip body transform for bbcodes in skipBodyTransform
-    if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
-        for (var i=0; i<options.skipBodyTransform.length; i++) {
-            var trbb = options.skipBodyTransform[i];
-            var xp = new RegExp('(\\['+trbb+'[\\s\\S]*?\\])([\\s\\S]*?)(\\[\\/'+trbb+'\\])',"mgi");
-            html = html.replace(xp,function(l,pre,text,post) {
-                text = text.replace(/\[/g,"&#91;")
-                    .replace(/\]/g,"&#93;");
-                return pre+text+post;
-            });
+        smileLen = options.smileList.length, smile, smileBB, smileRegexp,
+        allBtn = options.allButtons,
+        selectArray, selectLen, selectName,
+        i, j,
+        applyBB = function (html, element) {
+            var bbToHTML;
+            if (element.bbOpen !== "" && element.bbClose !== "") {
+                wysibb.helpers.checkBBtoHTML(element);
+                bbToHTML = element.bbToHTML;
+                html = wysibb.helpers.replaceBBtoHTML(html, bbToHTML);
+            }
+            return html;
+        };
+    html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    for (i = 0; i < smileLen; i += 1) {
+        smile = options.smileList[i];
+        smile.img = wysibb.helpers.wbbStringFormat(smile.img, options);
+        smileBB = smile.bbcode;
+        if (smile && smile.img) {
+            smileBB = smileBB.replace(/([^a-z0-9])/gi, "\\$1");
+            smileRegexp = new RegExp(smileBB, "mg");
+            html = html.replace(smileRegexp, smile.img);
         }
     }
-    //check for smiles
-    html = html.replace(/\</g,"&lt;");
-    html = html.replace(/\>/g,"&gt;");
-    for (var i=0; i< smileLen; i++) {
-        var repl = options.smileList[i];
-        repl.img = wysibb.helpers.wbbStringFormat(repl.img, options);
-        var smbb = repl.bbcode;
-        if (repl && repl.img) {
-            smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
-            var bregexp = new RegExp(smbb,"mg");
-            html = html.replace(bregexp,repl.img);
-        }
-    }
-    for(currowName in allBtn) {
+    for (currowName in allBtn) {
         if (allBtn.hasOwnProperty(currowName)) {
             currow = options.allButtons[currowName];
             if (!currow.type || currow.type !== "select") {
-                wysibb.helpers.checkBBtoHTML(currow);
-                bbToHTML = currow.bbToHTML;
-                html = wysibb.helpers.replaceBBtoHTML(html, bbToHTML);
+                html = applyBB(html, currow);
             } else {
-
+                selectArray = currow.options.split(',');
+                selectLen = selectArray.length;
+                for (j = 0; j < selectLen; j += 1) {
+                    selectName = selectArray[j];
+                    currow = options.selectOptions[selectName];
+                    html = applyBB(html, currow);
+                }
             }
-            html = wysibb.helpers.removeBreaks(html);
         }
-        element.html(html);
     }
-
     //clear br's
-    var resobj = $("<div>"+html+"</div>");
-    resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
-        $(el).remove();
-    });
-
-    return resobj.html();
-}
+    //var resobj = $("<div>"+html+"</div>");
+    //resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
+    //$(el).remove();
+    //});
+    //return resobj.html();
+    return html;
+};

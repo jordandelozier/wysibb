@@ -7,6 +7,7 @@
 <body>
     <div style="width: 960px; height: 350px; margin: 20px auto; border: 1px #111;">
         <textarea id = "editContent"  style="min-height: 250px; height: auto; width: 100%; display: block;">
+            <strong>STRONG</strong>
             :)
             [size=200]Test text of BB editor[/size]
 
@@ -44,6 +45,7 @@
     </div>
     <div style="width: 960px; margin: 20px auto; border: 1px #111;">
         <div id = "viewContent">
+            <strong>STRONG</strong>
             :)
             [size=200]Test text of BB editor[/size]
 
@@ -95,12 +97,12 @@
                     themePrefix: 'themes'
                 },
                 viewElement = $("#viewContent"),
-                bbCode = viewElement.text(),
-                htmlCode = wysibb.render(bbCode, viewElement);
+                bbCode = viewElement.html(),
+                htmlCode = wysibb.render(bbCode);
 
         $(document).ready(function () {
             $("#editContent").wysibb(myOpt);
-            //viewElement.html(htmlCode);
+            viewElement.html(htmlCode);
         });
     </script>
 </body>

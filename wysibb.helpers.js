@@ -32,6 +32,7 @@ wysibb.helpers = {
         var bbkey, bbrepl, bbToHTML = obj.bbToHTML;
         if (!bbToHTML || bbToHTML.isEmpty()) {
             bbToHTML = {};
+            //bbkey = obj.bbOpen + "(.*?)" + obj.bbClose;
             bbkey = obj.bbOpen + "(.*?)" + obj.bbClose;
             bbrepl = obj.htmlOpen + "$1" + obj.htmlClose;
             bbToHTML[bbkey] = bbrepl;
@@ -49,6 +50,7 @@ wysibb.helpers = {
                     .replace(/\]/g, "\\]")
                     .replace(/\\\[\\\[/g, "[")
                     .replace(/\\\]\\\]/g, "]");
+                element = element.replace("(.*?)", "([\\s\\S]*?)");
                 regExp = new RegExp(element, "gmi");
                 html = wysibb.helpers.bbReplace(html, regExp, rexExpPattern);
                 //html = html.replace(bregexp,repl);

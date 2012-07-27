@@ -1166,68 +1166,7 @@ var wysibb = wysibb || {};
 			return outbb;
 		}
 		function transformBBtoHTML(bbtext) {
-			var html=bbtext;
-			
-			//check for skip body transform for bbcodes in skipBodyTransform
-			if (options.skipBodyTransform && options.skipBodyTransform.length>0) {
-				for (var i=0; i<options.skipBodyTransform.length; i++) {
-					var trbb = options.skipBodyTransform[i];
-					var xp = new RegExp('(\\['+trbb+'[\\s\\S]*?\\])([\\s\\S]*?)(\\[\\/'+trbb+'\\])',"mgi");
-					html = html.replace(xp,function(l,pre,text,post) {
-						text = text.replace(/\[/g,"&#91;")
-								.replace(/\]/g,"&#93;");
-						return pre+text+post;
-					});
-				}
-			}
-			
-			
-			
-			//check for smiles
-			html = html.replace(/\</g,"&lt;");
-			html = html.replace(/\>/g,"&gt;");
-			for (var i=0; i<options.smileList.length; i++) {
-				var repl = options.smileList[i];
-				var smbb = repl.bbcode;
-				if (repl && repl.img) {
-					smbb = smbb.replace(/([^a-z0-9])/gi,"\\$1");
-					var bregexp = new RegExp(smbb,"mg");
-					html = html.replace(bregexp,repl.img);
-				}
-			}
-			for (var i=0; i<enabledButtons.length; i++) {
-				var currow = options.allButtons[enabledButtons[i]];
-				var bbToHTML = currow.bbToHTML;
-
-				if (!bbToHTML) {
-					$.log("Create bbtHTML");
-					bbToHTML = {};
-					var bbkey = currow.bbOpen+"(.*?)"+currow.bbClose;
-					var bbrepl = currow.htmlOpen+"$1"+currow.htmlClose;
-					bbToHTML[bbkey]=bbrepl;
-				}
-
-				for (var bbreg in bbToHTML) {
-					
-					var repl = bbToHTML[bbreg];
-					bbreg = bbreg.replace(/\*\]/g,"\\*]")
-						.replace(/\[/g,"\\[")
-						.replace(/\]/g,"\\]")
-						.replace(/\\\[\\\[/g,"[")
-						.replace(/\\\]\\\]/g,"]");
-					var bregexp = new RegExp(bbreg,"gmi");
-					html = bbReplace(html,bregexp,repl);
-					//html = html.replace(bregexp,repl);
-				}
-			}
-			
-			//clear br's
-			var resobj = $("<div>"+html+"</div>");
-			resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
-				$(el).remove();
-			});
-			
-			return resobj.html();
+            return wysibb.render(bbtext);
 		}
 		function initSelection() {
 			this.getNode = function(withTextNodes) {
@@ -1513,12 +1452,6 @@ var wysibb = wysibb || {};
 			}
 			options.smileList = newSmileList;
 		}
-		function bbReplace(str,regexp,repl) {
-			while (str.match(regexp)) {
-				str=str.replace(regexp,repl);
-			}
-			return str;
-		}
 		function initFormSubmit() {
 			$.log("initFormSubmit");
 			$txtArea.parents("form").bind("submit",function() {
@@ -1736,7 +1669,7 @@ var wysibb = wysibb || {};
 				xhr.setRequestHeader("Cache-Control", "no-cache");						
 				xhr.setRequestHeader("Content-Length", file.size);
 				var body = "--" + boundary + "\r\n";
-				filename = unescape(encodeURIComponent(file.name));
+				var filename = unescape(encodeURIComponent(file.name));
 				body += "Content-Disposition: form-data; name='img'; filename='" + filename + "'\r\n";
 				body += "Content-Type: application/octet-stream\r\n\r\n";
 				body += (file.getAsBinary ? file.getAsBinary() : file.readAsBinary()) + "\r\n";
@@ -1759,7 +1692,9 @@ var wysibb = wysibb || {};
 			$.log(evt);
 		}
 		this.insertImgWithThumb = function(img,thumb) {
+            var bbcode;
 			$("#wbbModalWindow").hide();
+
 			if (bbmode) {
 				if (thumb && options.allButtons["img"].uploader.useThumb) {
 					bbcode = "[url="+img+"][img]"+thumb+"[/img][/url]";
@@ -1780,9 +1715,8 @@ var wysibb = wysibb || {};
 			updateToolbar();
 		}
 		init();
-		
 		function wbbStringFormat(template, data) {
-			return template.replace(/\{([\w\.]*)\}/g, function (str, key) {var keys = key.split("."), value = data[keys.shift()];$.each(keys, function () { value = value[this]; });return (value === null || value === undefined) ? "" : value;});
+			return wysibb.helpers.wbbStringFormat(template, data);
 		}
 		function showModalWindow(title,body) {
 			var $mw = $("#wbbModalWindow");

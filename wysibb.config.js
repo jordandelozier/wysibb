@@ -24,6 +24,10 @@ wysibb.options = {
     validTags:			["a","b","i","s","u","img","ul","ol","li","br","p","q","strike","blockquote","table","tr","td"],
     buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
     allButtons:			{
+        "wbbConvertation": {
+            htmlToBB: {'span.tab':"   %(this).html()%"},
+            bbToHTML: {'\n':'<br/>','\\s\\s\\s':'<span class="tab">\uFEFF\uFEFF</span>'}
+        },
         "bold":	{
             title:"Жирный",
             buttonHTML: '<span class="ve-tlb-bold"></span>',
@@ -288,10 +292,6 @@ wysibb.options = {
             tdwidth:	15,
             htmlToBB: {'td':'[td]%$(this).html()%[/td]','tr':'[tr]%$(this).html()%[/tr]','table':'[table]%$(this).html()%[/table]'},
             bbToHTML: {'[table](.*?)[/table]':'<table class="wbbtable" cellpadding="0" cellspacing="5">$1</table>','[tr](.*?)[/tr]':'<tr>$1</tr>','[td](.*?)[/td]':'<td>$1</td>'}
-        },
-        'wbbConvertation': {
-            htmlToBB: {'span.tab':"   %(this).html()%"},
-            bbToHTML: {'\n':'<br/>','\\s\\s\\s':'<span class="tab">\uFEFF</span>'}
         }
     },
     selectOptions: {
