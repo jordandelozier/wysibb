@@ -25,8 +25,8 @@ wysibb.options = {
     buttons:			"bold,italic,underline,strike,sup,sub,|,fontsizeselect,fontfamilyselect,fontcolor,|,justifyleft,justifycenter,justifyright,|,link,img,table,|,bullist,numlist,quote,offtopic,code,spoiler", //default active button list
     allButtons:			{
         "wbbConvertation": {
-            htmlToBB: {'span.tab':"   %(this).html()%"},
-            bbToHTML: {'\n':'<br/>','\\s\\s\\s':'<span class="tab">\uFEFF\uFEFF</span>'}
+            htmlToBB: {'span.tab': "%(this).html()%"},
+            bbToHTML: {'\n':'<br/>','\\s\\s\\s\\s':'<span class="tab">&nbsp;&nbsp;&nbsp;&nbsp;</span>'}
         },
         "bold":	{
             title:"Жирный",
@@ -35,7 +35,7 @@ wysibb.options = {
             bbName: "b",
             bbOpen: "[b]",
             bbClose: "[/b]",
-            htmlToBB: {'b':'[b]%$(this).html()%[/b]','strong':'[b]%$(this).html()%[/b]'},
+            htmlToBB: {'b': '[b]%$(this).html()%[/b]', 'strong': '[b]%$(this).html()%[/b]'},
             bbToHTML: {'[b](.*?)[/b]':'<b>$1</b>'}
         },
         "italic": {

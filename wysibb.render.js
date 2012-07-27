@@ -52,11 +52,13 @@ wysibb.render = function (bbtext) {
             }
         }
     }
+    //return html;
     //clear br's
-    //var resobj = $("<div>"+html+"</div>");
-    //resobj.find("ul > br,table > br, tr > br").each(function(idx,el) {
-    //$(el).remove();
-    //});
-    //return resobj.html();
-    return html;
+    html = $("<div>" + html + "</div>");
+    html.find("ul > br,table > br, tr > br").each(
+        function (idx, el) {
+            $(el).remove();
+        }
+    );
+    return html.html();
 };
