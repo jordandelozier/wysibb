@@ -11,7 +11,7 @@ ul,ol{padding:0 0 0 30px}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn:hover{border-radius:2px;border:1px solid #aaa;padding:1px 2px;box-shadow:0px 0px 3px #aaa;z-index:1;background:#fafafa;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn.on,.wysibb .wysibb-toolbar .wysibb-toolbar-btn:active{border:1px solid #aaa;padding:1px;box-shadow:inset 0px 0px 3px #aaa;border-radius:2px;background:#ddd;z-index:10;padding:1px 2px;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-btn.off,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-btn.off:active{cursor:default;opacity:0.3;border:0;padding:2px 3px;box-shadow:none}
-.wysibb .wysibb-toolbar .wysibb-toolbar-vert{display:inline-block;*display:inline;zoom: 1;/* margin-top:8px; */width:21px;height:27px;background:url(//www.wysibb.com/static/theme/default/img/vert.png) 0 0 no-repeat;}
+.wysibb .wysibb-toolbar .wysibb-toolbar-vert{display:inline-block;*display:inline;zoom: 1;/* margin-top:8px; */width:21px;height:27px;background:url(./img/vert.png) 0 0 no-repeat;}
 .wysibb-toolbar-linebreak{}
 .ve-tlb-bold{background:url(./img/icons.png) 0 0 no-repeat;width:20px;}
 .ve-tlb-italic{background:url(./img/icons.png) 0 -40px no-repeat;width:20px;}
