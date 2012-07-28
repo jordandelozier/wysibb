@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<project name="Javascript compress project" basedir="." default="WysiBB">
+
+    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask"
+             classpath="tools/compiler/compiler.jar"/>
+
+    <target name="WysiBB">
+        <jscomp compilationLevel="simple" warning="quiet"
+                debug="false" output="jquery.wysibb.min.js">
+            <sources dir="${basedir}">
+                <file name="wysibb.helpers.js"/>
+                <file name="wysibb.render.js"/>
+                <file name="jquery.wysibb.js"/>
+            </sources>
+        </jscomp>
+    </target>
+
+    <target name="WysiBBRender">
+        <jscomp compilationLevel="simple" warning="quiet"
+                debug="false" output="jquery.wysibb.render.min.js">
+            <sources dir="${basedir}">
+                <file name="wysibb.helpers.js"/>
+                <file name="wysibb.render.js"/>
+            </sources>
+        </jscomp>
+    </target>
+</project>

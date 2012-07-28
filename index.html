@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>WysiBB example</title>
+</head>
+<body>
+    <div style="width: 960px; height: 350px; margin: 20px auto; border: 1px #111;">
+        <textarea id = "editContent"  style="min-height: 250px; height: auto; width: 100%; display: block;">
+            <strong>STRONG</strong>
+            :)
+            [size=200]Test text of BB editor[/size]
+
+            [size=100][b]Lorem ipsum dolor sit amet[/b], - BOLD
+            [font=comic sans ms,cursive]consectetur adipiscing elit. Quisque malesuada turpis nunc, eget posuere nibh. Aliquam non libero - Comick[/font]
+            [i]elit, eget semper orci. Morbi[/i] - ITALIC
+            [font=courier new,courier,monospace]semper imperdiet lorem non posuere. - Courier[/font]
+            [font=georgia,serif]Aenean consequat, tellus sit amet rhoncus cursus, dolor nibh  - Georgia[/font]
+            [u]pharetra ante, at laoreet[/u] - UNDERLINE
+            [color=#ff0000]mi tellus varius elit.[/color] - RED
+            [color=#00ff00]In consectetur lobortis est,[/color] - GREEN 
+            [color=#0000ff]id ultrices lorem cursus quis.[/color] - BLUE
+
+            LEFT:
+            [left]Maecenas lobortis elementum laoreet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec suscipit metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.﻿[/left]
+            RIGHT:
+            [right]Ut ut lorem justo, nec imperdiet tortor. Pellentesque elementum metus eget enim sagittis pellentesque. Praesent vel felis non nulla volutpat molestie vel feugiat mauris.﻿[/right][/size]CENTER:
+            [center]Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In hac habitasse platea dictumst. Aliquam at lacus purus, eu vestibulum mi. Sed eu arcu non nulla rhoncus adipiscing.﻿[/center]
+            [url=https://www.google.com/]Praesent enim nibh,[/url] - LINK
+            [img]https://www.google.com/logos/2012/earhart12-hp.jpg[/img] - IMAGE
+
+            TABLE
+            [table][tr][td]﻿bibendum vel tempus eget, pharetra porttitor odio.[/td][td]Donec nec purus est,
+            Donec nec purus est, ﻿[/td][td]﻿Donec scelerisque porta enim. Ut vulputate, elit eget sodales volutpat, lectus urna ultricies tortor, vitae suscipit leo eros et nibh.[/td][/tr][/table]
+            QUOTE:
+            [quote]bibendum vel tempus eget, pharetra porttitor odio. Donec nec purus est, sit amet eleifend ipsum. Donec scelerisque porta enim. Ut vulputate, elit eget sodales volutpat, lectus urna ultricies tortor, vitae suscipit leo eros et nibh. Donec tortor odio, porta pulvinar tristique sit amet, cursus eu erat.[/quote][size=100]
+            [offtop]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/offtop]
+            [/size]
+            [size=100][code]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/code][/size][spoiler][size=100]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/size]
+            [/spoiler][size=150]
+            Test list:
+            [/size][size=100]
+            [list=1][*]Lorem ipsum dolor sit amet, consectetur adipiscing elit.[*]Etiam sit amet magna enim, nec accumsan nisi.[*]Etiam placerat pretium lacus, quis porta lorem scelerisque nec.[*]Sed in est sed metus suscipit mattis id aliquet diam.[/list][list][*]Sed a dolor tincidunt mi adipiscing vestibulum vel eu enim.[*]Integer accumsan laoreet tellus, sit amet gravida erat rhoncus ut.[*]Aliquam tempor feugiat purus, eu vulputate justo molestie ut.[*]Ut ac massa non nisl commodo adipiscing vitae in risus.[/list][/size]
+        </textarea>
+    </div>
+    <div style="width: 960px; margin: 20px auto; border: 1px #111;">
+        <div id = "viewContent">
+            <strong>STRONG</strong>
+            :)
+            [size=200]Test text of BB editor[/size]
+
+            [size=100][b]Lorem ipsum dolor sit amet[/b], - BOLD
+            [font=comic sans ms,cursive]consectetur adipiscing elit. Quisque malesuada turpis nunc, eget posuere nibh. Aliquam non libero - Comick[/font]
+            [i]elit, eget semper orci. Morbi[/i] - ITALIC
+            [font=courier new,courier,monospace]semper imperdiet lorem non posuere. - Courier[/font]
+            [font=georgia,serif]Aenean consequat, tellus sit amet rhoncus cursus, dolor nibh  - Georgia[/font]
+            [u]pharetra ante, at laoreet[/u] - UNDERLINE
+            [color=#ff0000]mi tellus varius elit.[/color] - RED
+            [color=#00ff00]In consectetur lobortis est,[/color] - GREEN 
+            [color=#0000ff]id ultrices lorem cursus quis.[/color] - BLUE
+
+            LEFT:
+            [left]Maecenas lobortis elementum laoreet. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nec suscipit metus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.﻿[/left]
+            RIGHT:
+            [right]Ut ut lorem justo, nec imperdiet tortor. Pellentesque elementum metus eget enim sagittis pellentesque. Praesent vel felis non nulla volutpat molestie vel feugiat mauris.﻿[/right][/size]CENTER:
+            [center]Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In hac habitasse platea dictumst. Aliquam at lacus purus, eu vestibulum mi. Sed eu arcu non nulla rhoncus adipiscing.﻿[/center]
+            [url=https://www.google.com/]Praesent enim nibh,[/url] - LINK
+            [img]https://www.google.com/logos/2012/earhart12-hp.jpg[/img] - IMAGE
+
+            TABLE
+            [table][tr][td]﻿bibendum vel tempus eget, pharetra porttitor odio.[/td][td]Donec nec purus est,
+            Donec nec purus est, ﻿[/td][td]﻿Donec scelerisque porta enim. Ut vulputate, elit eget sodales volutpat, lectus urna ultricies tortor, vitae suscipit leo eros et nibh.[/td][/tr][/table]
+            QUOTE:
+            [quote]bibendum vel tempus eget, pharetra porttitor odio. Donec nec purus est, sit amet eleifend ipsum. Donec scelerisque porta enim. Ut vulputate, elit eget sodales volutpat, lectus urna ultricies tortor, vitae suscipit leo eros et nibh. Donec tortor odio, porta pulvinar tristique sit amet, cursus eu erat.[/quote][size=100]
+            [offtop]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/offtop]
+            [/size]
+            [size=100][code]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/code][/size][spoiler][size=100]Proin fermentum accumsan eleifend. Mauris tempus mi sed eros mattis pellentesque id at lectus. Donec sem massa, rhoncus non molestie vel, faucibus ut lorem. Cras tortor lacus, sollicitudin in porta vitae, accumsan vel justo. Aliquam magna neque, rhoncus in lacinia a, feugiat sed justo. Vestibulum porttitor tellus diam. Sed euismod suscipit magna.[/size]
+            [/spoiler][size=150]
+            Test list:
+            [/size][size=100]
+            [list=1][*]Lorem ipsum dolor sit amet, consectetur adipiscing elit.[*]Etiam sit amet magna enim, nec accumsan nisi.[*]Etiam placerat pretium lacus, quis porta lorem scelerisque nec.[*]Sed in est sed metus suscipit mattis id aliquet diam.[/list][list][*]Sed a dolor tincidunt mi adipiscing vestibulum vel eu enim.[*]Integer accumsan laoreet tellus, sit amet gravida erat rhoncus ut.[*]Aliquam tempor feugiat purus, eu vulputate justo molestie ut.[*]Ut ac massa non nisl commodo adipiscing vitae in risus.[/list][/size]
+        </div>
+    </div>
+    <script src="http://yandex.st/jquery/1.7.2/jquery.js" type="text/javascript"></script>
+    <script src="wysibb.config.js" type="text/javascript"></script>
+    <script src="wysibb.presets.js" type="text/javascript"></script>
+    <script src="wysibb.helpers.js" type="text/javascript"></script>
+    <script src="wysibb.render.js" type="text/javascript"></script>
+    <script src="jquery.wysibb.js" type="text/javascript"></script>
+    <script>
+        var myOpt = {
+                    debug: false,
+                    watchTxtArea: false,
+                    autoResize: false,
+                    smileAutoDetect: false,
+                    themeName: 'default',
+                    themePrefix: 'themes'
+                },
+                viewElement = $("#viewContent"),
+                bbCode = viewElement.html(),
+                htmlCode = wysibb.render(bbCode);
+
+        $(document).ready(function () {
+            $("#editContent").wysibb(myOpt);
+            viewElement.html(htmlCode);
+        });
+    </script>
+</body>
+</html>
