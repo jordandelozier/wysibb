@@ -30,9 +30,8 @@ wysibb.helpers = {
     checkBBtoHTML: function (obj) {
         "use strict";
         var bbkey, bbrepl, bbToHTML = obj.bbToHTML;
-        if (!bbToHTML || bbToHTML.isEmpty()) {
+        if (!bbToHTML || this.isEmpty(bbToHTML)) {
             bbToHTML = {};
-            //bbkey = obj.bbOpen + "(.*?)" + obj.bbClose;
             bbkey = obj.bbOpen + "(.*?)" + obj.bbClose;
             bbrepl = obj.htmlOpen + "$1" + obj.htmlClose;
             bbToHTML[bbkey] = bbrepl;
@@ -53,7 +52,6 @@ wysibb.helpers = {
                 element = element.replace("(.*?)", "([\\s\\S]*?)");
                 regExp = new RegExp(element, "gmi");
                 html = wysibb.helpers.bbReplace(html, regExp, rexExpPattern);
-                //html = html.replace(bregexp,repl);
             }
         }
         return html;
@@ -69,16 +67,15 @@ wysibb.helpers = {
         pattern = /\s+/g;
         result = result.replace(pattern, " ");
         return result;
-    }
-};
-
-Object.prototype.isEmpty = function () {
-    "use strict";
-    var key, map = this;
-    for (key in map) {
-        if (map.hasOwnProperty(key)) {
-            return false;
+    },
+    isEmpty: function (obj) {
+        "use strict";
+        var key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
 };
