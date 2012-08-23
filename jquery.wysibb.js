@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.0.0 - 2012-08-21
+/*! WysiBB - WYSIWYG BBCode editor - v1.0.0 - 2012-08-23
 * http://www.wysibb.com
 * Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -93,6 +93,7 @@ var CURLANG = {
 			themeName:			"default",
 			bodyClass:			"",
 			lang:				"ru",
+			tabInsert:			true,
 //			toolbar:			false,
 			//img upload config 
 			imgupload:			true,
@@ -100,7 +101,7 @@ var CURLANG = {
 			img_maxwidth:		800,
 			img_maxheight:		800,
 			//END img upload config 
-			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table,video",
+			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table",
 			allButtons: {
 				bold : {
 					title: CURLANG.bold,
@@ -293,7 +294,7 @@ var CURLANG = {
 						'<font face="{FONT}">{SELTEXT}</font>':'[font={FONT}]{SELTEXT}[/font]'
 					}
 				},
-				smilebox: { // !!!!!
+				smilebox: {
 					type: 'smilebox',
 					title: CURLANG.smilebox,
 					buttonHTML: '<span class="ve-tlb-smilebox"></span>'
@@ -334,9 +335,8 @@ var CURLANG = {
 							}
 						],
 						onSubmit: function(cmd,opt,queryState) {
-							$.log("Submit");
 							var url = this.$modal.find('input[name="SRC"]').val();
-							var a = url.match(/^http:\/\/www\.youtube\.com\/watch\?v=([a-z0-9]+)/i);
+							var a = url.match(/^http:\/\/www\.youtube\.com\/watch\?v=([a-z0-9_]+)/i);
 							if (a && a.length==2) {
 								var code = a[1];
 								this.insertAtCursor(this.getCodeByCommand(cmd,{src:code}));
@@ -346,7 +346,7 @@ var CURLANG = {
 						}
 					},
 					transform: {
-						'<iframe src="http://www.youtube.com/embed/{SRC}" width="640" height="480" frameborder="0"></iframe>':'[video]http://www.youtube.com/embed/{SRC}[/video]'
+						'<iframe src="http://www.youtube.com/embed/{SRC}" width="640" height="480" frameborder="0"></iframe>':'[video]{SRC}[/video]'
 					}
 				},
 				
@@ -398,7 +398,8 @@ var CURLANG = {
 				}
 			},
 			systr: {
-				'<br/>':"\n"
+				'<br/>':"\n",
+				'<span class="wbbtab"></span>': '   '
 			},
 			customRules: {
 				td: [["[td]{SELTEXT}[/td]",{seltext: {rgx:false,attr:false,sel:false}}]],
@@ -432,15 +433,6 @@ var CURLANG = {
 			},this));
 		}
 		
-		
-		if (settings && settings.allButtons) {
-			$.each(settings.allButtons,$.proxy(function(k,v) {
-				if (v.transform && this.options.allButtons[k]) {
-					delete this.options.allButtons[k].transform;
-				}
-			},this));
-		}
-		$.extend(true,this.options,settings);
 		//check for preset
 		if (typeof(WBBPRESET)!="undefined") {
 			if (WBBPRESET.allButtons) {
@@ -453,6 +445,16 @@ var CURLANG = {
 			}
 			$.extend(true,this.options,WBBPRESET);
 		} 
+		
+		if (settings && settings.allButtons) {
+			$.each(settings.allButtons,$.proxy(function(k,v) {
+				if (v.transform && this.options.allButtons[k]) {
+					delete this.options.allButtons[k].transform;
+				}
+			},this));
+		}
+		$.extend(true,this.options,settings);
+		
 		
 		this.init();
 	}
@@ -640,11 +642,12 @@ var CURLANG = {
 			$.each(o.systr,$.proxy(function(html,bb) {
 				if (!html.match(/\{\S+?\}/)) {
 					//without params
-					var rs = this.elFromString(html,document).tagName.toLowerCase();
+					var rs = this.filterByNode(this.elFromString(html,document));
 					o.rules[rs]=[];
 					o.rules[rs].push([bb,{}]);
 				}
 			},this));
+			//this.options.btnlist.push("_systr");
 			
 			//smile rules
 			o.srules={};
@@ -729,7 +732,7 @@ var CURLANG = {
 							this.lastRange=this.getRange();
 							$tmpel.attr('contenteditable', 'true').attr('class', 'paste').appendTo(this.body).focus();
 							setTimeout($.proxy(function() {
-								this.clearPaste(e.currentTarget);
+								this.clearPaste($tmpel);
 								var html = $tmpel.html();
 								$tmpel.remove();
 								this.$body.attr("contentEditable","true");
@@ -747,11 +750,23 @@ var CURLANG = {
 							if (!isLi) {
 								e.preventDefault();
 								this.checkForLastBR(this.getSelectNode());
-								$.log(this.body.outerHTML); 
 								this.insertAtCursor('<br/>',false);
 							}
 						}
 					},this));
+					
+					//tabInsert
+					if (this.options.tabInsert===true) {
+						//tab insert
+						this.$body.bind('keydown', $.proxy(function(e) {
+							if (e.which == 9) {
+								//insert tab
+								if (e.preventDefault) {e.preventDefault();}
+								this.insertAtCursor('<span class="wbbtab">\uFEFF</span>',false);
+							}
+						},this));
+					}
+					
 					
 					
 					//add event listeners
@@ -943,7 +958,8 @@ var CURLANG = {
 				$btn.find(".option").each($.proxy(function(i,el){
 					var $el = $(el);
 					var r = this.queryState($el.attr("oid"),true);
-					if (r==$el.attr("cmdvalue")) {
+					var cmdvalue = $el.attr("cmdvalue");
+					if ((cmdvalue && r==$el.attr("cmdvalue")) || (!cmdvalue && r)) {
 						$sval.text($el.text());
 						$el.addClass("selected");
 						return false;
@@ -995,7 +1011,7 @@ var CURLANG = {
 				}
 			},this));
 			
-			$(document).bind("keyup",$.proxy(this.escModal,this)); //ESC key close modal
+			$(document).bind("keydown",$.proxy(this.escModal,this)); //ESC key close modal
 			if (this.options.onlyBBmode!==true) {
 				$(this.doc).bind("keyup",$.proxy(this.escModal,this)); //ESC key close modal
 			}
@@ -1198,7 +1214,7 @@ var CURLANG = {
 			}
 		},
 		execNativeCommand: function(cmd,param) { 
-			$.log("execNativeCommand: '"+cmd+"' : "+param);
+			//$.log("execNativeCommand: '"+cmd+"' : "+param); 
 			this.body.focus(); //set focus to frame body
 			if (cmd=="insertHTML" && !window.getSelection) { //IE does't support insertHTML
 				var r = (this.lastRange) ? this.lastRange:this.doc.selection.createRange(); //IE 7,8 range lost fix
@@ -1497,7 +1513,12 @@ var CURLANG = {
 		},
 		toBB: function(data) {
 			if (!data) {return "";};
+			
+			//.replace(/\[/g,"&#91;").replace(/\]/g,"&#93;")
 			var $e = (typeof(data)=="string") ? $('<span>').html(data):$(data);
+			
+			$e.find('div br:last-child').remove();
+			
 			var outbb="";
 			
 			//transform smiles
@@ -1507,10 +1528,11 @@ var CURLANG = {
 
 			$e.contents().each($.proxy(function(i,el) {
 				var $el = $(el);
+				$.log($el);
 				if (el.nodeType===3) {
-					outbb+=el.data.replace(/\n+/,"");
-				}else if (el.tagName=="BR") {
-					outbb+="\n";
+					outbb+=el.data.replace(/\n+/,"").replace(/\t/g,"   ");
+				/* }else if (el.tagName=="1BR") {
+					outbb+="\n"; */
 				}else{
 					//process html tag
 					var rpl,processed=false;
@@ -1529,7 +1551,7 @@ var CURLANG = {
 									var $cel = (c.sel) ? $(el).find(c.sel):$(el);
 									if (c.attr && !$cel.attr(c.attr)) {skip=true;return s;} //skip if needed attribute not present, maybe other bbcode
 									var cont = (c.attr) ? $cel.attr(c.attr):$cel.html();
-									if (typeof(cont)=="undefined") {skip=true;return s;}
+									if (typeof(cont)=="undefined" || cont==null) {skip=true;return s;}
 									var regexp = c.rgx;
 									
 									//style fix
@@ -1537,7 +1559,6 @@ var CURLANG = {
 										regexp+=";";
 									}
 									if (c.attr=="style" && cont && cont.substr(cont.length-1,1)!=";") {cont+=";"}
-									$.log("CONT: "+cont);
 									//prepare regexp
 									var rgx = (regexp) ? new RegExp(regexp,""):false;
 									if (rgx) {
@@ -1582,7 +1603,7 @@ var CURLANG = {
 								if (skip) {continue;}
 								if ($el.is("img,br,hr")) {
 									//replace element
-									$el = $("<span>").html(bbcode);
+									outbb+=bbcode;
 									break;
 								}else{
 									if (keepElement) {
@@ -1612,11 +1633,12 @@ var CURLANG = {
 		getHTML: function(bbdata,init) {
 			if (!this.options.bbmode && !init) {return this.$body.html()}
 			
-			bbdata = bbdata.replace(/</g,"&lt;");
+			bbdata = bbdata.replace(/</g,"&lt;").replace(/\{/g,"&#123;").replace(/\}/g,"&#125;");
+			bbdata = bbdata.replace(/\[code\](.*?)\[\/code\]/g,function(s) {
+				s = s.substr("[code]".length,s.length-"[code]".length-"[/code]".length).replace(/\[/g,"&#91;").replace(/\]/g,"&#93;");
+				return "[code]"+s+"[/code]";
+			});
 			//transform smiles
-			/* $.each(this.options.srules,$.proxy(function(s,bb) {
-				bbdata = bbdata.replace(new RegExp(this.prepareRGX(bb[0]),"g"),this.strf(bb[1],this.options));
-			},this)); */
 			$.each(this.options.smileList,$.proxy(function(i,row) {
 				bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),this.strf(row.img,this.options));
 			},this));
@@ -1624,47 +1646,42 @@ var CURLANG = {
 			$.each(this.options.btnlist,$.proxy(function(i,b){
 				if (b!="|" && b!="-") {
 					var find=true;
-						if (!this.options.allButtons[b] || !this.options.allButtons[b].transform) {
-							return true;
-						}
-						$.each(this.options.allButtons[b].transform,$.proxy(function(html,bb) {
-							html = html.replace(/\n/g,""); //IE 7,8 FIX
-							var a=[];
-							bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1")
-								.replace(" ","\\s+");
-							bb = bb.replace(/\{\S+?\}/gi,function(s) {
-								s=s.substr(1,s.length-2);
-								a.push(s);
-								return "([\\s\\S]*?)";
-							});
-							var n=0,am;
-							//var rgx = new RegExp(bb,"mgi");
-							while ((am = (new RegExp(bb,"mgi")).exec(bbdata)) != null) {
-								if (am) {
-									var r={};
-									$.each(a,$.proxy(function(i,k) {
-										r[k]=am[i+1];
-									},this));
-									var nhtml = html;
-									nhtml = this.strf(nhtml,r);
-									bbdata = bbdata.replace(am[0],nhtml);
-								}
+					if (!this.options.allButtons[b] || !this.options.allButtons[b].transform) {
+						return true;
+					}
+					$.each(this.options.allButtons[b].transform,$.proxy(function(html,bb) {
+						html = html.replace(/\n/g,""); //IE 7,8 FIX
+						var a=[];
+						bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1")
+							.replace(/\s/g,"\\s");
+						bb = bb.replace(/\{\S+?\}/gi,function(s) {
+							s=s.substr(1,s.length-2);
+							a.push(s);
+							return "([\\s\\S]*?)";
+						});
+						var n=0,am;
+						while ((am = (new RegExp(bb,"mgi")).exec(bbdata)) != null) {
+							if (am) {
+								var r={};
+								$.each(a,$.proxy(function(i,k) {
+									r[k]=am[i+1];
+								},this));
+								var nhtml = html;
+								nhtml = this.strf(nhtml,r);
+								bbdata = bbdata.replace(am[0],nhtml);
 							}
-						},this));
+						}
+					},this));
 				}
 			},this));
 			
-			//$.log("BEFORE BBDATA: "+bbdata);
-			//bbdata = bbdata.replace(/\n+/g,""); //IE 7,8 FIX
 			//transform system codes
 			$.each(this.options.systr,function(html,bb) {
 				bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1")
-					.replace(" ","\\s+");
+					.replace(" ","\\s");
 				bbdata = bbdata.replace(new RegExp(bb,"g"),html);
 			});
 			
-			
-			//$.log("BBDATA: "+bbdata);
 			return bbdata;
 		},
 		//UTILS
@@ -1799,7 +1816,7 @@ var CURLANG = {
 					//clear empty only for span,font
 					return false;
 				}
-				if ($.trim($(this).html()).length==0) {
+				if (!$(this).hasClass("wbbtab") && $.trim($(this).html()).length==0) {
 					return true;
 				}else if ($(this).children().size()>0) {
 					$(this).children().filter(emptyFilter).remove();
@@ -1875,17 +1892,24 @@ var CURLANG = {
 			$.each(this.options.rules,$.proxy(function(s,bb) {
 				$block.find(s).attr("wbbkeep",1);
 			},this));
-			
 			//replace div and p without last br to html()+br
-			$block.find("*[wbbkeep!='1']").each(function() {
-				var $this = $(this);
-				if ($this.is('div,p') && ($this.children()==0 || this.lastChild.tagName!="BR")) {
+			$block.find("*[wbbkeep!='1']").each($.proxy(function(i,el) {
+				var $this = $(el);
+				if ($this.is('div,p') && ($this.children()==0 || el.lastChild.tagName!="BR")) {
 					$this.after("<br/>").after($this.contents()).remove();
 				}else{
-					$this.after($this.contents()).remove();
+					$this.after($this.html()).remove();
 				}
-			});
-			$block.find("*[wbbkeep='1']").removeAttr("wbbkeep").removeAttr("style");
+			},this));
+			$block.find("*[wbbkeep]").removeAttr("wbbkeep").removeAttr("style");
+			/* $block.contents().filter(function(i,el) {return el.nodeType===3}).each(function() {
+				//$.log(this); 
+				if (this.data.match(/\t/)) {
+					//$.log("repl");
+					this.data = this.data.replace(/\t/g,"   ");
+				}
+			}); */
+			//$.log($block);
 		},
 		sortArray: function(ar,asc) {
 			ar.sort(function(a,b) {
@@ -2002,6 +2026,7 @@ var CURLANG = {
 			this.$modal.show();
 			//if (window.getSelection) 
 			$wbbm.css("margin-top",($(window).height()-$wbbm.outerHeight())/3+"px");
+			setTimeout($.proxy(function() {this.$modal.find("input:visible")[0].focus()},this),10);
 		},
 		escModal: function(e) {
 			if (e.which==27) {this.closeModal();}
@@ -2041,13 +2066,15 @@ var CURLANG = {
 					}else{
 						value=$(src).html();
 					}
-					if (v.rgx!==false) {
-						var m = value.match(new RegExp(v.rgx));
-						if (m && m.length==2) {
-							value = m[1];
+					if (value) {
+						if (v.rgx!==false) {
+							var m = value.match(new RegExp(v.rgx));
+							if (m && m.length==2) {
+								value = m[1];
+							}
 						}
+						params[k]=value.replace(/"/g,"'");
 					}
-					params[k]=value.replace(/"/g,"'");
 				},this))
 			}
 			return params;

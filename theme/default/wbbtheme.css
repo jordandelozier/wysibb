@@ -125,6 +125,7 @@ ul,ol{padding:0 0 0 30px}
 .ve-tlb-colorpick{background: url(./img/icons.png) 5px -436px;width:24px;height:24px;}
 .ve-tlb-table{background: url(./img/icons.png) 0 -460px;width:20px;}
 .ve-tlb-smilebox{background: url(./img/icons.png) 0 -480px;width:20px;}
+.ve-tlb-video{background: url(./img/icons.png) 0 -500px;width:20px;}
 
 
 /* END TOOLBAR */
@@ -132,7 +133,7 @@ ul,ol{padding:0 0 0 30px}
 /* CONTENT */
 .wysibb-text{margin:5px;}
 .wysibb-text .wysibb-text-iframe{max-width:100%;width:100%;margin:0;}
-.wysibb-body{text-align:left;min-width:0 !important;}
+.wysibb-body{text-align:left;min-width:0 !important;overflow:auto !important}
 /* END CONTENT */
 
 /* DEFAULT STYLES */
@@ -160,7 +161,9 @@ ul,ol{padding:0 0 0 30px}
 .quote blockquote{
   margin:0;
 }
-
+.wbbtab{
+  margin-left:30px;
+}
 /* END DEFAULT STYLES */
 
 /* DROPDOWN */
