@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="modx.prosilver.en.xsl"?>
+<!--NOTICE: Please open this file in your web browser. If presented with a security warning, you may safely tell it to allow the blocked content.-->
+<!--For security purposes, please check: http://www.phpbb.com/mods/ for the latest version of this MOD.\nAlthough MODs are checked before being allowed in the MODs Database there is no guarantee that there are no security problems within the MOD.\nNo support will be given for MODs not found within the MODs Database which can be found at http://www.phpbb.com/mods/-->
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.5.xsd">
+	<header>
+		<meta name="generator" content="MODX file generated with PP MODX Creator by tumba25 (online version)"/>
+		<license><![CDATA[http://opensource.org/licenses/gpl-license.php GNU General Public License v2]]></license>
+		<title lang="en"><![CDATA[WysiBB]]></title>
+		<description lang="en"><![CDATA[WYSIWYG BBcode editor]]></description>
+		<author-group>
+			<author>
+				<realname><![CDATA[Vadim Dobroskok]]></realname>
+				<username><![CDATA[wbb]]></username>
+				<homepage><![CDATA[http://www.wysibb.com]]></homepage>
+				<email><![CDATA[support@wysibb.com]]></email>
+			</author>
+		</author-group>
+		<mod-version>1.0.0</mod-version>
+		<installation>
+			<level>easy</level>
+			<time>60</time>
+			<target-version>3.0.11</target-version>
+		</installation>
+	</header>
+	<action-group>
+		<copy>
+			<file from="root/install_wysibb.php" to="install_wysibb.php"/>
+			<file from="root/umil/" to="umil/"/>
+			<file from="root/adm/style/acp_wysibb.html" to="adm/style/acp_wysibb.html"/>
+			<file from="root/language/en/mods/wysibb.php" to="language/en/mods/wysibb.php"/>
+			<file from="root/includes/acp/acp_wysibb.php" to="includes/acp/acp_wysibb.php"/>
+			<file from="root/includes/acp/info/acp_wysibb.php" to="includes/acp/info/acp_wysibb.php"/>
+		</copy>
+		<open src="includes/functions.php">
+			<edit>
+				<find><![CDATA[function phpbb_user_session_handler()
+{
+	global $phpbb_hook;
+
+	if (!empty($phpbb_hook) && $phpbb_hook->call_hook(__FUNCTION__))
+	{
+		if ($phpbb_hook->hook_return(__FUNCTION__))
+		{
+			return $phpbb_hook->hook_return_result(__FUNCTION__);
+		}
+	}
+
+	return;
+}]]></find>
+				<action type="after-add"><![CDATA[/* WYSIBB */
+function wysibb_load() {	
+	global $config,$user;
+	if ($config['wysibb_enable']) {
+		$wbbload="";
+		if ($config['wysibb_exjquery']) {
+			$wbbload .= '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>';
+		}
+		$wbbload .= '<script src="'.($config['wysibb_prefix']).'/jquery.wysibb.min.js"></script>';
+		$wbbload .= '<script src="'.($config['wysibb_prefix']).'/preset/phpbb3.js"></script>';
+		if ($user->data['user_lang']!="ru") {
+			$wbbload .= '<script src="'.($config['wysibb_prefix']).'/lang/en.js"></script>';
+			$wbbload .= '<script src="'.($config['wysibb_prefix']).'/lang/'.$user->data['user_lang'].'.js"></script>';
+		}
+		$wbbload .= '<link rel="stylesheet" type="text/css" href="'.($config['wysibb_prefix_theme']).'/wbbtheme.css">';
+		
+		return $wbbload;
+	}
+	return '';
+}
+function wysibb_init() {
+	global $config,$user,$db;
+	if ($config['wysibb_enable']) {
+		
+		$custom_bbcodes="";
+		$custom_buttons="";
+		
+		$sql = 'SELECT *
+			FROM ' . BBCODES_TABLE . '
+			WHERE display_on_posting = 1
+			ORDER BY bbcode_tag';
+			
+		$result = $db->sql_query($sql);
+
+		while ($row = $db->sql_fetchrow($result)) {
+			$trhtml = $row['bbcode_tpl'];
+			$trbb = $row['bbcode_match'];
+			preg_match('/\<iframe/i',$trhtml,$ifrmatch);
+			if (sizeof($ifrmatch)==0) {
+				// skip iframes, it is need to be configured in preset/phpbb3.js
+				if (strlen($custom_bbcodes)>0) {
+					$custom_bbcodes.=",";
+				}
+				preg_match('/\{\S+\}/',$trhtml,$hmatches);
+				
+				$trhtml = str_replace("\n","",$trhtml);
+				$trhtml = preg_replace("/display:\s*none/","",$trhtml);
+				$trhtml = preg_replace("/\son[a-z]+=\".*?\"/","",$trhtml);
+
+				if (sizeof($hmatches)==1) {
+					$trhtml = str_replace($hmatches[0],"{SELTEXT}",$trhtml);
+					$trbb = str_replace($hmatches[0],"{SELTEXT}",$trbb);
+				}
+				
+				$custom_bbcodes.="\n".$row['bbcode_tag'].': {
+					title: "'.$row['bbcode_helpline'].'",
+					buttonText: "'.$row['bbcode_tag'].'",
+					transform: {
+						\''.$trhtml.'\':\''.$trbb.'\'
+					}
+				}';
+				if (strlen($custom_buttons)>0) {
+					$custom_buttons.=",";
+				}
+				$custom_buttons.=$row['bbcode_tag'];
+			}
+		}
+		$db->sql_freeresult($result);
+	
+		if (strlen($custom_buttons)>0) {
+			$custom_buttons = ",|,".$custom_buttons;
+		}
+		$wbbopt="var wbbsetting={
+			buttons: 'bold,italic,underline,|,quote,code,bullist,numlist,|,img,link,smilebox,fontsize,fontcolor$custom_buttons',
+			allButtons: {
+				$custom_bbcodes
+			},
+			";
+			if ($user->data['user_lang']!="ru") {$wbbopt.="lang: '".$user->data['user_lang']."',\ndeflang: 'en',\n";}
+			$wbbopt.="imgupload: ".(($config['wysibb_iupload']==1) ? "true":"false").",
+			img_uploadurl: '".$config['wysibb_iupload_url']."',
+			img_maxwidth: '".$config['wysibb_iupload_maxwidth']."',
+			img_maxheight: '".$config['wysibb_iupload_maxheight']."'
+		}";
+		
+		return '<a href="http://www.wysibb.com" target="_blank">WysiBB</a><script>'.$wbbopt.';$("textarea").wysibb(wbbsetting);</script>';
+	}
+	return '';
+}
+/* END WYSIBB */]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA['TRANSLATION_INFO'		=> (!empty($user->lang['TRANSLATION_INFO'])) ? $user->lang['TRANSLATION_INFO'] : '',]]></find>
+				<action type="after-add"><![CDATA['WYSIBB_LOAD'			=> wysibb_load(),
+'WYSIBB_INIT'			=> wysibb_init(),]]></action>
+			</edit>
+		</open>
+		<open src="styles/prosilver/overall_header.html">
+			<edit>
+				<find><![CDATA[</head>]]></find>
+				<action type="replace-with"><![CDATA[{WYSIBB_LOAD}
+</head>]]></action>
+			</edit>
+		</open>
+		<open src="styles/prosilver/overall_footer.html">
+			<edit>
+				<find><![CDATA[<div class="copyright">{CREDIT_LINE}]]></find>
+				<action type="replace-with"><![CDATA[<div class="copyright">{CREDIT_LINE} {WYSIBB_INIT}]]></action>
+			</edit>
+		</open>
+		
+		<php-installer><![CDATA[install_wysibb.php]]></php-installer>
+		<diy-instructions lang="en"><![CDATA[1. Copy all files
+2. Run install_wysibb.php and follow the instruction]]></diy-instructions>
+	</action-group>
+</mod>
