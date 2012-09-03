@@ -2,6 +2,13 @@
 html{height:100% !important;}
 ul,ol{padding:0 0 0 30px}
 .wysibb{margin:0 0 15px 0 !important;border:1px solid #ddd;position:relative;background:#fff;font-family:Arial,Verdana,Tahoma;}
+.wysibb-texarea{
+  border:none !important;
+  margin:0 !important;
+  outline: none !important;
+  padding:0 !important;
+  width:100% !important;
+}
 /* TOOLBAR */
 .wysibb .wysibb-toolbar{
   background:#f4f4f4;
@@ -127,13 +134,14 @@ ul,ol{padding:0 0 0 30px}
 .ve-tlb-smilebox{background: url(./img/icons.png) 0 -480px;width:20px;}
 .ve-tlb-video{background: url(./img/icons.png) 0 -500px;width:20px;}
 
+.tthotkey{color:#ddd;font-size:9px;}
 
 /* END TOOLBAR */
 
 /* CONTENT */
 .wysibb-text{margin:5px;}
 .wysibb-text .wysibb-text-iframe{max-width:100%;width:100%;margin:0;}
-.wysibb-body{text-align:left;min-width:0 !important;overflow:auto !important}
+.wysibb-body{text-align:left;min-width:0 !important;overflow:auto !important;margin:0 !important;padding:0 !important;}
 /* END CONTENT */
 
 /* DEFAULT STYLES */
@@ -343,6 +351,7 @@ ul,ol{padding:0 0 0 30px}
   background: rgba(255,255,255,0.7);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#7Fffffff,endColorstr=#7Fffffff);
   zoom: 1;
+  z-index: 1000;
 }
 
 #wbbmodal  .wbbm{

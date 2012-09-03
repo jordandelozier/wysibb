@@ -16,13 +16,13 @@ WBBPRESET = {
 		bullist: {
 			transform: {
 				'<ul>{SELTEXT}</ul>':'[list]{SELTEXT}[/list]',
-				'<li>dfh</li>':'[*]{SELTEXT}\n'
+				'<li>{SELTEXT}</li>':'[*]{SELTEXT}\n'
 			}
 		},
 		numlist: {
 			transform: {
-				'<ul>{SELTEXT}</ul>':'[list=1]{SELTEXT}[/list]',
-				'<li>dfh</li>':'[*]{SELTEXT}\n'
+				'<ol>{SELTEXT}</ol>':'[list=1]{SELTEXT}[/list]',
+				'<li>{SELTEXT}</li>':'[*]{SELTEXT}\n'
 			}
 		}
 	},

@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.0.0 - 2012-08-23
+/*! WysiBB - WYSIWYG BBCode editor - v1.0.2 - 2012-09-03
 * http://www.wysibb.com
 * Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -79,15 +79,19 @@ var CURLANG = {
 (function($) {
 	'use strict';
 	$.wysibb = function(txtArea,settings) {
+		
+		this.startTime = (new Date()).getTime();
+		this.debug("Start");
 		$(txtArea).data("wbb",this);
-
+		
+		if (settings && settings.deflang && typeof(WBBLANG[settings.deflang])!="undefined") {CURLANG = WBBLANG[settings.deflang];}
 		if (settings && settings.lang && typeof(WBBLANG[settings.lang])!="undefined") {CURLANG = WBBLANG[settings.lang];}
 		
 		this.txtArea=txtArea;
 		this.$txtArea=$(txtArea);
 		var id = this.$txtArea.attr("id") || this.setUID(this.txtArea);
 		this.options = {
-			version:			"1.0.0",
+			version:			"1.0.2",
 			bbmode:				false,
 			onlyBBmode:			false,
 			themeName:			"default",
@@ -100,6 +104,10 @@ var CURLANG = {
 			img_uploadurl:		"/iupload.php",
 			img_maxwidth:		800,
 			img_maxheight:		800,
+			hotkeys:			true,
+			showHotkeys:		true,
+			autoresize:			true,
+			resize_maxheight:	800, 
 			//END img upload config 
 			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table",
 			allButtons: {
@@ -107,6 +115,7 @@ var CURLANG = {
 					title: CURLANG.bold,
 					buttonHTML: '<span class="ve-tlb-bold"></span>',
 					excmd: 'bold',
+					hotkey: 'ctrl+b',
 					transform : {
 						'<b>{SELTEXT}</b>':"[b]{SELTEXT}[/b]",
 						'<strong>{SELTEXT}</strong>':"[b]{SELTEXT}[/b]"
@@ -116,6 +125,7 @@ var CURLANG = {
 					title: CURLANG.italic,
 					buttonHTML: '<span class="ve-tlb-italic"></span>',
 					excmd: 'italic',
+					hotkey: 'ctrl+i',
 					transform : {
 						'<i>{SELTEXT}</i>':"[i]{SELTEXT}[/i]",
 						'<em>{SELTEXT}</em>':"[i]{SELTEXT}[/i]"
@@ -125,6 +135,7 @@ var CURLANG = {
 					title: CURLANG.underline,
 					buttonHTML: '<span class="ve-tlb-underline"></span>',
 					excmd: 'underline',
+					hotkey: 'ctrl+u',
 					transform : {
 						'<u>{SELTEXT}</u>':"[u]{SELTEXT}[/u]"
 					}
@@ -157,6 +168,7 @@ var CURLANG = {
 				link : {
 					title: CURLANG.link,
 					buttonHTML: '<span class="ve-tlb-link"></span>',
+					hotkey: 'ctrl+shift+2',
 					modal: {
 						title: CURLANG.modal_link_title,
 						width: "500px",
@@ -176,6 +188,7 @@ var CURLANG = {
 				img : {
 					title: CURLANG.img,
 					buttonHTML: '<span class="ve-tlb-img"></span>',
+					hotkey: 'ctrl+shift+1',
 					modal: {
 						title: CURLANG.modal_img_title,
 						width: "600px",
@@ -219,6 +232,7 @@ var CURLANG = {
 				quote : {
 					title: CURLANG.quote,
 					buttonHTML: '<span class="ve-tlb-quote"></span>',
+					hotkey: 'ctrl+shift+3',
 					//subInsert: true,
 					transform : { 
 						'<div class="quote"><blockquote>{SELTEXT}</blockquote></div>':"[quote]{SELTEXT}[/quote]"
@@ -227,6 +241,7 @@ var CURLANG = {
 				code : {
 					title: CURLANG.code,
 					buttonText: '[code]',
+					hotkey: 'ctrl+shift+4',
 					transform : {
 						'<div class="codewrap"><div class="codetop">Код:</div><div class="codemain">{SELTEXT}</div></div>':"[code]{SELTEXT}[/code]"
 					}
@@ -455,15 +470,13 @@ var CURLANG = {
 		}
 		$.extend(true,this.options,settings);
 		
-		
 		this.init();
 	}
 	
 	$.wysibb.prototype = {
 		lastid : 1,
 		init:	function() {
-			
-		
+			this.debug("Init");
 			//check for mobile
 			this.isMobile = function(a) {(/android.+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a))}(navigator.userAgent||navigator.vendor||window.opera);
 			
@@ -485,7 +498,9 @@ var CURLANG = {
 			this.initTransforms();
 			this.build();
 			this.initModal();
-			
+			if (this.options.hotkeys===true && !this.isMobile) {
+				this.initHotkeys();
+			}
 			//sort smiles
 			this.options.smileList.sort(function(a,b) {
 				return (b.bbcode.length-a.bbcode.length);
@@ -512,7 +527,7 @@ var CURLANG = {
 			//var $test = $('<span>').append('[table]<span><tr><td>﻿1</td><td>2﻿</td></tr><tr><td>﻿3</td><td>﻿4</td></tr></span>[/table]');
 			//var $test = $('<span>').append('<table><tr>[td]2323[/td]</tr></table>');
 			//$.log($test);
-			
+			this.debug("Complete");
 		},
 		initTransforms: function() {
 			$.log("Create rules for transform HTML=>BB");
@@ -541,7 +556,7 @@ var CURLANG = {
 							bhtml = bhtml.replace(a+'="','_'+a+'="');
 						});
 
-						var $bel = $('<div style="display:none">').append($(this.elFromString(bhtml,document)));
+						var $bel = $(document.createElement('DIV')).append($(this.elFromString(bhtml,document)));
 						var rootSelector = this.filterByNode($bel.children());
 						//create root selector for isContain
 						if (!ob.excmd) {
@@ -671,22 +686,21 @@ var CURLANG = {
 		build: function() {
 			$.log("Build editor");
 			
-			this.$editor = $('<div class="wysibb">');
+			//this.$editor = $('<div class="wysibb">');
+			this.$editor = $('<div>').addClass("wysibb");
 			
 			this.$editor.insertAfter(this.txtArea).append(this.txtArea);
 			
-			this.$txtArea.css("border","0").css("outline","none").css("padding","0").css("margin","0");
-			//.after(this.strf('<link rel="stylesheet" type="text/css" media="all" href="{themePrefix}/{themeName}/theme.css?{version}" />',this.options));
-			
+			this.startHeight = this.$txtArea.outerHeight();
+			this.$txtArea.addClass("wysibb-texarea");
 			this.buildToolbar();
-			
 			//Build iframe if needed
 			this.$txtArea.wrap('<div class="wysibb-text">');
 			
 			if (this.options.onlyBBmode===false) {
 				var height = this.$txtArea.outerHeight();
 				this.$iFrame = $(this.strf('<iframe src="about:blank" class="wysibb-text-iframe" frameborder="0" style="height:{height}px;"></iframe>',{height:height}));
-				this.$txtArea.css("width","100%").hide();
+				this.$txtArea.hide();
 				
 				//load iframe
 				this.$iFrame.bind('load',$.proxy(function() {
@@ -744,11 +758,11 @@ var CURLANG = {
 					},this));
 					
 					//insert BR on press enter
-					this.$body.bind('keydown',$.proxy(function(e) {
+					$(this.doc).bind('keydown',$.proxy(function(e) {
 						if (e.which == 13) {
 							var isLi = this.isContain(this.getSelectNode(),'li');
 							if (!isLi) {
-								e.preventDefault();
+								if (e.preventDefault) {e.preventDefault();}
 								this.checkForLastBR(this.getSelectNode());
 								this.insertAtCursor('<br/>',false);
 							}
@@ -758,7 +772,7 @@ var CURLANG = {
 					//tabInsert
 					if (this.options.tabInsert===true) {
 						//tab insert
-						this.$body.bind('keydown', $.proxy(function(e) {
+						$(this.doc).bind('keydown', $.proxy(function(e) {
 							if (e.which == 9) {
 								//insert tab
 								if (e.preventDefault) {e.preventDefault();}
@@ -770,8 +784,14 @@ var CURLANG = {
 					
 					
 					//add event listeners
-					this.$body.bind('mouseup keyup',$.proxy(this.updateUI,this));
-					this.$body.bind('mousedown',$.proxy(function(e) {this.checkForLastBR(e.target)},this));
+
+					$(this.doc).bind('mouseup keyup',$.proxy(this.updateUI,this));
+					$(this.doc).bind('mousedown',$.proxy(function(e) {this.checkForLastBR(e.target)},this));
+					
+					//attach hotkeys
+					if (this.options.hotkeys===true) {
+						$(this.doc).bind('keydown',$.proxy(this.presskey,this));
+					}
 					
 				},this)).insertAfter(this.$txtArea);
 			}
@@ -781,16 +801,25 @@ var CURLANG = {
 			
 			//add event listeners to textarea
 			this.$txtArea.bind('mouseup keyup',$.proxy(this.updateUI,this));
+			
+			//attach hotkeys
+			if (this.options.hotkeys===true) {
+				$(document).bind('keydown',$.proxy(this.presskey,this));
+			}
 		},
 		buildToolbar: function() {
 			if (this.options.toolbar === false) {return false;}
 			
-			this.$toolbar = $('<div class="wysibb-toolbar">').prependTo(this.$editor);
+			//this.$toolbar = $('<div class="wysibb-toolbar">').prependTo(this.$editor);
+			this.$toolbar = $('<div>').addClass("wysibb-toolbar").prependTo(this.$editor);
 			
 			var $btnContainer;
 			$.each(this.options.buttons,$.proxy(function(i,bn) {
 				var opt = this.options.allButtons[bn];
-				if (i==0 || bn=="|") {
+				if (i==0 || bn=="|" || bn=="-") {
+					if (bn=="-") {
+						this.$toolbar.append("<div>");
+					}
 					$btnContainer = $('<div class="wysibb-toolbar-container">').appendTo(this.$toolbar);
 				}
 				if (opt) {
@@ -812,7 +841,8 @@ var CURLANG = {
 			this.$toolbar.find(".btn-tooltip").hover(function () {$(this).parent().css("overflow","hidden")},function() {$(this).parent().css("overflow","visible")});
 			
 			//build bbcode switch button
-			var $bbsw = $('<div class="wysibb-toolbar-container modeSwitch"><div class="wysibb-toolbar-btn" unselectable="on"><span class="btn-inner ve-tlb-bbcode" unselectable="on"></span></div></div>').appendTo(this.$toolbar);
+			//var $bbsw = $('<div class="wysibb-toolbar-container modeSwitch"><div class="wysibb-toolbar-btn" unselectable="on"><span class="btn-inner ve-tlb-bbcode" unselectable="on"></span></div></div>').appendTo(this.$toolbar);
+			var $bbsw = $(document.createElement('div')).addClass("wysibb-toolbar-container modeSwitch").html('<div class="wysibb-toolbar-btn" unselectable="on"><span class="btn-inner ve-tlb-bbcode" unselectable="on"></span></div>').appendTo(this.$toolbar);
 			$bbsw.children(".wysibb-toolbar-btn").click($.proxy(function(e) {
 				$(e.currentTarget).toggleClass("on");
 				this.modeSwitch();
@@ -826,7 +856,8 @@ var CURLANG = {
 				container = this.$toolbar;
 			}
 			var btnHTML = (opt.buttonHTML) ? $(this.strf(opt.buttonHTML,this.options)).addClass("btn-inner") : this.strf('<span class="btn-inner btn-text">{text}</span>',{text:opt.buttonText.replace(/</g,"&lt;")});
-			var $btn = $('<div class="wysibb-toolbar-btn wbb-'+bn+'">').appendTo(container).append(btnHTML).append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));
+			var hotkey = (this.options.hotkeys===true && this.options.showHotkeys===true && opt.hotkey) ? (' <span class="tthotkey">['+opt.hotkey+']</span>'):""
+			var $btn = $('<div class="wysibb-toolbar-btn wbb-'+bn+'">').appendTo(container).append(btnHTML).append(this.strf('<span class="btn-tooltip">{title}<ins/>{hotkey}</span>',{title:opt.title,hotkey:hotkey}));
 			
 			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			//attach events
@@ -898,10 +929,12 @@ var CURLANG = {
 			$dropblock.css("width",(cols*opt.cellwidth+2)+"px").css("height",(rows*opt.cellwidth+2)+"px");
 			for (var j=1; j<=cols; j++) {
 				for (var h=1; h<=rows; h++) {
-					$dropblock.append(this.strf('<div class="tbl-sel" style="width:{width}px;height:{height}px;z-index:{zindex}" title="{row},{col}"></div>',{width: (j*opt.cellwidth),height: (h*opt.cellwidth),zindex: --allcount,row:h,col:j}));
+					//var html = this.strf('<div class="tbl-sel" style="width:{width}px;height:{height}px;z-index:{zindex}" title="{row},{col}"></div>',{width: (j*opt.cellwidth),height: (h*opt.cellwidth),zindex: --allcount,row:h,col:j});
+					var html = '<div class="tbl-sel" style="width:'+(j*opt.cellwidth)+'px;height:'+(h*opt.cellwidth)+'px;z-index:'+(--allcount)+'" title="'+h+','+j+'"></div>';
+					$dropblock.append(html);
 				}
 			}
-			
+			//this.debug("Attach event on: tbl-sel");
 			$btn.find(".tbl-sel").click($.proxy(function(e) {
 				var t = $(e.currentTarget).attr("title");
 				var rc = t.split(",");
@@ -916,6 +949,7 @@ var CURLANG = {
 				code += (this.options.bbmode) ? '[/table]':'</table>';
 				this.insertAtCursor(code);
 			},this));
+			//this.debug("END Attach event on: tbl-sel");
 			$btn.click($.proxy(function(e) {
 				this.dropdownclick(".wbb-tbl",".wbb-list",e);
 			},this));
@@ -934,7 +968,7 @@ var CURLANG = {
 				if (typeof(oname)=="string") {
 					var option = this.options.allButtons[oname];
 					if (option) {
-						$.log("create: "+oname); 
+						//$.log("create: "+oname); 
 						if (option.html) {
 							$('<span>').addClass("option").attr("oid",oname).attr("cmdvalue",option.exvalue).appendTo($sblock).append(this.strf(option.html,{seltext:option.title}));
 						}else{
@@ -994,16 +1028,21 @@ var CURLANG = {
 				this.insertAtCursor((this.options.bbmode) ? this.toBB(e.currentTarget):$($(e.currentTarget).html()));
 			},this))
 		},
-		updateUI: function() {
-			$.each(this.controllers,$.proxy(function(i,$btn) {
-				$btn.trigger('queryState');
-			},this));
+		updateUI: function(e) {
+			if ((e.which>=8 && e.which<=46) || e.which>90 || e.type=="mouseup") {
+				$.each(this.controllers,$.proxy(function(i,$btn) {
+					$btn.trigger('queryState');
+				},this));
+			}
+			if (this.options.autoresize===true) {
+				this.autoresize();
+			}
 		},
 		initModal: function() {
 			$.log("Init modal");
-			var $dbody = $(document.body);
-			this.$modal = $('<div id="wbbmodal">').appendTo(document.body)
-				.append('<div class="wbbm"><div class="wbbm-title"><span class="wbbm-title-text"></span><span class="wbbclose" title="'+CURLANG.close+'">×</span></div><div class="wbbm-content"></div><div class="wbbm-bottom"><button id="wbbm-submit" class="wbb-button">'+CURLANG.save+'</button><button id="wbbm-cancel" class="wbb-cancel-button">'+CURLANG.cancel+'</button><button id="wbbm-remove" class="wbb-remove-button">'+CURLANG.remove+'</button></div></div>').hide(); //temp
+			this.$modal = $('<div>').attr("id","wbbmodal").prependTo(document.body)
+				.html('<div class="wbbm"><div class="wbbm-title"><span class="wbbm-title-text"></span><span class="wbbclose" title="'+CURLANG.close+'">×</span></div><div class="wbbm-content"></div><div class="wbbm-bottom"><button id="wbbm-submit" class="wbb-button">'+CURLANG.save+'</button><button id="wbbm-cancel" class="wbb-cancel-button">'+CURLANG.cancel+'</button><button id="wbbm-remove" class="wbb-remove-button">'+CURLANG.remove+'</button></div></div>').hide();
+			
 			this.$modal.find('#wbbm-cancel,.wbbclose').click($.proxy(this.closeModal,this));
 			this.$modal.bind('click',$.proxy(function(e) {
 				if ($(e.target).parents(".wbbm").size()==0) {
@@ -1017,11 +1056,49 @@ var CURLANG = {
 			}
 			
 		},
+		initHotkeys: function() {
+			$.log("initHotkeys");
+			this.hotkeys=[];
+			var klist = "0123456789       abcdefghijklmnopqrstuvwxyz";
+			$.each(this.options.allButtons,$.proxy(function(cmd,opt) {
+				if (opt.hotkey) {
+					var keys = opt.hotkey.split("+");
+ 					if (keys && keys.length>=2) {
+						var metasum=0;
+						var key = keys.pop();
+						$.each(keys,function(i,k) {
+							switch($.trim(k.toLowerCase())) {
+								case "ctrl": {metasum+=1;break;}
+								case "shift": {metasum+=4;break;}
+								case "alt": {metasum+=7;break;}
+							}
+						})
+						//$.log("metasum: "+metasum+" key: "+key+" code: "+(klist.indexOf(key)+48));
+						if (metasum>0) {
+							if (!this.hotkeys["m"+metasum]) {this.hotkeys["m"+metasum]=[];}
+							this.hotkeys["m"+metasum]["k"+(klist.indexOf(key)+48)]=cmd;
+						}
+					}
+				}
+			},this))
+		},
+		presskey: function(e) {
+			if (e.ctrlKey==true || e.shiftKey==true || e.altKey==true) {
+				var  metasum = ((e.ctrlKey==true) ? 1:0)+((e.shiftKey==true) ? 4:0)+((e.altKey==true) ? 7:0);
+				if (this.hotkeys["m"+metasum] && this.hotkeys["m"+metasum]["k"+e.which]) {
+					this.execCommand(this.hotkeys["m"+metasum]["k"+e.which],false);
+					e.preventDefault();
+					return false;
+				}
+			}
+		},
+		
 		//COMMAND FUNCTIONS
 		execCommand: function(command,value) {
-			
+			$.log("execCommand: "+command);
 			var opt = this.options.allButtons[command];
 			var queryState = this.queryState(command,value);
+			//$.log(queryState);
 			if (opt.excmd) {
 				//use NativeCommand
 				if (this.options.bbmode) {
@@ -1127,6 +1204,11 @@ var CURLANG = {
 			$.log("wbbInsertCallback: "+command);
 			var data = this.getCodeByCommand(command,paramobj);
 			this.insertAtCursor(data);
+			var snode = this.getSelectNode();
+			if (snode.nodeType==3) {snode=snode.parentNode;}
+			if ($(snode).is("span,font")) {
+				this.selectNode(snode);
+			}
 			
 		},
 		wbbRemoveCallback: function(command,clear) {
@@ -1227,7 +1309,6 @@ var CURLANG = {
 				}
 				this.lastRange=false;
 			}else if (cmd=="insertHTML") { //fix webkit bug with insertHTML
-				$.log("Chrome");
 				var sel = this.getSelection();
 				var e = this.elFromString(param);
 				var rng = (this.lastRange) ? this.lastRange:this.getRange();
@@ -1513,11 +1594,23 @@ var CURLANG = {
 		},
 		toBB: function(data) {
 			if (!data) {return "";};
-			
 			//.replace(/\[/g,"&#91;").replace(/\]/g,"&#93;")
 			var $e = (typeof(data)=="string") ? $('<span>').html(data):$(data);
 			
-			$e.find('div br:last-child').remove();
+			//remove last BR
+			$e.find("div,blockquote,p").each(function() {
+				if (this.nodeType!=3 && this.lastChild && this.lastChild.tagName=="BR") {
+					$(this.lastChild).remove();
+				}
+			})
+			if ($e.is("div,blockquote,p") && $e[0].nodeType!=3 && $e[0].lastChild && $e[0].lastChild.tagName=="BR") {
+				$($e[0].lastChild).remove();
+			}
+			//END remove last BR
+			
+			//Remove BR
+			$e.find("ul > br, table > br, tr > br").remove();
+			//IE
 			
 			var outbb="";
 			
@@ -1528,10 +1621,10 @@ var CURLANG = {
 
 			$e.contents().each($.proxy(function(i,el) {
 				var $el = $(el);
-				$.log($el);
 				if (el.nodeType===3) {
 					outbb+=el.data.replace(/\n+/,"").replace(/\t/g,"   ");
-				/* }else if (el.tagName=="1BR") {
+					//outbb+=el.data.replace(/\t/g,"   ");
+				/* }else if (el.tagName=="BR") {
 					outbb+="\n"; */
 				}else{
 					//process html tag
@@ -1544,6 +1637,9 @@ var CURLANG = {
 								var bbcode = rlist[i][0];
 								var crules = rlist[i][1];
 								var skip=false,keepElement=false,keepAttr=false;
+								if (!$el.is("br")) {
+									bbcode = bbcode.replace(/\n/g,"<br>");
+								}
 								bbcode = bbcode.replace(/\{(\S+?)\}/g,function(s) {
 									s = s.substr(1,s.length-2);
 									var c = crules[s.toLowerCase()];
@@ -1554,7 +1650,7 @@ var CURLANG = {
 									if (typeof(cont)=="undefined" || cont==null) {skip=true;return s;}
 									var regexp = c.rgx;
 									
-									//style fix
+									//style fix 
 									if (regexp && c.attr=="style" && regexp.substr(regexp.length-1,1)!=";") {
 										regexp+=";";
 									}
@@ -1600,6 +1696,7 @@ var CURLANG = {
 									
 									return cont || "";
 								});
+								
 								if (skip) {continue;}
 								if ($el.is("img,br,hr")) {
 									//replace element
@@ -1652,14 +1749,16 @@ var CURLANG = {
 					$.each(this.options.allButtons[b].transform,$.proxy(function(html,bb) {
 						html = html.replace(/\n/g,""); //IE 7,8 FIX
 						var a=[];
-						bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1")
-							.replace(/\s/g,"\\s");
+						$.log("BEFORE: "+bb);
+						bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1");
+							//.replace(/\s/g,"\\s");
 						bb = bb.replace(/\{\S+?\}/gi,function(s) {
 							s=s.substr(1,s.length-2);
 							a.push(s);
 							return "([\\s\\S]*?)";
 						});
 						var n=0,am;
+						$.log("AFTER: "+bb);
 						while ((am = (new RegExp(bb,"mgi")).exec(bbdata)) != null) {
 							if (am) {
 								var r={};
@@ -1701,7 +1800,7 @@ var CURLANG = {
 		},
 		strf: function(str,data) {
 			data = this.keysToLower($.extend({},data));
-			return str.replace(/\{([\w\.]*)\}/g, function (str, key) {key = key.toLowerCase();var keys = key.split("."), value = data[keys.shift().toLowerCase()];$.each(keys, function () { value = value[this]; });return (value === null || value === undefined) ? "" : value;});
+			return str.replace(/\{([\w\.]*)\}/g, function (str, key) {key = key.toLowerCase();var keys = key.split("."), value = data[keys.shift().toLowerCase()];$.each(keys, function () { value = value[this]; }); return (value === null || value === undefined) ? "" : value;});
 		},
 		elFromString: function(str,doc) {
 			if (typeof(doc)=="undefined") {
@@ -1740,7 +1839,7 @@ var CURLANG = {
 			}
 		},
 		prepareRGX: function(r) {
-			return r.replace(/(\[|\]|\)|\(|\.|\*|\?|\:|\|)/g,"\\$1").replace(/\{.*?\}/g,"([\\s\\S]*?)");
+			return r.replace(/(\[|\]|\)|\(|\.|\*|\?|\:|\||\\)/g,"\\$1").replace(/\{.*?\}/g,"([\\s\\S]*?)");
 			//return r.replace(/([^a-z0-9)/ig,"\\$1").replace(/\{.*?\}/g,"([\\s\\S]*?)");
 		},
 		checkForLastBR: function(node) {
@@ -1879,7 +1978,7 @@ var CURLANG = {
 			}
 		},
 		sync: function() {
-			if (this.options.bbmode && this.doc) {
+			if (this.options.bbmode) {
 				this.$body.html(this.getHTML(this.txtArea.value,true));
 			}else{
 				this.$txtArea.val(this.getBBCode());
@@ -1928,6 +2027,33 @@ var CURLANG = {
 					},this));
 				}
 			}
+		},
+		destroy: function() {
+			this.$editor.replaceWith(this.$txtArea);
+			this.$txtArea.removeClass("wysibb-texarea").show();
+			this.$modal.remove();
+			this.$txtArea.data("wbb",null);
+		},
+		autoresize: function() {
+			clearTimeout(this.resizeTimer);
+			this.resizeTimer=setTimeout($.proxy(function() {
+				var wh = this.$iFrame.outerHeight();
+				var ih = this.$body.outerHeight();
+				if (ih>wh) {
+					if (ih>this.options.resize_maxheight) {ih=this.options.resize_maxheight;}
+/* 					this.lastRange=this.getRange();
+					this.$iFrame.animate({
+						height: (ih+30)+"px"
+					},100,$.proxy(function() {
+						this.selectRange(this.lastRange);
+					},this));
+					this.$iFrame.select(); */
+					//this.selectRange(this.lastRange);
+					this.$iFrame.height((ih+30)+"px");
+					this.$txtArea.height((ih+30)+"px");
+					
+				}
+			},this),200);
 		},
 		
 		//MODAL WINDOW
@@ -2132,13 +2258,26 @@ var CURLANG = {
 		},
 		checkFilter: function(node,filter) {
 			$.log("node: "+$(node).get(0).outerHTML+" filter: "+filter+" res: "+$(node).is(filter.toLowerCase()));
+		},
+		debug: function(msg) {
+			var time = (new Date()).getTime();
+
+			if (typeof(console)!="undefined") {
+				console.log((time-this.startTime)+" ms: "+msg);
+			}else{
+				$("#exlog").append('<p>'+(time-this.startTime)+" ms: "+msg+'</p>');  
+			}
+			this.startTime=time;
 		}
 	}
 	
 	$.log = function(msg) {
 		if (typeof(console)!="undefined") {
 			console.log(msg);
+		}else{
+			$("#exlog").append('<p>'+msg+'</p>');  
 		}
+		
 	}
 	$.fn.wysibb = function(settings) {
 		return this.each(function() {
@@ -2200,6 +2339,9 @@ var CURLANG = {
 	}
 	$.fn.sync = function() {
 		this.data("wbb").sync();
+	}
+	$.fn.destroy = function() {
+		this.data("wbb").destroy();
 	}
 	
 	
