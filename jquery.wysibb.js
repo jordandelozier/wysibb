@@ -1364,7 +1364,7 @@ var CURLANG = {
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(bb);
 			});
-			tr=this.sortArray(tr,-1);
+			//tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
 				v = v.replace(/\{\S+?\}/g,function(a) {
@@ -1400,7 +1400,7 @@ var CURLANG = {
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(html);
 			});
-			tr=this.sortArray(tr,-1);
+			//tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
 				v = v.replace(/\{\S+\}/g,function(a) {
@@ -1713,7 +1713,7 @@ var CURLANG = {
 								});
 								
 								if (skip) {continue;}
-								if ($el.is("img,br,hr")) {
+								if ($el.is("img,br,hr,iframe")) {
 									//replace element
 									outbb+=bbcode;
 									break;
