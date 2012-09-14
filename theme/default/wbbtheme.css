@@ -1,6 +1,6 @@
 /* wysibb */
-html{height:100% !important;}
-ul,ol{padding:0 0 0 30px}
+.wysibb html{height:100% !important;}
+.wysibb ul,ol{padding:0 0 0 30px}
 .wysibb{margin:0 0 15px 0 !important;border:1px solid #ddd;position:relative;background:#fff;font-family:Arial,Verdana,Tahoma;}
 .wysibb-texarea{
   border:none !important;
