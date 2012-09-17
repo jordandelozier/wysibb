@@ -47,3 +47,46 @@
     border-bottom-right-radius: 3px;
     border-top-right-radius: 3px;
 }
+
+
+.ve-tlb-italic {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -40px transparent;
+    width: 20px;
+}
+.ve-tlb-bold {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -1px transparent;
+    width: 20px;
+}
+
+.ve-tlb-bold {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -1px transparent;
+    width: 20px;
+}
+
+.ve-tlb-img {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -60px transparent;
+    width: 20px;
+}
+
+.ve-tlb-list {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -180px transparent;
+    width: 20px;
+}
+
+.ve-tlb-video {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -500px transparent;
+    width: 20px;
+}
+
+
+.wysibb-toolbar-btn.on .ve-tlb-italic {
+        background-position: -19px -40px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-bold {
+    background-position: -19px -1px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-list{
+    background-position: -20px -180px;
+}
