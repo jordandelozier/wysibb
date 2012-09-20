@@ -78,6 +78,15 @@
     width: 20px;
 }
 
+.ve-tlb-bbcode{
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -198px transparent;
+    width: 26px;
+    height: 11px !important;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+
+}
 
 .wysibb-toolbar-btn.on .ve-tlb-italic {
         background-position: -19px -40px;
@@ -89,4 +98,8 @@
 
 .wysibb-toolbar-btn.on .ve-tlb-list{
     background-position: -20px -180px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-bbcode{
+    background-position: 0px -211px;
 }
