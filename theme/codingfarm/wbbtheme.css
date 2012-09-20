@@ -1,0 +1,109 @@
+.wysibb {
+    background: #F3F3F3;
+}
+
+.wysibb .wysibb-toolbar {
+    border-bottom: none;
+    background: none;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container {
+    border: none;
+    padding: 0;
+    border-radius: 3px;
+    background: #FBFBFB;
+    background-image: linear-gradient(bottom, #EEE, #FEFEFE);
+    background-image: -moz-linear-gradient(bottom, #EEE, #FEFEFE);
+    background-image: -o-linear-gradient(bottom, #EEE, #FEFEFE);
+    background-image: -webkit-linear-gradient(bottom, #EEE, #FEFEFE);
+    background-image: -ms-linear-gradient(bottom, #EEE, #FEFEFE);
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn {
+    margin: 0;
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:hover {
+    border-radius: 0;
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on,
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on:hover {
+    border-radius: 0;
+    background: #757575;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .3) inset;
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:first-child,
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on:first-child {
+    border-bottom-left-radius: 3px;
+    border-top-left-radius: 3px;
+}
+
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:last-child,
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on:last-child {
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.ve-tlb-italic {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -40px transparent;
+    width: 20px;
+}
+
+.ve-tlb-bold {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -1px transparent;
+    width: 20px;
+}
+
+.ve-tlb-bold {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -1px transparent;
+    width: 20px;
+}
+
+.ve-tlb-img {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -60px transparent;
+    width: 20px;
+}
+
+.ve-tlb-list {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -180px transparent;
+    width: 20px;
+}
+
+.ve-tlb-video {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -500px transparent;
+    width: 20px;
+}
+
+.ve-tlb-bbcode {
+    background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -198px transparent;
+    width: 26px;
+    height: 11px !important;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-italic {
+    background-position: -19px -40px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-bold {
+    background-position: -19px -1px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-list {
+    background-position: -20px -180px;
+}
+
+.wysibb-toolbar-btn.on .ve-tlb-bbcode {
+    background-position: 0px -211px;
+}

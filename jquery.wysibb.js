@@ -107,6 +107,8 @@ var CURLANG = {
 			hotkeys:			true,
 			showHotkeys:		true,
 			autoresize:			true,
+            disablePageStyles: false,
+            editorStyles: [],
 			resize_maxheight:	800, 
 			//END img upload config 
 			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table",
@@ -713,14 +715,27 @@ var CURLANG = {
 					var ihead=this.doc.getElementsByTagName('head')[0];
 					this.$body.addClass("wysibb-body").addClass(this.options.bodyClass);
 					//load stylesheets
-					$("link[rel='stylesheet']").each(function(idx,el) {
-						$(ihead).append($(el).clone()[0].outerHTML);
-					});
-					$("style").each(function(idx,el) {
-						$(ihead).append($(el).clone()[0].outerHTML);
-					});
 
-					if ('contentEditable' in this.body) {
+                    if (!this.options.disablePageStyles) {
+                        $("link[rel='stylesheet']").each(function (idx, el) {
+                            $(ihead).append($(el).clone()[0].outerHTML);
+                        });
+                        $("style").each(function (idx, el) {
+                            $(ihead).append($(el).clone()[0].outerHTML);
+                        });
+                    }
+                    if (typeof (this.options.editorStyles) != 'undefined') {
+                        if (typeof(this.options.editorStyles) == 'string') {
+                            $(ihead).append("<link rel='stylesheet' href='" + this.options.editorStyles + "'>");
+                        }
+                        else {
+                            $.each(this.options.editorStyles, function (i, el) {
+                                $(ihead).append("<link rel='stylesheet' href='" + el + "'>");
+                            });
+                        }
+                    }
+
+                    if ('contentEditable' in this.body) {
 						this.body.contentEditable=true;
 						try{
 							//fix for mfirefox
@@ -1349,7 +1364,7 @@ var CURLANG = {
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(bb);
 			});
-			tr=this.sortArray(tr,-1);
+			//tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
 				v = v.replace(/\{\S+?\}/g,function(a) {
@@ -1385,7 +1400,7 @@ var CURLANG = {
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(html);
 			});
-			tr=this.sortArray(tr,-1);
+			//tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
 				v = v.replace(/\{\S+\}/g,function(a) {
@@ -1698,7 +1713,7 @@ var CURLANG = {
 								});
 								
 								if (skip) {continue;}
-								if ($el.is("img,br,hr")) {
+								if ($el.is("img,br,hr,iframe")) {
 									//replace element
 									outbb+=bbcode;
 									break;
