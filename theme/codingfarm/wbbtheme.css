@@ -5,6 +5,10 @@
 .wysibb .wysibb-toolbar {
     border-bottom: none;
     background: none;
+    user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: -moz-none;
 }
 
 .wysibb .wysibb-toolbar .wysibb-toolbar-container {
@@ -48,11 +52,11 @@
     border-top-right-radius: 3px;
 }
 
-
 .ve-tlb-italic {
     background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -40px transparent;
     width: 20px;
 }
+
 .ve-tlb-bold {
     background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -1px transparent;
     width: 20px;
@@ -78,7 +82,7 @@
     width: 20px;
 }
 
-.ve-tlb-bbcode{
+.ve-tlb-bbcode {
     background: url("./img/codingfarm-icons.png") no-repeat scroll 0 -198px transparent;
     width: 26px;
     height: 11px !important;
@@ -89,17 +93,17 @@
 }
 
 .wysibb-toolbar-btn.on .ve-tlb-italic {
-        background-position: -19px -40px;
+    background-position: -19px -40px;
 }
 
 .wysibb-toolbar-btn.on .ve-tlb-bold {
     background-position: -19px -1px;
 }
 
-.wysibb-toolbar-btn.on .ve-tlb-list{
+.wysibb-toolbar-btn.on .ve-tlb-list {
     background-position: -20px -180px;
 }
 
-.wysibb-toolbar-btn.on .ve-tlb-bbcode{
+.wysibb-toolbar-btn.on .ve-tlb-bbcode {
     background-position: 0px -211px;
 }
