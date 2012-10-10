@@ -1,16 +1,17 @@
 WBBPRESET = {
 	bodyClass: "content content-phpbb3",
-	buttons: 'bold,italic,underline,|,quote,code,bullist,numlist,|,img,link,smilebox,fontsize,fontcolor',
+	buttons: 'bold,italic,underline,|,quote,code,bullist,numlist,|,img,link,smilebox,fontsize,fontcolor,attach',
+	traceTextarea: true,
 	allButtons: {
 		quote: {
 			transform: {
 				'<blockquote class="uncited"><div>{SELTEXT}</div></blockquote>':'[quote]{SELTEXT}[/quote]',
-				'<blockquote><div><cite>{AUTHOR} писал(а):</cite>{SELTEXT}</div></blockquote>':'[quote="{AUTHOR}"]{SELTEXT}[/quote]'
+				'<blockquote><div><cite contenteditable="false">{AUTHOR} писал(а):</cite>{SELTEXT}</div></blockquote>':'[quote="{AUTHOR}"]{SELTEXT}[/quote]'
 			}
 		},
 		code: {
 			transform: {
-				'<dl class="codebox"><dt>Код: <a href="#">Выделить всё</a></dt><dd><code>{SELTEXT}</code></dd></dl>':'[code]{SELTEXT}[/code]'
+				'<dl class="codebox"><dt contenteditable="false">Код: <a>Выделить всё</a></dt><dd><code>{SELTEXT}</code></dd></dl>':'[code]{SELTEXT}[/code]'
 			}
 		},
 		bullist: {
@@ -21,8 +22,14 @@ WBBPRESET = {
 		},
 		numlist: {
 			transform: {
-				'<ol>{SELTEXT}</ol>':'[list=1]{SELTEXT}[/list]',
+				'<ul>{SELTEXT}</ul>':'[list=1]{SELTEXT}[/list]',
 				'<li>{SELTEXT}</li>':'[*]{SELTEXT}\n'
+			}
+		},
+		attach: {
+			buttonText: "attach",
+			transform: {
+				'<div class="inline-attachment" num={NUM}><dl class="file"><dt class="attach-image"><img src="/forum/download/file.php?id={NUM}" alt="{ALT}"></dt><dd>{ALT} Просмотров: 0</dd></dl></div>':'[attachment={NUM}]{ALT}[/attachment]'
 			}
 		}
 	},
