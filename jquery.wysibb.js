@@ -1,9 +1,5 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.1.0 - 2012-10-09
-* http://www.wysibb.com
-* Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
-
 if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
-var CURLANG = {
+CURLANG = {
 	bold: "Полужирный",
 	italic: "Курсив",
 	underline: "Подчеркнутый",
@@ -45,7 +41,8 @@ var CURLANG = {
 	modal_img_tab1: "Ввести URL",
 	modal_img_tab2: "Загрузить файл",
 	modal_imgsrc_text: "Введите адрес изображения",
-	modal_img_btn: "Выберите изображение для загрузки",
+	modal_img_btn: "Выберите файл для загрузки",
+	add_attach: "Добавить вложение",
 	
 	modal_video_text: "Введите URL видео",
 	
@@ -55,13 +52,15 @@ var CURLANG = {
 	remove: "Удалить",
 	
 	validation_err: "Введенные данные некорректны",
-	error_onupload: "Ошибка во время загрузки файла",
+	error_onupload: "Ошибка во время загрузки файла или такое расширение файла не поддерживается",
 	
-	fileupload_text1: "Перетащите изображение сюда",
+	fileupload_text1: "Перетащите файл сюда",
 	fileupload_text2: "или",
 	
 	loading: "Загрузка",
 	auto: "Авто",
+	views: "Просмотров",
+	downloads: "Скачиваний",
 	
 	//smiles
 	sm1: "Улыбка",
@@ -80,8 +79,6 @@ var wbbdebug=true;
 (function($) {
 	'use strict';
 	$.wysibb = function(txtArea,settings) {
-		
-		//this.startTime = (new Date()).getTime();
 		$(txtArea).data("wbb",this);
 		
 		if (settings && settings.deflang && typeof(WBBLANG[settings.deflang])!="undefined") {CURLANG = WBBLANG[settings.deflang];}
@@ -91,7 +88,6 @@ var wbbdebug=true;
 		this.$txtArea=$(txtArea);
 		var id = this.$txtArea.attr("id") || this.setUID(this.txtArea);
 		this.options = {
-			version:			"1.1.0",
 			bbmode:				false,
 			onlyBBmode:			false,
 			themeName:			"default", 
@@ -111,8 +107,10 @@ var wbbdebug=true;
 			loadPageStyles:		true,
 			traceTextarea:		false,
 //			direction:			"ltr",
+			smileConversion:	true,
+
 			//END img upload config 
-			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table",
+			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,link,|,bullist,numlist,smilebox,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,offtop,table,removeFormat",
 			allButtons: {
 				bold : {
 					title: CURLANG.bold,
@@ -417,21 +415,11 @@ var wbbdebug=true;
 					}
 				},
 				
-				removeFormat: {
+				removeformat: {
 					title: CURLANG.removeFormat,
 					buttonHTML: '<span class="ve-tlb-removeformat"></span>',
 					excmd: "removeFormat"
 				}
-				/* ,
-				
-				//sysbuttons
-				indent: {
-					title: CURLANG.indent,
-					hotkey: "tab",
-					transform: {
-						"&nbsp;&nbsp;&nbsp;":'   '
-					}
-				} */
 			},
 			systr: {
 				'<br/>':"\n",
@@ -500,7 +488,7 @@ var wbbdebug=true;
 		init:	function() {
 			$.log("Init",this);
 			//check for mobile
-			this.isMobile = function(a) {(/android.+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a))}(navigator.userAgent||navigator.vendor||window.opera);
+			this.isMobile = function(a) {(/android|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|meego.+mobile|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a))}(navigator.userAgent||navigator.vendor||window.opera);
 			
 			//use bbmode on mobile devices
 			if (this.isMobile) {this.onlyBBmode=this.bbmode=true}
@@ -609,6 +597,7 @@ var wbbdebug=true;
 									if (r) {
 										for (var a=0; a<r.length; a++) {	
 											var rname = r[a].substr(1,r[a].length-2);
+												rname = rname.replace(this.getValidationRGX(rname),"");
 											var p = this.relFilterByNode(el,rootSelector);
 											var regRepl = (attr!=r[a]) ? this.getRegexpReplace(attr,r[a]):false;
 											crules[rname.toLowerCase()]={sel:(p) ? $.trim(p):false,attr:item,rgx:regRepl}
@@ -776,40 +765,35 @@ var wbbdebug=true;
 					
 					//check for exist content in textarea
 					if (this.txtArea.value.length>0) {
-						this.$body.html(this.getHTML(this.txtArea.value,true));
+						this.txtAreaInitContent();
 					}
 					
 					
 					//clear html on paste from external editors
-					/* $(this.doc).bind('keydown', $.proxy(function(e) {
+					$(this.doc).bind('keydown', $.proxy(function(e) {
 						if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
-							//e.preventDefault();
-							$.log(e);
 							this.lastRange = this.getRange();
-							this.$body.removeAttr("contentEditable");
-							var $tmpel = $(document.createElement('INS'));
+							var tmpel=document.createElement('DIV');
+							var $tmpel = $(tmpel).html("\uFEFF");
 							$tmpel.attr('contenteditable', 'true').attr('class', 'paste').appendTo(this.body).focus();
+							this.selectNode(tmpel);
 							setTimeout($.proxy(function() {
 								this.clearPaste($tmpel);
-								var html = '<span>'+$tmpel.html()+'</span>';
+								var rdata = '<span>'+$tmpel.html()+'</span>';
 								$tmpel.remove();
-								$.log(html);
 								this.$body.attr("contentEditable","true");
 								this.body.focus();
 								this.selectRange(this.lastRange);
-								this.insertAtCursor(html,false);
+								
+								if (this.cleartext) {
+									if (this.isInClearTextBlock()) {
+										rdata = this.toBB(rdata).replace(/\n/g,"<br/>").replace(/\s{3}/g,'<span class="wbbtab"></span>');
+									}
+								}
+								
+								this.insertAtCursor(rdata,false);
 								this.lastRange=false;
 							},this), 1);
-						}
-					},this)); */
-					
-					$(this.doc).bind('keyup', $.proxy(function(e) {
-						if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
-							setTimeout($.proxy(function() {
-								this.clearPaste(this.$body);
-								var html = this.$body.html().replace(/\s{3}/g,'<span class="wbbtab"></span>');
-								this.$body.html(html);
-							},this),10);
 						}
 					},this));
 					
@@ -838,19 +822,18 @@ var wbbdebug=true;
 					
 					//trace Textarea
 					if (this.options.traceTextarea===true) {
-						$(document).bind("click",$.proxy(function(e) {
-							var data = this.$txtArea.val();
-							if (this.options.bbmode===false && data!="" && $(e.target).closest("div.wysibb").size()==0 && !this.$txtArea.attr("wbbsync")) {
-								this.insertAtCursor(this.getHTML(data,true));
-								this.$txtArea.val("");
-							}
-						},this));
+						$(document).bind("click",$.proxy(this.traceTextareaEvent,this));
 						this.$txtArea.val("");
 					}
 					
 					//attach hotkeys
 					if (this.options.hotkeys===true) {
 						$(this.doc).bind('keydown',$.proxy(this.presskey,this));
+					}
+					
+					//smileConversion
+					if (this.options.smileConversion===true) {
+						$(this.doc).bind('keyup',$.proxy(this.smileConversion,this));
 					}
 					
 					this.inited=true;
@@ -893,6 +876,7 @@ var wbbdebug=true;
 					}else if (opt.type=="smilebox") {
 						this.buildSmilebox($btnContainer,bn,opt);
 					}else{
+						
 						this.buildButton($btnContainer,bn,opt);
 					}
 				}
@@ -1009,6 +993,7 @@ var wbbdebug=true;
 				}
 				code += (this.options.bbmode) ? '[/table]':'</table>';
 				this.insertAtCursor(code);
+				this.lastRange=false;
 			},this));
 			//this.debug("END Attach event on: tbl-sel");
 			$btn.click($.proxy(function(e) {
@@ -1087,6 +1072,7 @@ var wbbdebug=true;
 			},this));
 			$btn.find('.smile').click($.proxy(function(e) {
 				this.insertAtCursor((this.options.bbmode) ? this.toBB(e.currentTarget):$($(e.currentTarget).html()));
+				this.lastRange=false;
 			},this))
 		},
 		updateUI: function(e) {
@@ -1099,19 +1085,13 @@ var wbbdebug=true;
 				this.autoresize();
 			}
 			//check for onlyClearText
-			if (this.cleartext && this.options.bbmode===false) {
-				var cmdskip=false;
-				$.each(this.cleartext,$.proxy(function(sel,command) {
-					if (this.isContain(this.getSelectNode(),sel)) {
-						cmdskip=true;
-					}
-				},this))
-			}
-			if (cmdskip) {
+			if (this.isInClearTextBlock()) {
 				this.$toolbar.find(".wysibb-toolbar-btn:not(.on,.mswitch)").addClass("dis");
 			}else{
 				this.$toolbar.find(".wysibb-toolbar-btn.dis").removeClass("dis");
 			}
+			
+			
 		},
 		initModal: function() {
 			this.$modal=$("#wbbmodal");
@@ -1177,18 +1157,9 @@ var wbbdebug=true;
 			var queryState = this.queryState(command,value);
 			
 			//check for onlyClearText
-			if (this.cleartext) {
-				var cmdskip=false;
-				var cmdskipname;
-				$.each(this.cleartext,$.proxy(function(sel,command) {
-					if (this.isContain(this.getSelectNode(),sel)) {
-						cmdskip=true;
-						cmdskipname=command;
-						return false;
-					}
-				},this))
-				if (cmdskip && command!=cmdskipname) {return;} //skip command execute if cursor in onlyClearText block
-			}
+			var skipcmd = this.isInClearTextBlock();
+			if (skipcmd && skipcmd!=command) {return;}
+			
 			
 			if (opt.excmd) {
 				//use NativeCommand
@@ -1234,14 +1205,20 @@ var wbbdebug=true;
 				if (opt.excmd) {
 					//native command
 					if (withvalue) {
-						var v = (this.doc.queryCommandValue(opt.excmd)+"").replace(/\'/g,"");
-						if (opt.excmd=="foreColor") {
-							v = this.rgbToHex(v);
-						}
-						//return (v==value);
-						return v;
+						try {
+							//Firefox fix
+							var v = (this.doc.queryCommandValue(opt.excmd)+"").replace(/\'/g,"");
+							if (opt.excmd=="foreColor") {
+								v = this.rgbToHex(v);
+							}
+							//return (v==value);
+							return v;
+						}catch(e) {return false;}
 					}else{
-						return this.doc.queryCommandState(opt.excmd);
+						try {
+							//Firefox fix, exception while get queryState for UnorderedList
+							return this.doc.queryCommandState(opt.excmd);
+						}catch(e) {return false;}
 					}
 				}else{
 					//custom command
@@ -1430,7 +1407,20 @@ var wbbdebug=true;
 			}
 			
 			var bbcode = this.options.allButtons[command].bbcode;
-			bbcode = this.strf(bbcode,params);
+			//bbcode = this.strf(bbcode,params);
+			bbcode = bbcode.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+				if (vrgx) {
+					var vrgxp;
+					if (vrgx) {
+						vrgxp = new RegExp(vrgx+"+","i");
+					}
+					if (typeof(params[p.toLowerCase()])!="undefined" && params[p.toLowerCase()].toString().match(vrgxp)===null) {
+						//not valid value
+						return "";
+					}
+				}
+				return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
+			});
 			
 			//insert first with max params
 			var rbbcode=null;
@@ -1441,11 +1431,13 @@ var wbbdebug=true;
 			tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
-				v = v.replace(/\{\S+?\}/g,function(a) {
-					a = a.substr(1,a.length-2); 
-					var r = params[a.toLowerCase()];
-					if (!r) {valid=false;};
-					return r;
+				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+					var vrgxp;
+					if (vrgx) {
+						vrgxp = new RegExp(vrgx+"+","i");
+					}
+					if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
+					return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
 				});
 				if (valid) {rbbcode = v;return false;}
 			});
@@ -1475,7 +1467,16 @@ var wbbdebug=true;
 			params["seltext"] = '<span id="'+this.seltextID+'">'+params["seltext"]+'</span>'; //use for select seltext
 			
 			var html = this.options.allButtons[command].html;
-			html = this.strf(html,params);
+			html = html.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+				if (vrgx) {
+					var vrgxp = new RegExp(vrgx+"+","i");
+					if (typeof(params[p.toLowerCase()])!="undefined" && params[p.toLowerCase()].toString().match(vrgxp)===null) {
+						//not valid value
+						return "";
+					}
+				}
+				return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
+			});
 			
 			//insert first with max params
 			var rhtml=null;
@@ -1486,11 +1487,13 @@ var wbbdebug=true;
 			tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
 				var valid=true;
-				v = v.replace(/\{\S+\}/g,function(a) {
-					a = a.substr(1,a.length-2); 
-					var r = params[a.toLowerCase()];
-					if (!r) {valid=false;};
-					return r;
+				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+					var vrgxp;
+					if (vrgx) {
+						vrgxp = new RegExp(vrgx+"+","i");
+					}
+					if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
+					return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
 				});
 				if (valid) {rhtml = v;return false;}
 			});
@@ -1680,9 +1683,8 @@ var wbbdebug=true;
 		getRegexpReplace: function(str,validname) {
 			str = str.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\)/g,"\\$1") 
 				.replace(/\s+/g,"\\s+")
-				.replace(validname,"(.+)")
+				.replace(validname.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\)/g,"\\$1"),"(.+)")
 				.replace(/\{\S+\}/g,".*");
-			//if (str.substr(str.length-1,1)=="?") {str+="$";}
 			return (str);
 		},
 		getBBCode: function() {
@@ -1740,10 +1742,10 @@ var wbbdebug=true;
 								if (!$el.is("br")) {
 									bbcode = bbcode.replace(/\n/g,"<br>");
 								}
-								bbcode = bbcode.replace(/\{(\S+?)\}/g,function(s) {
-									s = s.substr(1,s.length-2);
+								bbcode = bbcode.replace(/\{(.*?)(\[.*?\])*\}/g,$.proxy(function(str,s,vrgx) {
 									var c = crules[s.toLowerCase()];
-									if (typeof(c)=="undefined") {$.log("Error in configuration of BBCode["+rootsel+"]. Param: {"+s+"} not found in HTML representation.");skip=true;return s;}
+									//if (typeof(c)=="undefined") {$.log("Param: {"+s+"} not found in HTML representation.");skip=true;return s;}
+									if (typeof(c)=="undefined") {$.log("Param: {"+s+"} not found in HTML representation.");skip=true;}
 									var $cel = (c.sel) ? $(el).find(c.sel):$(el);
 									if (c.attr && !$cel.attr(c.attr)) {skip=true;return s;} //skip if needed attribute not present, maybe other bbcode
 									var cont = (c.attr) ? $cel.attr(c.attr):$cel.html();
@@ -1795,7 +1797,7 @@ var wbbdebug=true;
 									if ($el.is('table,tr,td,font')) {keepElement=true;}
 									
 									return cont || "";
-								});
+								},this));
 								
 								if (skip) {continue;}
 								if ($el.is("img,br,hr")) {
@@ -1831,14 +1833,21 @@ var wbbdebug=true;
 			if (!this.options.bbmode && !init) {return this.$body.html()}
 			
 			if (!skiplt) {bbdata = bbdata.replace(/</g,"&lt;").replace(/\{/g,"&#123;").replace(/\}/g,"&#125;");}
-			bbdata = bbdata.replace(/\[code\](.*?)\[\/code\]/g,function(s) {
+			bbdata = bbdata.replace(/\[code\]([\s\S]*?)\[\/code\]/g,function(s) {
 				s = s.substr("[code]".length,s.length-"[code]".length-"[/code]".length).replace(/\[/g,"&#91;").replace(/\]/g,"&#93;");
 				return "[code]"+s+"[/code]";
 			});
 			//transform smiles
 			$.each(this.options.smileList,$.proxy(function(i,row) {
-				bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),this.strf(row.img,this.options));
+				//bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),this.strf(row.img,this.options));
+				bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),"_WBBSM"+i+"_");
 			},this));
+			
+			bbdata = bbdata.replace(/_WBBSM(\d+)_/g,$.proxy(function(s,i) {
+				return this.strf(this.options.smileList[i].img,this.options);
+			},this));
+			
+			
 			
 			$.each(this.options.btnlist,$.proxy(function(i,b){
 				if (b!="|" && b!="-") {
@@ -1851,11 +1860,15 @@ var wbbdebug=true;
 						var a=[];
 						bb = bb.replace(/(\(|\)|\[|\]|\.|\*|\?|\:|\\|\\)/g,"\\$1");
 							//.replace(/\s/g,"\\s");
-						bb = bb.replace(/\{\S+?\}/gi,function(s) {
-							s=s.substr(1,s.length-2);
+						bb = bb.replace(/\{(.*?)(\\\[.*?\\\])*\}/gi,$.proxy(function(str,s,vrgx) {
 							a.push(s);
+							if (vrgx) {
+								//has validation regexp
+								vrgx = vrgx.replace(/\\/g,"");
+								return "("+vrgx+"*?)";
+							}
 							return "([\\s\\S]*?)";
-						});
+						},this));
 						var n=0,am;
 						while ((am = (new RegExp(bb,"mgi")).exec(bbdata)) != null) {
 							if (am) {
@@ -1864,6 +1877,7 @@ var wbbdebug=true;
 									r[k]=am[i+1];
 								},this));
 								var nhtml = html;
+								nhtml = nhtml.replace(/\{(.*?)(\[.*?\])\}/g,"{$1}");
 								nhtml = this.strf(nhtml,r);
 								bbdata = bbdata.replace(am[0],nhtml);
 							}
@@ -1944,7 +1958,8 @@ var wbbdebug=true;
 			if (!node) {$node = this.body;} 
 			if (node.nodeType==3) {node=node.parentNode;}
 			var $node = $(node);
-			if (this.options.bbmode===false && $node.is('div,blockquote') && $node.contents().size()>0) {
+			if ($node.is("span[id*='wbbid']")) {$node = $node.parent();}
+			if (this.options.bbmode===false && $node.is('div,blockquote,code') && $node.contents().size()>0) {
 				var l = $node[0].lastChild;
 				if (!l || (l && l.tagName!="BR")) {$node.append("<br/>");}
 			}
@@ -1996,7 +2011,7 @@ var wbbdebug=true;
 			if (this.options.bbmode) {
 				//to HTML
 				this.$body.html(this.getHTML(this.$txtArea.val()));
-				this.$txtArea.hide().removeAttr("wbbsync");
+				this.$txtArea.hide().removeAttr("wbbsync").val("");
 				this.$iFrame.show();
 				this.$body.focus();
 			}else{
@@ -2174,7 +2189,57 @@ var wbbdebug=true;
 				this.removeLastBodyBR();
 			}
 		},
-		
+		traceTextareaEvent: function(e) {
+			var data = this.$txtArea.val();
+			if (this.options.bbmode===false && data!="" && $(e.target).closest("div.wysibb").size()==0 && !this.$txtArea.attr("wbbsync")) {
+				this.insertAtCursor(this.getHTML(data,true));
+				this.$txtArea.val("");
+			}
+		},
+		txtAreaInitContent: function() {
+			this.$body.html(this.getHTML(this.txtArea.value,true));
+		},
+		getValidationRGX: function(s) {
+			if (s.match(/\[\S+\]/)) {
+				return s.replace(/.*(\\*\[\S+\]).*/,"$1");
+			}
+			return "";
+		},
+		smileConversion: function() {
+			var snode = this.getSelectNode();
+			if (snode.nodeType==3) {
+				var ndata = snode.data;
+				if (ndata.length>=2 && !this.isInClearTextBlock(snode)) {
+					$.each(this.options.srules,$.proxy(function(i,sar) {
+						var smbb = sar[0];
+						var fidx = ndata.indexOf(smbb);
+						if (fidx!=-1) {
+							var afternode_txt = ndata.substring(fidx+smbb.length,ndata.length);
+							var afternode = document.createTextNode(afternode_txt);
+							var afternode_cursor = document.createElement("SPAN");
+							snode.data = snode.data.substr(0,fidx);
+							$(snode).after(afternode).after(afternode_cursor).after(this.strf(sar[1],this.options));
+							this.selectNode(afternode_cursor);
+							return false;
+						}
+					},this));
+				}
+			}
+		},
+		isInClearTextBlock: function(snode) {
+			if (this.cleartext && this.options.bbmode===false) {
+				if (!snode) {snode = this.getSelectNode();}
+				var find=false;
+				$.each(this.cleartext,$.proxy(function(sel,command) {
+					if (this.isContain(snode,sel)) {
+						find=command;
+						return false;
+					}
+				},this))
+				return find;
+			}
+			return false;
+		},
 		
 		//MODAL WINDOW
 		showModal: function(cmd,opt,queryState) {
@@ -2211,6 +2276,9 @@ var wbbdebug=true;
 						inp["value"]=queryState[inp.param.toLowerCase()];
 						if (inp.param.toLowerCase()=="seltext" && (!inp["value"] || inp["value"]=="")) {
 							inp["value"] = this.getSelectText(this.options.bbmode);
+						}
+						if (inp["value"] && inp["value"].indexOf("<span id='wbbid")==0 && $(inp["value"]).is("span[id*='wbbid']")) {
+							inp["value"] = $(inp["value"]).html();
 						}
 						$c.append(this.strf('<div class="wbbm-inp-row"><label>{title}</label><input class="modal-text" type="text" name="{param}" value="{value}"/></div>',inp));
 					},this));
@@ -2450,9 +2518,11 @@ var wbbdebug=true;
 	}
 	$.fn.insertAtCursor = function(data,forceBBMode) {
 		this.data("wbb").insertAtCursor(data,forceBBMode);
+		return this.data("wbb");
 	}
 	$.fn.execCommand = function(command,value) {
 		this.data("wbb").execCommand(command,value);
+		return this.data("wbb");
 	}
 	$.fn.insertImage = function(imgurl,thumburl) {
 		var editor = this.data("wbb");
@@ -2462,6 +2532,7 @@ var wbbdebug=true;
 	}
 	$.fn.sync = function() {
 		this.data("wbb").sync();
+		return this.data("wbb");
 	}
 	$.fn.destroy = function() {
 		this.data("wbb").destroy();
@@ -2469,7 +2540,7 @@ var wbbdebug=true;
 	
 	
 	$.fn.queryState = function(command) {
-		this.data("wbb").queryState(command);
+		return this.data("wbb").queryState(command);
 	}
 })(jQuery);
 
@@ -2524,7 +2595,7 @@ var wbbdebug=true;
 					e.preventDefault();
 					this.$block.removeClass('dragover');
 					var ufile = e.dataTransfer.files[0];
-					if (!ufile.name.match(new RegExp(this.opt.validation))) {
+					if (this.opt.validation && !ufile.name.match(new RegExp(this.opt.validation))) {
 						this.error(CURLANG.validation_err);
 						return false;
 					}

@@ -19,15 +19,20 @@ $lang = array_merge($lang, array(
 	'ACP_WYSIBB_PREFIX_DESC'		=> 'Путь к папке в которой находится файл jquery.wysibb.min.js',
 	'ACP_WYSIBB_PREFIX_THEME'		=> 'Путь к теме WysiBB',
 	'ACP_WYSIBB_PREFIX_THEME_DESC'	=> 'Путь к папке с темой WysiBB(wbbtheme.css). По умолчанию: /wbb/default/',
+	'ACP_WYSIBB_DEFBUTTONS'			=> 'Включенные ББ коды',
+	'ACP_WYSIBB_DEFBUTTONS_DESC'	=> 'Здесь необходимо перечислить включенные ББ коды.',
 	'ACP_WYSIBB_IUPLOAD_ENABLE'		=> 'Включить загрузку изображений',
-	'ACP_WYSIBB_IUPLOAD_ENABLE_DESC'=> 'Включить загрузку изображений средствами WysiBB на imageshack.us',
+	'ACP_WYSIBB_IUPLOAD_ENABLE_DESC'=> 'Можно выбрать загрузку изображений на фотохостинг Imageshack.us или загружать изображения на форум как вложения phpBB3(для этого необходимо включить поддержку вложений на форуме)',
+	'ACP_WYSIBB_IMGUPL_NATIVE'		=> 'phpBB3',
+	'ACP_WYSIBB_IMGUPL_IS'			=> 'Imageshack.us',
 	'ACP_WYSIBB_IUPLOAD_URL'		=> 'Путь к загрузчику изображений',
-	'ACP_WYSIBB_IUPLOAD_URL_DESC'	=> 'Путь к файлу iupload.php. Этот файл входит в состав редактора.',
+	'ACP_WYSIBB_IUPLOAD_URL_DESC'	=> 'Путь к файлу iupload_phpbb3.php. Этот файл входит в состав редактора.',
 	'ACP_WYSIBB_IUPLOAD_MAXWIDTH'	=> 'Максимальная ширина изображения',
 	'ACP_WYSIBB_IUPLOAD_MAXWIDTH_DESC'	=> 'При загрузке изображения на imageshack.us, размер будет уменьшаться до заданной ширины в пикселях. По умолчанию: 800',
 	'ACP_WYSIBB_IUPLOAD_MAXHEIGHT'	=> 'Максимальная высота изображения',
 	'ACP_WYSIBB_IUPLOAD_MAXHEIGHT_DESC'	=> 'При загрузке изображения на imageshack.us, размер будет уменьшаться до заданной высоты в пикселях. По умолчанию: 800',
-	'LOG_WYSIBB_UPDATED'			=> 'Настройки WysiBB успешно обновлены.'
+	'LOG_WYSIBB_UPDATED'			=> 'Настройки WysiBB успешно обновлены.',
+	'ACP_WYSIBB_CUSTOMBUTTONS'		=> 'Пользовательские ББ коды, которые можно включить в список'
 	
 	
 ));

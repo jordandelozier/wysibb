@@ -1,6 +1,6 @@
 /* wysibb */
 html{height:100% !important;}
-ul,ol{padding:0 0 0 30px}
+.wysibb-body ul,ol{padding:0 0 0 30px}
 .wysibb{margin:0 0 15px 0 !important;border:1px solid #ddd;position:relative;background:#fff;font-family:Arial,Verdana,Tahoma;}
 .wysibb-texarea{
   border:none !important;
@@ -40,9 +40,10 @@ ul,ol{padding:0 0 0 30px}
   padding:1px 2px;
   cursor:pointer;
   margin:0 0 0 1px;
+  font-size: 12px;
 }
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.dis:hover{opacity:0.3;cursor:default;overflow:hidden;border:0;padding:1px 2px;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on:hover {
-  cursor:default;
   background:#ccc;
   padding:0px 1px;
   box-shadow:inset 0px 0px 3px #aaa;
@@ -133,6 +134,7 @@ ul,ol{padding:0 0 0 30px}
 .ve-tlb-table{background: url(./img/icons.png) 0 -460px;width:20px;}
 .ve-tlb-smilebox{background: url(./img/icons.png) 0 -480px;width:20px;}
 .ve-tlb-video{background: url(./img/icons.png) 0 -500px;width:20px;}
+.ve-tlb-attach{background: url(./img/icons.png) 0 -520px;width:20px;}
 
 .tthotkey{color:#ddd;font-size:9px;}
 
@@ -194,6 +196,9 @@ ul,ol{padding:0 0 0 30px}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.on{
   padding-right:9px;
   background-position: 14px -399px;
+}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis:hover{
+  padding-right:9px;
 }
 .wbb-list{
   display:none;
@@ -269,6 +274,9 @@ ul,ol{padding:0 0 0 30px}
 /* SELECT */
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select{
   width:100px;
+  padding: 1px 1px 1px 5px;
+}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.dis:hover{
   padding: 1px 1px 1px 5px;
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.on{

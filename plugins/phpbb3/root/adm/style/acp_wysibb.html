@@ -18,33 +18,42 @@
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_PREFIX}:</label><br />{L_ACP_WYSIBB_PREFIX_DESC}</dt>
-			<dd><dd><input type="text" class="input" name="wysibb_prefix" value="{S_WYSIBB_PREFIX}" id="wysibb_prefix" /></label>
+			<dd><input type="text" class="input" name="wysibb_prefix" value="{S_WYSIBB_PREFIX}" id="wysibb_prefix" size="50"/>
 		</dd>
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_PREFIX_THEME}:</label><br />{L_ACP_WYSIBB_PREFIX_THEME_DESC}</dt>
-			<dd><dd><input type="text" class="input" name="wysibb_prefix_theme" value="{S_WYSIBB_PREFIX_THEME}" id="wysibb_prefix_theme" /></label>
+			<dd><input type="text" class="input" name="wysibb_prefix_theme" value="{S_WYSIBB_PREFIX_THEME}" id="wysibb_prefix_theme" size="50"/>
+			</dd>
+		</dl>
+		<dl>
+		<dt><label for="wysibb_defbuttons">{L_ACP_WYSIBB_DEFBUTTONS}:</label><br />{L_ACP_WYSIBB_DEFBUTTONS_DESC}</dt>
+			<dd><input type="text" class="input" name="wysibb_defbuttons" value="{S_WYSIBB_DEFBUTTONS}" id="wysibb_defbuttons" style="width:95%"/>
+			<br/>{L_ACP_WYSIBB_CUSTOMBUTTONS}:<br/> <b>{S_WYSIBB_CUSTOMBUTTONS}</b>
 		</dd>
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_IUPLOAD_ENABLE}:</label><br />{L_ACP_WYSIBB_IUPLOAD_ENABLE_DESC}</dt>
-			<dd><label><input type="radio" class="radio" name="wysibb_iupload" value="1" <!-- IF S_WYSIBB_IUPLOAD_ENABLE  --> checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+			<dd>
+			<label><input type="radio" class="radio" name="wysibb_iupload" value="1" <!-- IF S_WYSIBB_IUPLOAD_ENABLE_NATIVE  --> checked="checked"<!-- ENDIF --> /> {L_ACP_WYSIBB_IMGUPL_NATIVE}</label>
+			<label><input type="radio" class="radio" name="wysibb_iupload" value="2" <!-- IF S_WYSIBB_IUPLOAD_ENABLE_IS  --> checked="checked"<!-- ENDIF --> /> {L_ACP_WYSIBB_IMGUPL_IS}</label>
 			<label><input type="radio" class="radio" name="wysibb_iupload" value="0" <!-- IF S_WYSIBB_IUPLOAD_DISABLE  --> checked="checked"<!-- ENDIF --> /> {L_NO}</label>
+			
 		</dd>
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_IUPLOAD_URL}:</label><br />{L_ACP_WYSIBB_IUPLOAD_URL_DESC}</dt>
-			<dd><dd><input type="text" class="input" name="wysibb_iupload_url" value="{S_WYSIBB_IUPLOAD_URL}" id="wysibb_prefix_theme" /></label>
+			<dd><input type="text" class="input" name="wysibb_iupload_url" value="{S_WYSIBB_IUPLOAD_URL}" id="wysibb_prefix_theme" size="50" />
 		</dd>
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_IUPLOAD_MAXWIDTH}:</label><br />{L_ACP_WYSIBB_IUPLOAD_MAXWIDTH_DESC}</dt>
-			<dd><dd><input type="text" class="input" name="wysibb_iupload_maxwidth" value="{S_WYSIBB_IUPLOAD_MAXWIDTH}" id="wysibb_iupload_maxwidth" /></label>
+			<dd><input type="text" class="input" name="wysibb_iupload_maxwidth" value="{S_WYSIBB_IUPLOAD_MAXWIDTH}" id="wysibb_iupload_maxwidth" />
 		</dd>
 		</dl>
 		<dl>
 		<dt><label for="wysiwyg_show_radio">{L_ACP_WYSIBB_IUPLOAD_MAXHEIGHT}:</label><br />{L_ACP_WYSIBB_IUPLOAD_MAXHEIGHT_DESC}</dt>
-			<dd><dd><input type="text" class="input" name="wysibb_iupload_maxheight" value="{S_WYSIBB_IUPLOAD_MAXHEIGHT}" id="wysibb_iupload_maxheight" /></label>
+			<dd><input type="text" class="input" name="wysibb_iupload_maxheight" value="{S_WYSIBB_IUPLOAD_MAXHEIGHT}" id="wysibb_iupload_maxheight" />
 		</dd>
 		</dl>
 		

@@ -56,14 +56,15 @@ $language_file = 'mods/wysibb';
 * The version numbering must otherwise be compatible with the version_compare function - http://php.net/manual/en/function.version-compare.php
 */
 $versions = array(
-	'1.0.0' => array(
+	'1.0.1' => array(
 		'config_add' => array(
 			array('wysibb_enable', '1', 0),
 			array('wysibb_exjquery', '1', 0),
 			array('wysibb_prefix', '/wbb/', 0),
 			array('wysibb_prefix_theme', '/wbb/default/', 0),
+			array('wysibb_defbuttons', 'bold,italic,underline,|,quote,code,bullist,numlist,|,img,link,smilebox,fontsize,fontcolor,attach', 0),
 			array('wysibb_iupload', '1', 0),
-			array('wysibb_iupload_url', '/wbb/iupload.php', 0),
+			array('wysibb_iupload_url', '/wbb/iupload_phpbb3.php', 0),
 			array('wysibb_iupload_maxwidth', '800', 0),
 			array('wysibb_iupload_maxheight', '800', 0),
 		),

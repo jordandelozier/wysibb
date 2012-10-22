@@ -16,7 +16,7 @@
 				<email><![CDATA[support@wysibb.com]]></email>
 			</author>
 		</author-group>
-		<mod-version>1.0.0</mod-version>
+		<mod-version>1.0.2</mod-version>
 		<installation>
 			<level>easy</level>
 			<time>60</time>
@@ -30,9 +30,15 @@
 			<file from="root/adm/style/acp_wysibb.html" to="adm/style/acp_wysibb.html"/>
 			<file from="root/language/en/mods/wysibb.php" to="language/en/mods/wysibb.php"/>
 			<file from="root/includes/acp/acp_wysibb.php" to="includes/acp/acp_wysibb.php"/>
+			<file from="root/styles/prosilver/template/wysibb.html" to="styles/prosilver/template/wysibb.html"/>
 			<file from="root/includes/acp/info/acp_wysibb.php" to="includes/acp/info/acp_wysibb.php"/>
 		</copy>
 		<open src="includes/functions.php">
+			<edit>
+				<find><![CDATA['TRANSLATION_INFO'		=>]]></find>
+				<action type="after-add"><![CDATA['WYSIBB_LOAD'			=> wysibb_load(),
+'WYSIBB_INIT'			=> wysibb_init(),]]></action>
+			</edit>
 			<edit>
 				<find><![CDATA[function phpbb_user_session_handler()
 {
@@ -57,11 +63,14 @@ function wysibb_load() {
 			$wbbload .= '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>';
 		}
 		$wbbload .= '<script src="'.($config['wysibb_prefix']).'/jquery.wysibb.min.js"></script>';
-		$wbbload .= '<script src="'.($config['wysibb_prefix']).'/preset/phpbb3.js"></script>';
 		if ($user->data['user_lang']!="ru") {
-			$wbbload .= '<script src="'.($config['wysibb_prefix']).'/lang/en.js"></script>';
+			if ($user->data['user_lang']!="en") {
+				$wbbload .= '<script src="'.($config['wysibb_prefix']).'/lang/en.js"></script>';
+			}
 			$wbbload .= '<script src="'.($config['wysibb_prefix']).'/lang/'.$user->data['user_lang'].'.js"></script>';
+			$wbbload .= "<script>CURLANG=WBBLANG['".$user->data['user_lang']."'] || WBBLANG['en'] || CURLANG;</script>";
 		}
+		$wbbload .= '<script src="'.($config['wysibb_prefix']).'/preset/phpbb3.js"></script>';
 		$wbbload .= '<link rel="stylesheet" type="text/css" href="'.($config['wysibb_prefix_theme']).'/wbbtheme.css">';
 		
 		return $wbbload;
@@ -73,7 +82,6 @@ function wysibb_init() {
 	if ($config['wysibb_enable']) {
 		
 		$custom_bbcodes="";
-		$custom_buttons="";
 		
 		$sql = 'SELECT *
 			FROM ' . BBCODES_TABLE . '
@@ -109,50 +117,52 @@ function wysibb_init() {
 						\''.$trhtml.'\':\''.$trbb.'\'
 					}
 				}';
-				if (strlen($custom_buttons)>0) {
-					$custom_buttons.=",";
-				}
-				$custom_buttons.=$row['bbcode_tag'];
 			}
 		}
 		$db->sql_freeresult($result);
-	
-		if (strlen($custom_buttons)>0) {
-			$custom_buttons = ",|,".$custom_buttons;
+		
+		#check for upload type
+		$imgupl = "";
+		if ($config['wysibb_iupload']==1) { #native image upload
+			$imgupl = "img: {modal: {onLoad: fileModal}}";
+		}else if ($config['wysibb_iupload']==2) { #imageshack.us
+			#$imgupl = "img: {modal: {onLoad: this.imgLoadModal}}";
 		}
+		if (strlen($imgupl)>0 && strlen($custom_bbcodes)>0) {
+			$custom_bbcodes.=",";
+		}
+		
 		$wbbopt="var wbbsetting={
-			buttons: 'bold,italic,underline,|,quote,code,bullist,numlist,|,img,link,smilebox,fontsize,fontcolor$custom_buttons',
+			buttons: '".$config['wysibb_defbuttons']."',
 			allButtons: {
 				$custom_bbcodes
+				$imgupl
 			},
+			upload_type: ".$config['wysibb_iupload'].",
 			";
 			if ($user->data['user_lang']!="ru") {$wbbopt.="lang: '".$user->data['user_lang']."',\ndeflang: 'en',\n";}
-			$wbbopt.="imgupload: ".(($config['wysibb_iupload']==1) ? "true":"false").",
+			$wbbopt.="imgupload: ".(($config['wysibb_iupload']>0) ? "true":"false").",
 			img_uploadurl: '".$config['wysibb_iupload_url']."',
 			img_maxwidth: '".$config['wysibb_iupload_maxwidth']."',
 			img_maxheight: '".$config['wysibb_iupload_maxheight']."'
 		}";
 		
-		return '<a href="http://www.wysibb.com" target="_blank">WysiBB</a><script>'.$wbbopt.';$("textarea").wysibb(wbbsetting);</script>';
+		return '<a href="http://www.wysibb.com" target="_blank">WysiBB</a><script>'.$wbbopt.';$("textarea[name=\'message\']").wysibb(wbbsetting);</script>';
 	}
 	return '';
 }
 /* END WYSIBB */]]></action>
 			</edit>
-			<edit>
-				<find><![CDATA['TRANSLATION_INFO'		=> (!empty($user->lang['TRANSLATION_INFO'])) ? $user->lang['TRANSLATION_INFO'] : '',]]></find>
-				<action type="after-add"><![CDATA['WYSIBB_LOAD'			=> wysibb_load(),
-'WYSIBB_INIT'			=> wysibb_init(),]]></action>
-			</edit>
+			
 		</open>
-		<open src="styles/prosilver/overall_header.html">
+		<open src="styles/prosilver/template/overall_header.html">
 			<edit>
 				<find><![CDATA[</head>]]></find>
 				<action type="replace-with"><![CDATA[{WYSIBB_LOAD}
 </head>]]></action>
 			</edit>
 		</open>
-		<open src="styles/prosilver/overall_footer.html">
+		<open src="styles/prosilver/template/overall_footer.html">
 			<edit>
 				<find><![CDATA[<div class="copyright">{CREDIT_LINE}]]></find>
 				<action type="replace-with"><![CDATA[<div class="copyright">{CREDIT_LINE} {WYSIBB_INIT}]]></action>
