@@ -353,7 +353,7 @@ var wbbdebug=true;
 						],
 						onSubmit: function(cmd,opt,queryState) {
 							var url = this.$modal.find('input[name="SRC"]').val();
-							var a = url.match(/^http:\/\/www\.youtube\.com\/watch\?v=([a-z0-9_]+)/i);
+							var a = url.match(/^http:\/\/www\.youtube\.com\/watch\?.*?v=([a-z0-9_]+)/i);
 							if (a && a.length==2) {
 								var code = a[1];
 								this.insertAtCursor(this.getCodeByCommand(cmd,{src:code}));
@@ -523,6 +523,12 @@ var wbbdebug=true;
 			},this)); 
 			
 			$.log(this);
+			
+			$.log("Clear paste test");
+			var $tmp = $("<div>").html("<h1>test</h1>");
+			this.clearPaste($tmp);
+			$.log($tmp.html()); 
+			
 			//$.log($('<span>').html('[table]<tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr>[/table]')[0].outerHTML);
 			//$.log(this.toBB('<table><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>')); 
 			
@@ -569,6 +575,20 @@ var wbbdebug=true;
 
 						var $bel = $(document.createElement('DIV')).append($(this.elFromString(bhtml,document)));
 						var rootSelector = this.filterByNode($bel.children());
+						
+						//check if current rootSelector is exist, create unique selector for each transform (1.2.2)
+						if (rootSelector.match(/^div$/i) || o.rules[rootSelector]) {
+							//create unique selector
+							this.setUID($bel.children());
+							rootSelector = this.filterByNode($bel.children());
+							
+							//replace transform with unique selector
+							var nhtml2 = $bel.html();
+							ob.transform[nhtml2]=bbcode;
+							delete ob.transform[bhtml];
+							bhtml=nhtml2;
+						}
+						
 						//create root selector for isContain
 						if (!ob.excmd) {
 							if (!ob.rootSelector) {ob.rootSelector=[];}
@@ -772,28 +792,36 @@ var wbbdebug=true;
 					//clear html on paste from external editors
 					$(this.doc).bind('keydown', $.proxy(function(e) {
 						if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
-							this.lastRange = this.getRange();
-							var tmpel=document.createElement('DIV');
-							var $tmpel = $(tmpel).html("\uFEFF");
-							$tmpel.attr('contenteditable', 'true').attr('class', 'paste').appendTo(this.body).focus();
-							this.selectNode(tmpel);
-							setTimeout($.proxy(function() {
-								this.clearPaste($tmpel);
-								var rdata = '<span>'+$tmpel.html()+'</span>';
-								$tmpel.remove();
-								this.$body.attr("contentEditable","true");
-								this.body.focus();
-								this.selectRange(this.lastRange);
+							if (!this.$pasteBlock) {
+								this.lastRange = this.getRangeClone();
+								//this.$pasteBlock = $(this.doc.createElement('DIV')).html("\uFEFF");
+								this.$pasteBlock = $(this.elFromString('<div style="opacity:0;" contenteditable="true">\uFEFF</div>'));
 								
-								if (this.cleartext) {
-									if (this.isInClearTextBlock()) {
-										rdata = this.toBB(rdata).replace(/\n/g,"<br/>").replace(/\s{3}/g,'<span class="wbbtab"></span>');
+								this.$pasteBlock.appendTo(this.body);
+								if ($.browser.msie) {this.$pasteBlock.focus();} //IE 7,8 FIX
+								//.bind('paste',$.proxy(function(e) {
+									setTimeout($.proxy(function() {
+										this.clearPaste(this.$pasteBlock);
+										var rdata = '<span>'+this.$pasteBlock.html()+'</span>';
+										this.$body.attr("contentEditable","true");
+										this.$pasteBlock.blur().remove();
+										this.body.focus();
+
+										if (this.cleartext) {
+											if (this.isInClearTextBlock()) {
+												rdata = this.toBB(rdata).replace(/\n/g,"<br/>").replace(/\s{3}/g,'<span class="wbbtab"></span>');
+											}
+										}
+										this.selectRange(this.lastRange);
+										this.insertAtCursor(rdata,false);
+										this.lastRange=false;
+										this.$pasteBlock=false;
 									}
-								}
-								
-								this.insertAtCursor(rdata,false);
-								this.lastRange=false;
-							},this), 1);
+									,this), 1);
+								//},this)); 
+								this.selectNode(this.$pasteBlock[0]);
+							}
+							return true;
 						}
 					},this));
 					
@@ -1463,9 +1491,11 @@ var wbbdebug=true;
 					
 				}
 			}
-			this.seltextID = "wbbid_"+(++this.lastid);
-			params["seltext"] = '<span id="'+this.seltextID+'">'+params["seltext"]+'</span>'; //use for select seltext
 			
+			if (command!="link" && command!="img") {
+				this.seltextID = "wbbid_"+(++this.lastid);
+				params["seltext"] = '<span id="'+this.seltextID+'">'+params["seltext"]+'</span>'; //use for select seltext
+			}
 			var html = this.options.allButtons[command].html;
 			html = html.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
 				if (vrgx) {
@@ -1608,6 +1638,7 @@ var wbbdebug=true;
 		},
 		selectNode: function(node,rng) {
 			if (!rng) {rng = this.getRange();}
+			if (!rng) {return;}
 			if (window.getSelection) {
 				var sel = this.getSelection();
 				rng.selectNodeContents(node)
@@ -1619,13 +1650,27 @@ var wbbdebug=true;
 			}
 		},
 		selectRange: function(rng) {
-			if (!window.getSelection) {
-				rng.select();
-			}else{
-				var sel = this.getSelection();
-				sel.removeAllRanges();
-				sel.addRange(rng);
+			if (rng) {
+				if (!window.getSelection) {
+					rng.select();
+				}else{
+					var sel = this.getSelection();
+					sel.removeAllRanges();
+					sel.addRange(rng);
+				}
 			}
+		},
+		cloneRange: function(rng) {
+			if (rng) {
+				if (!window.getSelection) {
+					return rng.duplicate();
+				}else{
+					return rng.cloneRange();
+				}
+			}
+		},
+		getRangeClone: function() {
+			return this.cloneRange(this.getRange());
 		},
 		 
 		//TRANSFORM FUNCTIONS
@@ -1662,6 +1707,9 @@ var wbbdebug=true;
 						});
 						//filter+='['+item+'*="'+v.substr(0,v.indexOf("{"))+'"]';
 					}
+				}else{ //1.2.2
+					if (item.substr(0,1)=="_") {item=item.substr(1,item.length)}
+					filter+='['+item+']';
 				}
 			},this));
 			
@@ -1674,9 +1722,11 @@ var wbbdebug=true;
 		},
 		relFilterByNode: function(node,stop) {
 			var p="";
+			this.clearWrapAttributes(node);
 			while (node && node.tagName!="BODY" && !$(node).is(stop)) {
+				$.log("Get parent for relFilter: "+node.outerHTML+" STOP: "+stop);
 				p=this.filterByNode(node)+" "+p;
-				if (node) {node = node.parentNode;}
+				if (node) {node = node.parentNode;this.clearWrapAttributes(node);}
 			}
 			return p;
 		},
@@ -1732,7 +1782,7 @@ var wbbdebug=true;
 					//process html tag
 					var rpl,processed=false;
 					for (var rootsel in this.options.rules) {
-						if ($el.is(rootsel)) {
+						if ($el && $el.is(rootsel)) {
 							//it is root sel
 							var rlist = this.options.rules[rootsel];
 							for (var i=0; i<rlist.length; i++) {
@@ -1803,6 +1853,7 @@ var wbbdebug=true;
 								if ($el.is("img,br,hr")) {
 									//replace element
 									outbb+=bbcode;
+									$el=null;
 									break;
 								}else{
 									if (keepElement) {
@@ -1823,7 +1874,7 @@ var wbbdebug=true;
 							}
 						}
 					}
-					if ($el.is("iframe")) {return true;}
+					if (!$el || $el.is("iframe,img")) {return true;}
 					outbb+=this.toBB($el);
 				}
 			},this));
@@ -1837,15 +1888,17 @@ var wbbdebug=true;
 				s = s.substr("[code]".length,s.length-"[code]".length-"[/code]".length).replace(/\[/g,"&#91;").replace(/\]/g,"&#93;");
 				return "[code]"+s+"[/code]";
 			});
+			
+			
+			
 			//transform smiles
-			$.each(this.options.smileList,$.proxy(function(i,row) {
+			/* $.each(this.options.smileList,$.proxy(function(i,row) {
 				//bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),this.strf(row.img,this.options));
 				bbdata = bbdata.replace(new RegExp(this.prepareRGX(row.bbcode),"g"),"_WBBSM"+i+"_");
 			},this));
-			
 			bbdata = bbdata.replace(/_WBBSM(\d+)_/g,$.proxy(function(s,i) {
 				return this.strf(this.options.smileList[i].img,this.options);
-			},this));
+			},this)); */
 			
 			
 			
@@ -1893,7 +1946,26 @@ var wbbdebug=true;
 				bbdata = bbdata.replace(new RegExp(bb,"g"),html);
 			});
 			
-			return bbdata;
+			
+			var $wrap = $(this.elFromString("<div>"+bbdata+"</div>"));
+			//transform smiles
+			$wrap.contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this)).end().find("*").contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this));
+			
+			function smilerpl(i,el) {
+				var ndata = el.data;
+				$.each(this.options.smileList,$.proxy(function(i,row) {
+					var fidx = ndata.indexOf(row.bbcode);
+					if (fidx!=-1) {
+						var afternode_txt = ndata.substring(fidx+row.bbcode.length,ndata.length);
+						var afternode = document.createTextNode(afternode_txt);
+						el.data = el.data.substr(0,fidx);
+						$(el).after(afternode).after(this.strf(row.img,this.options));
+					}
+				},this));	
+			}
+			
+			
+			return $wrap.html();
 		},
 		//UTILS
 		setUID: function(el,attr) {
@@ -2103,6 +2175,7 @@ var wbbdebug=true;
 		clearPaste: function(el) {
 			var $block = $(el);
 			//clear paste
+			//$.log("clearPaste");
 			$.each(this.options.rules,$.proxy(function(s,bb) {
 				$block.find(s).attr("wbbkeep",1);
 			},this));
@@ -2209,7 +2282,7 @@ var wbbdebug=true;
 			var snode = this.getSelectNode();
 			if (snode.nodeType==3) {
 				var ndata = snode.data;
-				if (ndata.length>=2 && !this.isInClearTextBlock(snode)) {
+				if (ndata.length>=2 && !this.isInClearTextBlock(snode) && $(snode).parents("a").size()==0) {
 					$.each(this.options.srules,$.proxy(function(i,sar) {
 						var smbb = sar[0];
 						var fidx = ndata.indexOf(smbb);
@@ -2239,6 +2312,15 @@ var wbbdebug=true;
 				return find;
 			}
 			return false;
+		},
+		clearWrapAttributes: function(el) {
+			var $el = $(el);
+			$.each(this.options.attrWrap,function(i,a) {
+				if ($el.is("*[_"+a+"]")) {
+					$el.attr(a,$el.attr("_"+a));
+					$el.removeAttr("_"+a);
+				}
+			});
 		},
 		
 		//MODAL WINDOW
