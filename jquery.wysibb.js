@@ -1,3 +1,7 @@
+/*! WysiBB - WYSIWYG BBCode editor - v1.2.2 - 2012-10-26
+* http://www.wysibb.com
+* Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
+
 if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
 CURLANG = {
 	bold: "Полужирный",
@@ -567,6 +571,7 @@ var wbbdebug=true;
 				}
 				if (ob.transform && ob.skipRules!==true) {
 					for (var bhtml in ob.transform) {
+						var orightml = bhtml;
 						var bbcode = ob.transform[bhtml];
 						//wrap attributes 
 						$.each(o.attrWrap,function(i,a) {
@@ -579,6 +584,7 @@ var wbbdebug=true;
 						//check if current rootSelector is exist, create unique selector for each transform (1.2.2)
 						if (rootSelector.match(/^div$/i) || o.rules[rootSelector]) {
 							//create unique selector
+							$.log("create unique selector: "+rootSelector);
 							this.setUID($bel.children());
 							rootSelector = this.filterByNode($bel.children());
 							
@@ -611,9 +617,6 @@ var wbbdebug=true;
 								var attributes = this.getAttributeList(el);
 								$.each(attributes,$.proxy(function(i, item) {
 									var attr = $(el).attr(item);
-									$.log(el.outerHTML);
-									$.log(item);
-									$.log(attr);
 									if (item.substr(0,1)=='_') {
 										item = item.substr(1);
 									}
@@ -665,10 +668,14 @@ var wbbdebug=true;
 								}
 								sl=null;
 								var nbhtml = $bel.html();
+								//UnWrap attributes 
+								$.each(o.attrWrap,function(i,a) {
+									nbhtml = nbhtml.replace('_'+a+'="',a+'="');
+								});
 								if (bhtml!=nbhtml) {
 									//if we modify html, replace it
 									delete ob.transform[bhtml];
-									ob.transform[nbhtml]=bbcode
+									ob.transform[nbhtml]=bbcode;
 									bhtml=nbhtml;
 								}
 								
@@ -1727,12 +1734,12 @@ var wbbdebug=true;
 		},
 		relFilterByNode: function(node,stop) {
 			var p="";
-			node = $(node).clone()[0];
-			this.clearWrapAttributes(node);
+			$.each(this.options.attrWrap,function(i,a) {
+				stop = stop.replace('['+a,'[_'+a);
+			});
 			while (node && node.tagName!="BODY" && !$(node).is(stop)) {
-				//$.log("Get parent for relFilter: "+node.outerHTML+" STOP: "+stop);
 				p=this.filterByNode(node)+" "+p;
-				if (node) {node = $(node.parentNode).clone()[0];this.clearWrapAttributes(node);}
+				if (node) {node = node.parentNode;}
 			}
 			return p;
 		},
@@ -2318,15 +2325,6 @@ var wbbdebug=true;
 				return find;
 			}
 			return false;
-		},
-		clearWrapAttributes: function(el) {
-			var $el = $(el);
-			$.each(this.options.attrWrap,function(i,a) {
-				if ($el.is("*[_"+a+"]")) {
-					$el.attr(a,$el.attr("_"+a));
-					$el.removeAttr("_"+a);
-				}
-			});
 		},
 		
 		//MODAL WINDOW
