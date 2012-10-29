@@ -1,5 +1,5 @@
 /*Arabic language by Charafweb*/
-if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
+if (typeof (WBBLANG)=="undefined") {var WBBLANG = {};}
 WBBLANG['ar'] = {
 	code: "كود:",
 	bold: "سميك",
