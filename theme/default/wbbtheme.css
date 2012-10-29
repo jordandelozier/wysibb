@@ -262,6 +262,9 @@ html{height:100% !important;}
 .tbl-sel:hover{
   background:#eee;
 }
+.wbb-table{
+  width:90%
+}
 .wbb-table td{
   border: 1px dashed #DDD;
   padding: 3px;
