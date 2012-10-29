@@ -59,7 +59,6 @@ html{height:100% !important;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn span.btn-tooltip {
   display:none;
   background:#333;
-  border:1px solid #fff;
   position:absolute;
   line-height:20px;
   font-size:11px;
@@ -67,7 +66,7 @@ html{height:100% !important;}
   bottom:30px;
   left:0;
   color:#fff;
-  border-radius:3px;
+  border-radius:5px;
   white-space:nowrap;
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn span.btn-tooltip ins{
