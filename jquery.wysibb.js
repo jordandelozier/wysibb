@@ -1,9 +1,9 @@
 /*! WysiBB - WYSIWYG BBCode editor - v1.2.2 - 2012-10-26
 * http://www.wysibb.com
 * Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
-
-if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
-CURLANG = {
+"use strict"
+if (typeof (WBBLANG)=="undefined") {var WBBLANG = {};}
+var CURLANG = {
 	bold: "Полужирный",
 	italic: "Курсив",
 	underline: "Подчеркнутый",
@@ -363,7 +363,6 @@ var wbbdebug=true;
 								this.insertAtCursor(this.getCodeByCommand(cmd,{src:code}));
 							}
 							this.closeModal();
-							this.updateUI();
 							return false;
 						}
 					},
@@ -855,7 +854,6 @@ var wbbdebug=true;
 
 
 					//add event listeners
-					$(this.doc).bind('mouseup keyup',$.proxy(this.updateUI,this));
 					$(this.doc).bind('mousedown',$.proxy(function(e) {this.checkForLastBR(e.target)},this));
 
 					//trace Textarea
@@ -878,11 +876,7 @@ var wbbdebug=true;
 				},this)).insertAfter(this.$txtArea);
 			}
 
-
 			this.$editor.append('<span class="powered">Powered by <a href="http://www.wysibb.com" target="_blank">WysiBB<a/></span>');
-
-			//add event listeners to textarea
-			this.$txtArea.bind('mouseup keyup',$.proxy(this.updateUI,this));
 
 			//attach hotkeys
 			if (this.options.hotkeys===true) {
@@ -1230,7 +1224,6 @@ var wbbdebug=true;
 				//user custom command
 				opt.cmd.call(this,command,value,queryState);
 			}
-			this.updateUI();
 		},
 		queryState: function(command,withvalue) {
 			var opt = this.options.allButtons[command];
@@ -1403,6 +1396,7 @@ var wbbdebug=true;
 					}
 				},this));
 			}
+			return this.updateUI()
 		},
 		execNativeCommand: function(cmd,param) {
 			//$.log("execNativeCommand: '"+cmd+"' : "+param);
@@ -1435,7 +1429,6 @@ var wbbdebug=true;
 				}
 				this.doc.execCommand(cmd, false, param);
 			}
-
 		},
 		getCodeByCommand: function(command,paramobj) {
 			return (this.options.bbmode) ? this.getBBCodeByCommand(command,paramobj):this.getHTMLByCommand(command,paramobj);
@@ -1617,6 +1610,7 @@ var wbbdebug=true;
 					this.splitPrevNext(node);
 				}
 			}
+			return this.updateUI()
 		},
 		getSelectNode: function(rng) {
 			this.body.focus();
@@ -2243,20 +2237,17 @@ var wbbdebug=true;
 			this.resizeTimer=setTimeout($.proxy(function() {
 				var wh = this.$iFrame.outerHeight();
 				var ih = this.$body.outerHeight();
-				if (ih>wh) {
-					if (ih>this.options.resize_maxheight) {ih=this.options.resize_maxheight;}
+                if (ih>this.options.resize_maxheight) {ih=this.options.resize_maxheight;}
 /* 					this.lastRange=this.getRange();
-					this.$iFrame.animate({
-						height: (ih+30)+"px"
-					},100,$.proxy(function() {
-						this.selectRange(this.lastRange);
-					},this));
-					this.$iFrame.select(); */
-					//this.selectRange(this.lastRange);
-					this.$iFrame.height((ih+30)+"px");
-					this.$txtArea.height((ih+30)+"px");
-
-				}
+                this.$iFrame.animate({
+                    height: (ih+30)+"px"
+                },100,$.proxy(function() {
+                    this.selectRange(this.lastRange);
+                },this));
+                this.$iFrame.select(); */
+                //this.selectRange(this.lastRange);
+                this.$iFrame.height(ih+"px");
+                this.$txtArea.height(ih+"px");
 			},this),200);
 		},
 		pressTab: function(e) {
@@ -2407,13 +2398,13 @@ var wbbdebug=true;
 					this.wbbInsertCallback(cmd,params);
 					//END insert callback
 
-					this.closeModal().updateUI();
+					this.closeModal();
 				}
 			},this));
 			$wbbm.find('#wbbm-remove').click($.proxy(function() {
 				//clbk.remove();
 				this.wbbRemoveCallback(cmd); //remove callback
-				this.closeModal().updateUI();
+				this.closeModal();
 			},this));
 
 			$(document.body).css("overflow","hidden"); //lock the screen, remove scroll on body
@@ -2495,7 +2486,6 @@ var wbbdebug=true;
 						this.$txtArea.insertImage(data.image_link,data.thumb_link);
 
 						this.closeModal();
-						this.updateUI();
 					},this)
 				});
 

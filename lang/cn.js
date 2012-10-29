@@ -1,4 +1,4 @@
-if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
+if (typeof (WBBLANG)=="undefined") {var WBBLANG = {};}
 WBBLANG['cn'] = {
 	bold: "粗体",
 	italic: "斜体",
