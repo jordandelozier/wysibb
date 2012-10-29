@@ -1,5 +1,5 @@
-#WysiBB - WYSIWYG BBcode редактор
+#WysiBB - WYSIWYG BBcode editor
 
-[Официальный сайт](http://www.wysibb.com)  
-[Демо](http://www.wysibb.com/demo/)  
-[Форум](http://www.wysibb.com/forum/)  
+[Official website](http://www.wysibb.com)  
+[Demo](http://www.wysibb.com/demo/)  
+[Support forum](http://www.wysibb.com/forum/)  
