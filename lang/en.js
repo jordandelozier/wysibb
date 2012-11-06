@@ -27,6 +27,8 @@ WBBLANG['en'] = {
 	fs_big: "Big",
 	fs_verybig: "Very big",
 	smilebox: "Insert emoticon",
+	video: "Embed a video",
+	removeFormat:"Remove Format",
 	
 	modal_link_title: "Insert link",
 	modal_link_text: "Display text",
@@ -40,6 +42,9 @@ WBBLANG['en'] = {
 	modal_img_tab2: "Upload image",
 	modal_imgsrc_text: "Enter image URL",
 	modal_img_btn: "Choose file",
+	add_attach: "Add Attachment",
+	
+	modal_video_text: "Enter the URL of the video",
 	
 	close: "Close",
 	save: "Save",
@@ -54,6 +59,8 @@ WBBLANG['en'] = {
 	
 	loading: "Loading",
 	auto: "Auto",
+	views: "Views",
+	downloads: "Downloads",
 	
 	//smiles
 	sm1: "Smile",
