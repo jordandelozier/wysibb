@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.2.2 - 2012-10-26
+/*! WysiBB - WYSIWYG BBCode editor - v1.2.3 - 2012-11-06
 * http://www.wysibb.com
 * Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -528,11 +528,6 @@ var wbbdebug=true;
 			
 			$.log(this);
 			
-			$.log("Clear paste test");
-			var $tmp = $("<div>").html("<h1>test</h1>");
-			this.clearPaste($tmp);
-			$.log($tmp.html()); 
-			
 			//$.log($('<span>').html('[table]<tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr>[/table]')[0].outerHTML);
 			//$.log(this.toBB('<table><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>')); 
 			
@@ -560,6 +555,7 @@ var wbbdebug=true;
 			for (var bidx=0; bidx<btnlist.length; bidx++) {
 				var ob = o.allButtons[btnlist[bidx]];
 				if (!ob ) {continue;}
+				ob.en=true;
 				//add transforms to option list
 				if (ob.type=="select" && typeof(ob.options)=="string") {
 					var olist = ob.options.split(",");
@@ -570,7 +566,8 @@ var wbbdebug=true;
 					});
 				}
 				if (ob.transform && ob.skipRules!==true) {
-					for (var bhtml in ob.transform) {
+					var obtr = $.extend({},ob.transform);
+					for (var bhtml in obtr) {
 						var orightml = bhtml;
 						var bbcode = ob.transform[bhtml];
 						//wrap attributes 
@@ -582,7 +579,7 @@ var wbbdebug=true;
 						var rootSelector = this.filterByNode($bel.children());
 						
 						//check if current rootSelector is exist, create unique selector for each transform (1.2.2)
-						if (rootSelector.match(/^div$/i) || o.rules[rootSelector]) {
+						if (rootSelector=="div" || typeof(o.rules[rootSelector])!="undefined") {
 							//create unique selector
 							$.log("create unique selector: "+rootSelector);
 							this.setUID($bel.children());
@@ -703,17 +700,7 @@ var wbbdebug=true;
 			
 			//add custom rules, for table,tr,td and other
 			$.extend(o.rules,this.options.customRules);
-			//add system codes
-			/* $.each(o.systr,$.proxy(function(html,bb) {
-				if (!html.match(/\{\S+?\}/)) { 
-					//without params
-					var rs = this.filterByNode(this.elFromString(html,document));
-					o.rules[rs]=[];
-					o.rules[rs].push([bb,{}]);
-				}
-			},this)); */
-			//this.options.btnlist.push("_systr");
-			
+		
 			//smile rules
 			o.srules={};
 			if (this.options.smileList) {
@@ -741,7 +728,6 @@ var wbbdebug=true;
 			this.$editor = $('<div>').addClass("wysibb");
 			
 			//set direction if defined
-			$.log(this.options);
 			if (this.options.direction) {this.$editor.css("direction",this.options.direction)}
 			
 			this.$editor.insertAfter(this.txtArea).append(this.txtArea);
@@ -784,11 +770,12 @@ var wbbdebug=true;
 					
 					if ('contentEditable' in this.body) {
 						this.body.contentEditable=true;
-						this.doc.designMode = "on";
 						try{
 							//fix for mfirefox
 							//this.doc.execCommand('enableObjectResizing', false, 'false'); //disable iage resizing
 							this.doc.execCommand('StyleWithCSS', false, false);
+							this.doc.designMode = "on";
+							this.$body.append("<span></span>");
 						}catch(e) {}
 					}else{
 						//use onlybbmode
@@ -824,6 +811,7 @@ var wbbdebug=true;
 												rdata = this.toBB(rdata).replace(/\n/g,"<br/>").replace(/\s{3}/g,'<span class="wbbtab"></span>');
 											}
 										}
+										rdata = rdata.replace(/\t/g,'<span class="wbbtab"></span>');
 										this.selectRange(this.lastRange);
 										this.insertAtCursor(rdata,false);
 										this.lastRange=false;
@@ -1194,6 +1182,7 @@ var wbbdebug=true;
 		execCommand: function(command,value) {
 			$.log("execCommand: "+command);
 			var opt = this.options.allButtons[command];
+			if (opt.en!==true) {return false;}
 			var queryState = this.queryState(command,value);
 			
 			//check for onlyClearText
@@ -1231,6 +1220,7 @@ var wbbdebug=true;
 		},
 		queryState: function(command,withvalue) {
 			var opt = this.options.allButtons[command];
+			if (opt.en!==true) {return false;}
 			//if (opt.subInsert===true && opt.type!="colorpicker") {return false;}
 			if (this.options.bbmode) {
 				//bbmode
@@ -1504,9 +1494,12 @@ var wbbdebug=true;
 				}
 			}
 			
+			var postsel="";
+			this.seltextID = "wbbid_"+(++this.lastid);
 			if (command!="link" && command!="img") {
-				this.seltextID = "wbbid_"+(++this.lastid);
 				params["seltext"] = '<span id="'+this.seltextID+'">'+params["seltext"]+'</span>'; //use for select seltext
+			}else{
+				postsel = '<span id="'+this.seltextID+'">\uFEFF</span>'
 			}
 			var html = this.options.allButtons[command].html;
 			html = html.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
@@ -1539,7 +1532,7 @@ var wbbdebug=true;
 				});
 				if (valid) {rhtml = v;return false;}
 			});
-			return rhtml || html;
+			return (rhtml || html)+postsel;
 		},
 		
 		//SELECTION FUNCTIONS
@@ -1962,7 +1955,7 @@ var wbbdebug=true;
 			
 			var $wrap = $(this.elFromString("<div>"+bbdata+"</div>"));
 			//transform smiles
-			$wrap.contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this)).end().find("*").contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this));
+			/* $wrap.contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this)).end().find("*").contents().filter(function() {return this.nodeType==3}).each($.proxy(smilerpl,this));
 			
 			function smilerpl(i,el) {
 				var ndata = el.data;
@@ -1971,14 +1964,33 @@ var wbbdebug=true;
 					if (fidx!=-1) {
 						var afternode_txt = ndata.substring(fidx+row.bbcode.length,ndata.length);
 						var afternode = document.createTextNode(afternode_txt);
-						el.data = el.data.substr(0,fidx);
+						el.data = ndata = el.data.substr(0,fidx);
 						$(el).after(afternode).after(this.strf(row.img,this.options));
 					}
 				},this));	
-			}
-			
+			} */
+			this.getHTMLSmiles($wrap);
+			//$wrap.contents().filter(function() {return this.nodeType==3}).each($.proxy(this,smileRPL,this));
 			
 			return $wrap.html();
+		},
+		getHTMLSmiles: function(rel) {
+			$(rel).contents().filter(function() {return this.nodeType==3}).each($.proxy(this.smileRPL,this));
+		},
+		smileRPL: function(i,el) {
+			var ndata = el.data;
+			$.each(this.options.smileList,$.proxy(function(i,row) {
+				var fidx = ndata.indexOf(row.bbcode);
+				if (fidx!=-1) {
+					var afternode_txt = ndata.substring(fidx+row.bbcode.length,ndata.length);
+					var afternode = document.createTextNode(afternode_txt);
+					el.data = ndata = el.data.substr(0,fidx);
+					$(el).after(afternode).after(this.strf(row.img,this.options));
+					this.getHTMLSmiles(el.parentNode);
+					return false;
+				}
+			this.getHTMLSmiles(el);
+			},this));	
 		},
 		//UTILS
 		setUID: function(el,attr) {
@@ -2269,7 +2281,6 @@ var wbbdebug=true;
 			}
 		},
 		removeLastBodyBR: function() {
-			$.log("removeLastBodyBR");
 			if (this.body.lastChild && this.body.lastChild.nodeType!=3 && this.body.lastChild.tagName=="BR") {
 				this.body.removeChild(this.body.lastChild);
 				this.removeLastBodyBR();
