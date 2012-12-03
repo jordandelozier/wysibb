@@ -1,7 +1,20 @@
 /* wysibb */
+@font-face {
+  font-family: 'WysiBBiconFont';
+  src:url('../fonts/WysiBBiconFontAH.eot');
+  src:url('../fonts/WysiBBiconFontAH.eot?#iefix') format('embedded-opentype'),
+	  url('../fonts/WysiBBiconFontAH.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+ 
 html{height:100% !important;}
+.wysibb-body{
+  overflow-x: hidden
+}
 .wysibb-body ul,ol{padding:0 0 0 30px}
-.wysibb{margin:0 0 15px 0 !important;border:1px solid #ddd;position:relative;background:#fff;font-family:Arial,Verdana,Tahoma;}
+.wysibb{margin:0 0 15px 0 !important;border:1px solid #ddd;position:relative;background:#fff;font-family:Arial,Verdana,Tahoma;font-size:12px;}
 .wysibb-texarea{
   border:none !important;
   margin:0 !important;
@@ -37,12 +50,13 @@ html{height:100% !important;}
   min-width:24px;
   position:relative;
   vertical-align: middle;
-  padding:1px 2px;
+  padding:0px 1px;
   cursor:pointer;
   margin:0 0 0 1px;
   font-size: 12px;
+  border:1px solid transparent;
 }
-.wysibb .wysibb-toolbar .wysibb-toolbar-container .dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.dis:hover{opacity:0.3;cursor:default;overflow:hidden;border:0;padding:1px 2px;}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.dis:hover{opacity:0.3;cursor:default;overflow:hidden;border:0;padding:1px 2px;background:transparent;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on:hover {
   background:#ccc;
   padding:0px 1px;
@@ -69,6 +83,7 @@ html{height:100% !important;}
   color:#fff;
   border-radius:3px;
   white-space:nowrap;
+  z-index:10000;
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn span.btn-tooltip ins{
   width:0;
@@ -97,6 +112,23 @@ html{height:100% !important;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:hover span.btn-tooltip{
   display:block;
 }
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn .fonticon{
+  color:#333;
+  font-family: 'WysiBBiconFont';
+  font-size:18px;
+  line-height:20px;
+  text-shadow:0px 1px 0px #fff;
+  text-align:center;
+  /* -webkit-font-smoothing: antialiased; */
+  speak: none;
+}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn:hover .fonticon{
+  color:#000;
+}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.on .fonticon{
+  text-shadow:none;
+  color:#000;
+}
 .wysibb .wysibb-toolbar .modeSwitch{
   text-align:center;
   position:absolute;
@@ -105,7 +137,14 @@ html{height:100% !important;}
   border:0;
 }
 .wysibb .wysibb-toolbar .modeSwitch .wysibb-toolbar-btn{
-  width:46px;
+  /* width:46px; */
+}
+.modesw{
+  font-weight:bold;
+  font-size:0.9em;
+  line-height:20px;
+  text-align:center;
+  display:block;
 }
 
  
@@ -130,7 +169,7 @@ html{height:100% !important;}
 .ve-tlb-spoiler{background:url(./img/icons.png) 0 -340px no-repeat;width:20px;}
 .ve-tlb-sub{background:url(./img/icons.png) 0 -360px no-repeat;width:20px;}
 .ve-tlb-sup{background:url(./img/icons.png) 0 -380px no-repeat;width:20px;}
-.ve-tlb-colorpick{background: url(./img/icons.png) 5px -436px;width:24px;height:24px;}
+.ve-tlb-colorpick{/* background: url(./img/icons.png) 5px -436px; */width:24px;height:24px;line-height:24px;text-align:right;}
 .ve-tlb-table{background: url(./img/icons.png) 0 -460px;width:20px;}
 .ve-tlb-smilebox{background: url(./img/icons.png) 0 -480px;width:20px;}
 .ve-tlb-video{background: url(./img/icons.png) 0 -500px;width:20px;}
@@ -144,6 +183,9 @@ html{height:100% !important;}
 .wysibb-text{margin:5px;}
 .wysibb-text .wysibb-text-iframe{max-width:100%;width:100%;margin:0;}
 .wysibb-body{text-align:left;min-width:0 !important;overflow:auto !important;margin:0 !important;padding:0 !important;}
+.wysibb-text-editor{outline:none}
+.bottom-resize-line{height:5px;cursor:ns-resize;}
+.bottom-resize-line:hover,.bottom-resize-line.drag{background:#eee}
 /* END CONTENT */
 
 /* DEFAULT STYLES */
@@ -185,20 +227,24 @@ html{height:100% !important;}
   display:block;
   position:absolute;
   right:3px;
-  top:3px;
-  width:8px;
+  top:0px;
+  width:9px;
   height:24px;
-  background: url(./img/icons.png) -8px -400px;
+ /*  background: url(./img/icons.png) -8px -400px; */
   cursor:default;
+  text-decoration:none;
+  font-size:14px;
+  padding:0 2px;
+  line-height:24px;
 }
 
 
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.on{
-  padding-right:9px;
-  background-position: 14px -399px;
+  padding-right:10px;
+/*   background-position: 14px -399px; */
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis:hover{
-  padding-right:9px;
+/*   padding-right:9px; */
 }
 .wbb-list{
   display:none;
@@ -212,6 +258,7 @@ html{height:100% !important;}
   background:#fff;
   max-height:220px;
   overflow:auto;
+  z-index:1000;
 }
 /* END DROPDOWN */
 
@@ -272,30 +319,37 @@ html{height:100% !important;}
 /* TABLE PICKER */
 
 /* SELECT */
-.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select{
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.dis:hover{
   width:100px;
   padding: 1px 1px 1px 5px;
+  border:1px solid transparent;
+  background:transparent;
 }
-.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.dis:hover{
-  padding: 1px 1px 1px 5px;
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select:hover{
+  border: 1px solid #bbb;
+  background:#fff;
 }
-.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select:hover,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.on{
-  padding: 0 0 0 4px;
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select.on{
+   padding: 1px 1px 1px 5px;
+   border:1px solid #999;
+   background:#ccc;
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select .wbb-list{
   width:280px;
   padding:0;
   max-height:250px;
 }
-.wbb-select .sar{
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select .sar{
   display:block;
   position:absolute;
   right:3px;
-  top:4px;
-  width:8px;
+  top:3px;
+  width:10px;
   height:22px;
-  background: url(./img/icons.png) -8px -420px;
   cursor:default;
+  font-size:14px;
+  text-decoration:none;
+  padding:0 3px;
 }
 .wbb-select .val{
   height:24px;
@@ -437,6 +491,15 @@ html{height:100% !important;}
 #wbbmodal  .hastabs .wbbm-bottom,#wbbmodal .hastabs .wbbm-cont {
   margin-left:170px;	
   border-left:1px solid #ccc;
+}
+
+#wbbmodal .div-modal-text{
+  min-height:18px;
+  border:1px solid #aaa;
+  padding:3px;
+  line-height:18px;
+  max-height:100px;
+  overflow:auto;
 }
 #wbbmodal  .wbbm-bottom{
 
@@ -587,4 +650,12 @@ html{height:100% !important;}
 /* PHPBB3 */
 .content-phpbb3{
   font-size:13px;
+  line-height:normal !important;
+}
+.content-phpbb3 .codebox dt{
+  float:none;
+  width: 100%;
+}
+.content-phpbb3 .codebox dd{
+  margin:0 !important;
 }
