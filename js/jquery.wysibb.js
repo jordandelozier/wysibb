@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.3.0 - 2012-11-28
+/*! WysiBB - WYSIWYG BBCode editor - v1.3.1 - 2012-12-05
 * http://www.wysibb.com
 * Copyright (c) 2012 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -87,7 +87,6 @@ var wbbdebug=true;
 		
 		if (settings && settings.deflang && typeof(WBBLANG[settings.deflang])!="undefined") {CURLANG = WBBLANG[settings.deflang];}
 		if (settings && settings.lang && typeof(WBBLANG[settings.lang])!="undefined") {CURLANG = WBBLANG[settings.lang];}
-		
 		this.txtArea=txtArea;
 		this.$txtArea=$(txtArea);
 		var id = this.$txtArea.attr("id") || this.setUID(this.txtArea);
@@ -187,7 +186,8 @@ var wbbdebug=true;
 						]
 					},
 					transform : {
-						'<a href="{URL}">{SELTEXT}</a>':"[url={URL}]{SELTEXT}[/url]"
+						'<a href="{URL}">{SELTEXT}</a>':"[url={URL}]{SELTEXT}[/url]",
+						'<a href="{URL}">{URL}</a>':"[url]{URL}[/url]"
 					}
 				},
 				img : {
@@ -586,9 +586,8 @@ var wbbdebug=true;
 						var orightml = bhtml;
 						var bbcode = ob.transform[bhtml];
 						//wrap attributes 
-						$.each(o.attrWrap,function(i,a) {
-							bhtml = bhtml.replace(a+'="','_'+a+'="');
-						});
+						bhtml = this.wrapAttrs(bhtml);
+						
 
 						var $bel = $(document.createElement('DIV')).append($(this.elFromString(bhtml,document)));
 						var rootSelector = this.filterByNode($bel.children());
@@ -602,8 +601,13 @@ var wbbdebug=true;
 							
 							//replace transform with unique selector
 							var nhtml2 = $bel.html();
+							nhtml2 = this.unwrapAttrs(nhtml2);
+							var obhtml = this.unwrapAttrs(bhtml);
+							
+							
 							ob.transform[nhtml2]=bbcode;
-							delete ob.transform[bhtml];
+							delete ob.transform[obhtml];
+							
 							bhtml=nhtml2;
 						}
 						
@@ -685,9 +689,7 @@ var wbbdebug=true;
 							
 							var nbhtml = $bel.html();
 							//UnWrap attributes 
-							$.each(o.attrWrap,function(i,a) {
-								nbhtml = nbhtml.replace('_'+a+'="',a+'="');
-							});
+							nbhtml = this.unwrapAttrs(nbhtml);
 							if (orightml!=nbhtml) {
 								//if we modify html, replace it
 								delete ob.transform[orightml];
@@ -711,6 +713,10 @@ var wbbdebug=true;
 						}
 					}
 					
+					//sort rootSelector
+					if (ob.rootSelector) {
+						this.sortArray(ob.rootSelector,-1);
+					}
 					
 					var htmll = $.map(ob.transform,function(bb,html) {return html}).sort(function(a,b) {
 							return ((b[0] || "").length-(a[0] || "").length)
@@ -748,7 +754,6 @@ var wbbdebug=true;
 				this.rsellist.push(rootsel);
 			}
 			this.sortArray(this.rsellist,-1);
-			
 			
 		},
 		
@@ -1342,7 +1347,9 @@ var wbbdebug=true;
 			this.insertAtCursor(data);
 			
 			if (this.seltextID && data.indexOf(this.seltextID)!=-1) {
-				this.selectNode(this.$body.find("#"+this.seltextID)[0]);
+				var snode = this.$body.find("#"+this.seltextID)[0];
+				this.selectNode(snode);
+				$(snode).removeAttr("id");
 				this.seltextID=false;
 			}
 		},
@@ -1369,13 +1376,16 @@ var wbbdebug=true;
 			}else{
 				var node = this.getSelectNode();
 				$.each(opt.rootSelector,$.proxy(function(i,s) {
+					//$.log("RS: "+s);
 					var root = this.isContain(node,s);
+					if (!root) {return true;}
 					var $root = $(root);
 					var cs = this.options.rules[s][0][1];
 					if ($root.is("span[wbb]") || !$root.is("span,font")) { //remove only blocks
 						if (clear===true) {
 							$root.remove();
 						}else{
+							//$.log(cs);
 							if (cs && cs["seltext"] && cs["seltext"]["sel"]) {
 								var htmldata = $root.find(cs["seltext"]["sel"]).html();
 								if (opt.onlyClearText===true) {
@@ -1920,14 +1930,14 @@ var wbbdebug=true;
 									return cont || "";
 								},this));
 								if (skip) {continue;}
-								if ($el.is("img,br,hr") || $el.attr("notkeep")) {
+								$.log("bbcode: "+bbcode);
+								if ($el.is("img,br,hr")) {
 									//replace element
 									outbb+=bbcode;
 									$el=null;
 									break;
 								}else{
-									
-									if (keepElement) {
+									if (keepElement && !$el.attr("notkeep")) {
 										if ($.browser.msie) {
 											$el.empty().append($('<span>').html(bbcode));
 										}else{
@@ -2180,7 +2190,7 @@ var wbbdebug=true;
 		clearEmpty: function () {
 			this.$body.children().filter(emptyFilter).remove();
 			function emptyFilter() {
-				if (!$(this).is("span,font,a")) {
+				if (!$(this).is("span,font,a,b,i,u,s")) {
 					//clear empty only for span,font
 					return false;
 				}
@@ -2403,7 +2413,18 @@ var wbbdebug=true;
 			}
 			return false;
 		},
-		
+		wrapAttrs: function(html) {
+			$.each(this.options.attrWrap,function(i,a) {
+				html = html.replace(a+'="','_'+a+'="');
+			});
+			return html;
+		},
+		unwrapAttrs: function(html) {
+			$.each(this.options.attrWrap,function(i,a) {
+				html = html.replace('_'+a+'="',a+'="');
+			});
+			return html;
+		},
 		
 		//MODAL WINDOW
 		showModal: function(cmd,opt,queryState) {
