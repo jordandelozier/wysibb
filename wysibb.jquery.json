@@ -6,7 +6,8 @@
 	"wysibb",
     "wysiwyg",
     "bbcode",
-	"editor"
+	"editor",
+	"ui"
   ],
   "version": "1.3.3",
   "author": {
@@ -21,7 +22,7 @@
     }
   ],
   "bugs": "https://github.com/wbb/WysiBB/issues",
-  "homepage": "http://www.wysibb.com",
+  "homepage": "https://github.com/wbb/WysiBB",
   "docs": "http://www.wysibb.com/docs/",
   "download": "http://www.wysibb.com/download/",
   "dependencies": {
