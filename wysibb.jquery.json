@@ -1,7 +1,7 @@
 {
   "name": "wysibb",
-  "title": "jQuery WYSIWYG BBcode editor",
-  "description": "jQuery plugin for WYSIWYG BBcode editor.",
+  "title": "WysiBB",
+  "description": "WYSIWYG BBcode editor.",
   "keywords": [
 	"wysibb",
     "wysiwyg",
@@ -13,13 +13,7 @@
     "name": "Vadim Dobroskok",
     "url": "http://www.wysibb.com"
   },
-  "maintainers": [
-    {
-      "name": "Vadim Dobroskok",
-      "email": "support@wysibb.com",
-      "url": "http://www.wysibb.com"
-    }
-  ],
+  "maintainers": [],
   "licenses": [
     {
       "type": "MIT",
