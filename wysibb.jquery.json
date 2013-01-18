@@ -1,13 +1,12 @@
 {
-  "name": "WysiBB",
-  "title": "WysiBB - WYSIWYG BBcode editor",
-  "description": "WYSIWYG BBcode editor powered by jQuery.",
+  "name": "wysibb",
+  "title": "jQuery WYSIWYG BBcode editor",
+  "description": "jQuery plugin for WYSIWYG BBcode editor.",
   "keywords": [
-    "wysibb",
+	"wysibb",
     "wysiwyg",
     "bbcode",
-    "editor",
-    "ui"
+	"editor"
   ],
   "version": "1.3.3",
   "author": {
