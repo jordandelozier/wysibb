@@ -17,18 +17,18 @@ WBBPRESET = {
 		bullist: {
 			transform: {
 				'<ul>{SELTEXT}</ul>':'[list]{SELTEXT}[/list]',
-				'<li>{SELTEXT}</li>':'[*]{SELTEXT}\n'
+				'<li>{SELTEXT}</li>':'[*]{SELTEXT[^\[\]\*]}'
 			}
 		},
 		numlist: {
 			transform: {
 				'<ol>{SELTEXT}</ol>':'[list=1]{SELTEXT}[/list]',
-				'<li>{SELTEXT}</li>':'[*]{SELTEXT}\n'
+				'<li>{SELTEXT}</li>':'[*]{SELTEXT[^\[\]\*]}'
 			}
 		},
 		attach: {
 			title: CURLANG.add_attach,
-			buttonHTML: '<span class="ve-tlb-attach"></span>',
+			buttonHTML: '<span class="fonticon ve-tlb-attach1">\uE017</span>',
 			hotkey: 'ctrl+shift+5',
  			modal: {
 				title: CURLANG.add_attach,
