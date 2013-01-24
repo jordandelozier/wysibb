@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.3.2 - 2013-01-10
+/*! WysiBB - WYSIWYG BBCode editor - v1.3.4 - 2013-01-24
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -186,7 +186,7 @@ var wbbdebug=true;
 						]
 					},
 					transform : {
-						'<a href="{URL}" simple="false">{SELTEXT}</a>':"[url={URL}]{SELTEXT}[/url]",
+						'<a href="{URL}">{SELTEXT}</a>':"[url={URL}]{SELTEXT}[/url]",
 						'<a href="{URL}">{URL}</a>':"[url]{URL}[/url]"
 					}
 				},
@@ -819,14 +819,15 @@ var wbbdebug=true;
 				
 				
 				//clear html on paste from external editors
+				
 				this.$body.bind('keydown', $.proxy(function(e) {
 					if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
 						if (!this.$pasteBlock) {
-							this.lastRange = this.getRangeClone();
+							this.saveRange();
 							this.$pasteBlock = $(this.elFromString('<div style="opacity:0;" contenteditable="true">\uFEFF</div>'));
 							
 							this.$pasteBlock.appendTo(this.body);
-							if ($.browser.msie) {this.$pasteBlock.focus();} //IE 7,8 FIX
+							if ($.support.htmlSerialize) {this.$pasteBlock.focus();} //IE 7,8 FIX
 								setTimeout($.proxy(function() {
 									this.clearPaste(this.$pasteBlock);
 									var rdata = '<span>'+this.$pasteBlock.html()+'</span>';
@@ -869,18 +870,16 @@ var wbbdebug=true;
 					this.$body.bind('keydown', $.proxy(this.pressTab,this));
 				}
 				
-				
-				
 				//add event listeners
 				this.$body.bind('mouseup keyup',$.proxy(this.updateUI,this));
 				this.$body.bind('mousedown',$.proxy(function(e) {this.checkForLastBR(e.target)},this));
-				
+
 				//trace Textarea
 				if (this.options.traceTextarea===true) {
 					$(document).bind("mousedown",$.proxy(this.traceTextareaEvent,this));
 					this.$txtArea.val("");
 				}
-				
+
 				//attach hotkeys
 				if (this.options.hotkeys===true) {
 					this.$body.bind('keydown',$.proxy(this.presskey,this));
@@ -890,9 +889,9 @@ var wbbdebug=true;
 				if (this.options.smileConversion===true) {
 					this.$body.bind('keyup',$.proxy(this.smileConversion,this));
 				}
-				
+
 				this.inited=true;
-				
+
 				//create resize lines
 				if (this.options.autoresize===true) {
 					this.$bresize = $(this.elFromString('<div class="bottom-resize-line"></div>')).appendTo(this.$editor)
@@ -963,7 +962,7 @@ var wbbdebug=true;
 					this.modeSwitch();
 				},this));
 			}
-			if ($.browser.msie) {this.$toolbar.find("*").attr("unselectable","on");} //fix for ie8 and lower
+			if ($.support.htmlSerialize) {this.$toolbar.find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 		},
 		buildButton: function(container,bn,opt) {
@@ -974,7 +973,7 @@ var wbbdebug=true;
 			var hotkey = (this.options.hotkeys===true && this.options.showHotkeys===true && opt.hotkey) ? (' <span class="tthotkey">['+opt.hotkey+']</span>'):""
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-'+bn+'">').appendTo(container).append(btnHTML).append(this.strf('<span class="btn-tooltip">{title}<ins/>{hotkey}</span>',{title:opt.title,hotkey:hotkey}));
 			
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			//attach events
 			this.controllers.push($btn);
 			$btn.bind('queryState',$.proxy(function(e) {
@@ -989,7 +988,7 @@ var wbbdebug=true;
 		buildColorpicker: function(container,bn,opt) {
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-dropdown wbb-cp">').appendTo(container).append('<div class="ve-tlb-colorpick"><span class="fonticon">\uE010</span><span class="cp-line"></span></div><ins class="fonticon ar">\uE011</ins>').append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));
 			var $cpline = $btn.find(".cp-line");
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 			var $dropblock = $('<div class="wbb-list">').appendTo($btn); 
 			$dropblock.append('<div class="nc">'+CURLANG.auto+'</div>');
@@ -1038,7 +1037,7 @@ var wbbdebug=true;
 		},
 		buildTablepicker: function(container,bn,opt) {
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-dropdown wbb-tbl">').appendTo(container).append('<span class="btn-inner fonticon ve-tlb-table1">\uE00e</span><ins class="fonticon ar">\uE011</ins>').append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			var $dropblock = $('<div class="wbb-list">').appendTo($btn);
 			var rows = opt.rows || 10;
 			var cols = opt.cols || 10;
@@ -1079,7 +1078,7 @@ var wbbdebug=true;
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-select wbb-'+bn+'">').appendTo(container).append(this.strf('<span class="val">{title}</span><ins class="fonticon sar">\uE012</ins>',opt)).append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));  
 			var $sblock = $('<div class="wbb-list">').appendTo($btn);
 			var $sval = $btn.find("span.val");
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 			var olist = ($.isArray(opt.options)) ? opt.options:opt.options.split(",");
 			//$.log(this.printObjectInIE(olist));
@@ -1123,10 +1122,11 @@ var wbbdebug=true;
 			$btn.mousedown($.proxy(function(e) {
 				e.preventDefault();
 				this.dropdownclick(".wbb-select",".wbb-list",e);
+				$.log("LLR: "+this.lastRange);
 			},this));
 			$btn.find(".option").mousedown($.proxy(function(e) {
 				e.preventDefault();
-				//this.selectRange(this.lastRange);
+				$.log("LR: "+this.lastRange);
 				var oid = $(e.currentTarget).attr("oid");
 				var cmdvalue = $(e.currentTarget).attr("cmdvalue");
 				var opt = this.options.allButtons[oid];
@@ -1226,7 +1226,7 @@ var wbbdebug=true;
 			}
 		},
 		
-		//COMMAND FUNCTIONS
+		//COgdfMMAND FUNCTIONS
 		execCommand: function(command,value) {
 			$.log("execCommand: "+command);
 			var opt = this.options.allButtons[command];
@@ -1488,8 +1488,7 @@ var wbbdebug=true;
 				if (typeof param == "undefined") {param=false;}
 				if (this.lastRange) {
 					$.log("Last range select");
-					this.selectRange(this.lastRange);
-					this.lastRange=false;
+					this.selectLastRange()
 				}
 				document.execCommand(cmd, false, param);
 			}
@@ -1524,23 +1523,25 @@ var wbbdebug=true;
 			});
 			
 			//insert first with max params
-			var rbbcode=null;
+			var rbbcode=null,maxpcount=0;;
 			var tr=[];
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(bb);
 			});
 			tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
-				var valid=true;
+				var valid=true,pcount=0,pname={};;
 				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
 					var vrgxp;
+					p = p.toLowerCase();
 					if (vrgx) {
 						vrgxp = new RegExp(vrgx+"+","i");
 					}
 					if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
+					if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
 					return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
 				});
-				if (valid) {rbbcode = v;return false;}
+				if (valid && (pcount>maxpcount)) {rbbcode = v;maxpcount=pcount;}
 			});
 			return rbbcode || bbcode;
 		},
@@ -1585,23 +1586,25 @@ var wbbdebug=true;
 			});
 			
 			//insert first with max params
-			var rhtml=null;
+			var rhtml=null,maxpcount=0;
 			var tr=[];
 			$.each(this.options.allButtons[command].transform,function(html,bb) {
 				tr.push(html);
 			});
 			tr=this.sortArray(tr,-1);
 			$.each(tr,function(i,v) {
-				var valid=true;
+				var valid=true, pcount=0,pname={};
 				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
 					var vrgxp;
+					p = p.toLowerCase();
 					if (vrgx) {
 						vrgxp = new RegExp(vrgx+"+","i");
 					}
-					if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
-					return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
+					if (typeof(params[p])=="undefined" || (vrgx && params[p].toString().match(vrgxp)===null)) {valid=false;};
+					if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
+					return (typeof(params[p])=="undefined") ? "":params[p];
 				});
-				if (valid) {rhtml = v;return false;}
+				if (valid && (pcount>maxpcount)) {rhtml = v;maxpcount=pcount;}
 			});
 			return (rhtml || html)+postsel;
 		},
@@ -1753,6 +1756,7 @@ var wbbdebug=true;
 		},
 		selectLastRange: function() {
 			if (this.lastRange) {
+				this.body.focus();
 				this.selectRange(this.lastRange);
 				this.lastRange=false;
 			}
@@ -1950,7 +1954,7 @@ var wbbdebug=true;
 									break;
 								}else{
 									if (keepElement && !$el.attr("notkeep")) {
-										if ($.browser.msie) {
+										if ($.support.htmlSerialize) {
 											$el.empty().append($('<span>').html(bbcode));
 										}else{
 											$el.empty().html('<span>'+bbcode+'</span>');
@@ -2218,7 +2222,7 @@ var wbbdebug=true;
 		},
 		dropdownclick: function(bsel,tsel,e) {
 			//this.body.focus();
-			//if (!window.getSeletion && $.browser.msie) this.lastRange=this.getRange(); //IE 7 FIX
+			//if (!window.getSeletion && $.support.htmlSerialize) this.lastRange=this.getRange(); //IE 7 FIX
 			var $btn = $(e.currentTarget).closest(bsel);
 			if ($btn.hasClass("dis")) {return;}
 			if ($btn.attr("wbbshow")) {
@@ -2229,6 +2233,7 @@ var wbbdebug=true;
 					$(document).unbind("mousedown",this.dropdownhandler);
 				}
 				this.lastRange=false;
+				
 			}else{
 				this.saveRange();
 				this.$editor.find("*[wbbshow]").each(function(i,el) {
@@ -2365,20 +2370,22 @@ var wbbdebug=true;
 			}
 		},
 		traceTextareaEvent: function(e) {
-			if ($(document.activeElement).is("div.wysibb-body")) {
-				this.saveRange();
-			}
-			setTimeout($.proxy(function() {
-				var data = this.$txtArea.val();
-				if (this.options.bbmode===false && data!="" && $(e.target).closest("div.wysibb").size()==0 && !this.$txtArea.attr("wbbsync")) {
-					this.selectLastRange();
-					this.insertAtCursor(this.getHTML(data,true));
-					this.$txtArea.val("");
-				}
+			if ($(e.target).closest("div.wysibb").size()==0) {
 				if ($(document.activeElement).is("div.wysibb-body")) {
-					this.lastRange=false;
+					this.saveRange();
 				}
-			},this),100);
+				setTimeout($.proxy(function() {
+					var data = this.$txtArea.val();
+					if (this.options.bbmode===false && data!="" && $(e.target).closest("div.wysibb").size()==0 && !this.$txtArea.attr("wbbsync")) {
+						this.selectLastRange();
+						this.insertAtCursor(this.getHTML(data,true));
+						this.$txtArea.val("");
+					}
+					if ($(document.activeElement).is("div.wysibb-body")) {
+						this.lastRange=false;
+					}
+				},this),100);
+			}
 		},
 		txtAreaInitContent: function() {
 			//$.log(this.txtArea.value);
@@ -2527,9 +2534,8 @@ var wbbdebug=true;
 					params[pname]=pval;
 				},this));
 				if (valid) {
-					//if (this.lastRange) this.selectRange(this.lastRange);
+					$.log("Last range: "+this.lastRange);
 					this.selectLastRange();
-					//clbk.insert(params);
 					//insert callback
 					if (queryState) {
 						this.wbbRemoveCallback(cmd,true);
@@ -2550,9 +2556,9 @@ var wbbdebug=true;
 			},this));
 			
 			$(document.body).css("overflow","hidden"); //lock the screen, remove scroll on body
-			/* if ($(document.body).height()>$(window).height()) { //if body has scroll, add padding-right 20px
-				$(document.body).css("padding-right","20px");
-			} */
+			if (document.body.scrollHeight > document.body.clientHeight) { //if body has scroll, add padding-right 18px
+				$(document.body).css("padding-right","18px");
+			}
 			this.$modal.show();
 			//if (window.getSelection) 
 			$wbbm.css("margin-top",($(window).height()-$wbbm.outerHeight())/3+"px");
@@ -2632,7 +2638,7 @@ var wbbdebug=true;
 					},this)
 				});
 				
-				if ($.browser.msie) {
+				if ($.support.htmlSerialize) {
 					//ie not posting form by security reason, show default file upload
 					$.log("IE not posting form by security reason, show default file upload");
 					this.$modal.find("#nicebtn").hide();
