@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.3.3 - 2013-01-18
+/*! WysiBB - WYSIWYG BBCode editor - v1.3.4 - 2013-01-24
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -827,7 +827,7 @@ var wbbdebug=true;
 							this.$pasteBlock = $(this.elFromString('<div style="opacity:0;" contenteditable="true">\uFEFF</div>'));
 							
 							this.$pasteBlock.appendTo(this.body);
-							if ($.browser.msie) {this.$pasteBlock.focus();} //IE 7,8 FIX
+							if ($.support.htmlSerialize) {this.$pasteBlock.focus();} //IE 7,8 FIX
 								setTimeout($.proxy(function() {
 									this.clearPaste(this.$pasteBlock);
 									var rdata = '<span>'+this.$pasteBlock.html()+'</span>';
@@ -962,7 +962,7 @@ var wbbdebug=true;
 					this.modeSwitch();
 				},this));
 			}
-			if ($.browser.msie) {this.$toolbar.find("*").attr("unselectable","on");} //fix for ie8 and lower
+			if ($.support.htmlSerialize) {this.$toolbar.find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 		},
 		buildButton: function(container,bn,opt) {
@@ -973,7 +973,7 @@ var wbbdebug=true;
 			var hotkey = (this.options.hotkeys===true && this.options.showHotkeys===true && opt.hotkey) ? (' <span class="tthotkey">['+opt.hotkey+']</span>'):""
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-'+bn+'">').appendTo(container).append(btnHTML).append(this.strf('<span class="btn-tooltip">{title}<ins/>{hotkey}</span>',{title:opt.title,hotkey:hotkey}));
 			
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			//attach events
 			this.controllers.push($btn);
 			$btn.bind('queryState',$.proxy(function(e) {
@@ -988,7 +988,7 @@ var wbbdebug=true;
 		buildColorpicker: function(container,bn,opt) {
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-dropdown wbb-cp">').appendTo(container).append('<div class="ve-tlb-colorpick"><span class="fonticon">\uE010</span><span class="cp-line"></span></div><ins class="fonticon ar">\uE011</ins>').append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));
 			var $cpline = $btn.find(".cp-line");
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 			var $dropblock = $('<div class="wbb-list">').appendTo($btn); 
 			$dropblock.append('<div class="nc">'+CURLANG.auto+'</div>');
@@ -1037,7 +1037,7 @@ var wbbdebug=true;
 		},
 		buildTablepicker: function(container,bn,opt) {
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-dropdown wbb-tbl">').appendTo(container).append('<span class="btn-inner fonticon ve-tlb-table1">\uE00e</span><ins class="fonticon ar">\uE011</ins>').append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			var $dropblock = $('<div class="wbb-list">').appendTo($btn);
 			var rows = opt.rows || 10;
 			var cols = opt.cols || 10;
@@ -1078,7 +1078,7 @@ var wbbdebug=true;
 			var $btn = $('<div class="wysibb-toolbar-btn wbb-select wbb-'+bn+'">').appendTo(container).append(this.strf('<span class="val">{title}</span><ins class="fonticon sar">\uE012</ins>',opt)).append(this.strf('<span class="btn-tooltip">{title}<ins/></span>',{title:opt.title}));  
 			var $sblock = $('<div class="wbb-list">').appendTo($btn);
 			var $sval = $btn.find("span.val");
-			//if ($.browser.msie) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
+			//if ($.support.htmlSerialize) {$btn.attr("unselectable","on").find("*").attr("unselectable","on");} //fix for ie8 and lower
 			
 			var olist = ($.isArray(opt.options)) ? opt.options:opt.options.split(",");
 			//$.log(this.printObjectInIE(olist));
@@ -1954,7 +1954,7 @@ var wbbdebug=true;
 									break;
 								}else{
 									if (keepElement && !$el.attr("notkeep")) {
-										if ($.browser.msie) {
+										if ($.support.htmlSerialize) {
 											$el.empty().append($('<span>').html(bbcode));
 										}else{
 											$el.empty().html('<span>'+bbcode+'</span>');
@@ -2222,7 +2222,7 @@ var wbbdebug=true;
 		},
 		dropdownclick: function(bsel,tsel,e) {
 			//this.body.focus();
-			//if (!window.getSeletion && $.browser.msie) this.lastRange=this.getRange(); //IE 7 FIX
+			//if (!window.getSeletion && $.support.htmlSerialize) this.lastRange=this.getRange(); //IE 7 FIX
 			var $btn = $(e.currentTarget).closest(bsel);
 			if ($btn.hasClass("dis")) {return;}
 			if ($btn.attr("wbbshow")) {
@@ -2638,7 +2638,7 @@ var wbbdebug=true;
 					},this)
 				});
 				
-				if ($.browser.msie) {
+				if ($.support.htmlSerialize) {
 					//ie not posting form by security reason, show default file upload
 					$.log("IE not posting form by security reason, show default file upload");
 					this.$modal.find("#nicebtn").hide();

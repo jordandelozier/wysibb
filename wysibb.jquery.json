@@ -22,10 +22,11 @@
     }
   ],
   "bugs": "https://github.com/wbb/WysiBB/issues",
-  "homepage": "https://github.com/wbb/WysiBB",
+  "homepage": "http://www.wysibb.com",
   "docs": "http://www.wysibb.com/docs/",
+  "demo": "http://www.wysibb.com/demo/",
   "download": "http://www.wysibb.com/download/",
   "dependencies": {
-    "jquery": ">=1.6"
+    "jquery": ">=1.4"
   }
 }
