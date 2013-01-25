@@ -1,0 +1,76 @@
+/*Arabic language by Charafweb*/
+if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
+WBBLANG['pt_br'] = {
+	bold: "Negrito",
+	italic: "Italico",
+	underline: "Sublinhado",
+	strike: "Tachado",
+	link: "Link",
+	img: "Inserir imagem",
+	sup: "Sobrescrito",
+	sub: "Subscrito",
+	justifyleft: "Alinhar à esquerda",
+	justifycenter: "Centralizar",
+	justifyright: "Alinhar à direita",
+	table: "Inserir tabela",
+	bullist: "• Marcadores",
+	numlist: "1. Numeração",
+	quote: "Citar",
+	offtop: "Offtop",
+	code: "Código",
+	spoiler: "Destruir",
+	fontcolor: "Cor da fonte",
+	fontsize: "Tamanho da fonte",
+	fontfamily: "Fonte Família",
+	fs_verysmall: "Super pequeno",
+	fs_small: "Pequeno",
+	fs_normal: "Normal",
+	fs_big: "Grande",
+	fs_verybig: "Super grande",
+	smilebox: "Inserir emoticon",
+	video: "Embutir vídeo",
+	removeFormat:"Limpar formação",
+	
+	modal_link_title: "Links",
+	modal_link_text: "Texto",
+	modal_link_url: "URL",
+	modal_email_text: "Tela email",
+	modal_email_url: "Email",
+	modal_link_tab1: "Inserir URL",
+	
+	modal_img_title: "Imagens",
+	modal_img_tab1: "Inserir URL",
+	modal_img_tab2: "Upload da imagem",
+	modal_imgsrc_text: "Informe a URL da imagem",
+	modal_img_btn: "Escolha o arquivo",
+	add_attach: "Adicionar anexo",
+	
+	modal_video_text: "Digite a URL do vídeo",
+	
+	close: "Fechar",
+	save: "Salvar",
+	cancel: "Cancelar",
+	remove: "Deletar",
+	
+	validation_err: "Os dados digitado é inválido",
+	error_onupload: "Erro durante o upload de arquivos",
+	
+	fileupload_text1: "Arraste o arquivo aqui",
+	fileupload_text2: "ou",
+	
+	loading: "Carregando",
+	auto: "Auto",
+	views: "Exibições",
+	downloads: "Downloads",
+	
+	//smiles
+	sm1: "Sorrir",
+	sm2: "Risos",
+	sm3: "Piscar",
+	sm4: "Obrigado",
+	sm5: "Resmungar",
+	sm6: "Assustado",
+	sm7: "Zangado",
+	sm8: "Mágoado",
+	sm9: "Doente"
+};
