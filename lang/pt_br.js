@@ -1,4 +1,4 @@
-/*Arabic language by Charafweb*/
+/*Portuguese language by CharafWeb*/
 if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
 WBBLANG['pt_br'] = {
 	bold: "Negrito",
