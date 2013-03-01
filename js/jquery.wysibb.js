@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.3.4 - 2013-01-24
+/*! WysiBB - WYSIWYG BBCode editor - v1.4.0 - 2013-03-01
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -1053,7 +1053,7 @@ var wbbdebug=true;
 			//this.debug("Attach event on: tbl-sel");
 			$btn.find(".tbl-sel").mousedown($.proxy(function(e) {
 				e.preventDefault();
-				this.selectLastRange();
+				//this.selectLastRange();
 				var t = $(e.currentTarget).attr("title");
 				var rc = t.split(",");
 				var code = (this.options.bbmode) ? '[table]':'<table class="wbb-table" cellspacing="5" cellpadding="0">';
@@ -1126,7 +1126,6 @@ var wbbdebug=true;
 			},this));
 			$btn.find(".option").mousedown($.proxy(function(e) {
 				e.preventDefault();
-				$.log("LR: "+this.lastRange);
 				var oid = $(e.currentTarget).attr("oid");
 				var cmdvalue = $(e.currentTarget).attr("cmdvalue");
 				var opt = this.options.allButtons[oid];
@@ -1152,8 +1151,8 @@ var wbbdebug=true;
 				},this));
 				$btn.find('.smile').mousedown($.proxy(function(e) {
 					e.preventDefault();
-					this.selectLastRange();
-					this.insertAtCursor((this.options.bbmode) ? this.toBB(e.currentTarget):$($(e.currentTarget).html()));
+					//this.selectLastRange();
+					this.insertAtCursor((this.options.bbmode) ? this.toBB($(e.currentTarget).html()):$($(e.currentTarget).html()));
 				},this))
 			}
 		},
@@ -1664,7 +1663,7 @@ var wbbdebug=true;
 			if (typeof(code)!="string") {code = $("<div>").append(code).html();}
 			if ((this.options.bbmode && typeof(forceBBMode)=="undefined") || forceBBMode===true) {
 				var clbb = code.replace(/.*(\[\/\S+?\])$/,"$1");
-				var p = this.getCursorPosBB()+code.indexOf(clbb);
+				var p = this.getCursorPosBB()+((code.indexOf(clbb)!=-1 && code.match(/\[.*\]/)) ? code.indexOf(clbb):code.length);
 				if (document.selection) {
 					//IE
 					this.txtArea.focus();
@@ -1752,6 +1751,8 @@ var wbbdebug=true;
 			return this.cloneRange(this.getRange());
 		},
 		saveRange: function() {
+			this.setBodyFocus();
+			//this.lastRange=(this.options.bbmode) ? this.getCursorPosBB():this.getRangeClone();
 			this.lastRange=this.getRangeClone();
 		},
 		selectLastRange: function() {
@@ -1760,6 +1761,21 @@ var wbbdebug=true;
 				this.selectRange(this.lastRange);
 				this.lastRange=false;
 			}
+		},
+		setBodyFocus: function() {
+			$.log("Set focus to WysiBB editor");
+			if (this.options.bbmode) {
+				if (!this.$txtArea.is(":focus")) {
+					this.$txtArea.focus();
+				}
+			}else{
+				if (!this.$body.is(":focus")) {
+					this.$body.focus();
+				}
+			}
+		},
+		clearLastRange: function() {
+			this.lastRange=false;
 		},
 		 
 		//TRANSFORM FUNCTIONS
@@ -1946,7 +1962,7 @@ var wbbdebug=true;
 									return cont || "";
 								},this));
 								if (skip) {continue;}
-								$.log("bbcode: "+bbcode);
+								//$.log("bbcode: "+bbcode);
 								if ($el.is("img,br,hr")) {
 									//replace element
 									outbb+=bbcode;
