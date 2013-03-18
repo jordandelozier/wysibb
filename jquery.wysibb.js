@@ -1957,7 +1957,7 @@ var wbbdebug=true;
 								}else{
 									if (keepElement && !$el.attr("notkeep")) {
 										if ($el.is("table,tr,td")) {
-											bbcode = bbcode.replace(/\<(\/*?(table|tr|td))\>/ig,"[$1]").replace(/\<\/*tbody\>/ig,"").toLowerCase();
+											bbcode = bbcode.replace(/\<(\/*?(table|tr|td))[^>]*\>/ig, "[$1]").replace(/\<\/*tbody[^>]*\>/ig, "").toLowerCase();
 											outbb+=this.toBB($('<span>').html(bbcode));
 											$el=null;
 										}else{
