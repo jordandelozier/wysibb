@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.4.1 - 2013-03-05
+/*! WysiBB - WYSIWYG BBCode editor - v1.4.2 - 2013-03-22
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -79,7 +79,7 @@ WBBLANG['ru']= CURLANG = {
 	
 	
 };
-var wbbdebug=true;
+wbbdebug=true;
 (function($) {
 	'use strict';
 	$.wysibb = function(txtArea,settings) {
@@ -830,7 +830,7 @@ var wbbdebug=true;
 							this.$pasteBlock = $(this.elFromString('<div style="opacity:0;" contenteditable="true">\uFEFF</div>'));
 							
 							this.$pasteBlock.appendTo(this.body);
-							if ($.support.htmlSerialize) {this.$pasteBlock.focus();} //IE 7,8 FIX
+							if (!$.support.htmlSerialize) {this.$pasteBlock.focus();} //IE 7,8 FIX
 								setTimeout($.proxy(function() {
 									this.clearPaste(this.$pasteBlock);
 									var rdata = '<span>'+this.$pasteBlock.html()+'</span>';
@@ -875,7 +875,7 @@ var wbbdebug=true;
 				
 				//add event listeners
 				this.$body.bind('mouseup keyup',$.proxy(this.updateUI,this));
-				this.$body.bind('mousedown',$.proxy(function(e) {this.checkForLastBR(e.target)},this));
+				this.$body.bind('mousedown',$.proxy(function(e) {this.clearLastRange();this.checkForLastBR(e.target)},this));
 
 				//trace Textarea
 				if (this.options.traceTextarea===true) {
@@ -1957,7 +1957,7 @@ var wbbdebug=true;
 								}else{
 									if (keepElement && !$el.attr("notkeep")) {
 										if ($el.is("table,tr,td")) {
-											bbcode = bbcode.replace(/\<(\/*?(table|tr|td))\>/ig,"[$1]").replace(/\<\/*tbody\>/ig,"").toLowerCase();
+											bbcode = this.fixTableTransform(bbcode);
 											outbb+=this.toBB($('<span>').html(bbcode));
 											$el=null;
 										}else{
@@ -2294,9 +2294,6 @@ var wbbdebug=true;
 		},
 		clearPaste: function(el) {
 			var $block = $(el);
-			//clear paste
-			//$.log("clearPaste");
-			
 			//NEW 
 			$.each(this.options.rules,$.proxy(function(s,ar) {
 				var $sf = $block.find(s).attr("wbbkeep",1);
@@ -2317,6 +2314,7 @@ var wbbdebug=true;
 			},this));
 			$block.find("*[wbbkeep]").removeAttr("wbbkeep").removeAttr("style");
 			$.log($block.html());
+			//$.log("BBCODE: "+this.toBB($block.clone(true)));
 			$block.html(this.getHTML(this.toBB($block),true));
 			$.log($block.html());
 			
@@ -2571,7 +2569,7 @@ var wbbdebug=true;
 			},this));
 			
 			$(document.body).css("overflow","hidden"); //lock the screen, remove scroll on body
-			if (document.body.scrollHeight > document.body.clientHeight) { //if body has scroll, add padding-right 18px
+			if ($("body").height() > $(window).height()) { //if body has scroll, add padding-right 18px
 				$(document.body).css("padding-right","18px");
 			}
 			this.$modal.show();
@@ -2653,7 +2651,7 @@ var wbbdebug=true;
 					},this)
 				});
 				
-				if ($.support.htmlSerialize) {
+				if (!$.support.htmlSerialize) {
 					//ie not posting form by security reason, show default file upload
 					$.log("IE not posting form by security reason, show default file upload");
 					this.$modal.find("#nicebtn").hide();
@@ -2695,6 +2693,15 @@ var wbbdebug=true;
 				}
 				this.startTime=time;
 			}
+		},
+		
+		//Browser fixes
+		isChrome: function() {
+			return (window.chrome) ? true:false;
+		},
+		fixTableTransform: function(html) {
+			if ($.inArray("table",this.options.buttons)==-1) {return html;}
+			return (html) ? html.replace(/\<(\/*?(table|tr|td))[^>]*\>/ig,"[$1]".toLowerCase()).replace(/\<\/*tbody[^>]*\>/ig,""):"";
 		}
 	}
 	
