@@ -9,7 +9,7 @@
 	"editor",
 	"ui"
   ],
-  "version": "1.4.1",
+  "version": "1.4.2",
   "author": {
     "name": "Vadim Dobroskok",
     "url": "http://www.wysibb.com"
@@ -27,6 +27,6 @@
   "demo": "http://www.wysibb.com/demo/",
   "download": "http://www.wysibb.com/download/",
   "dependencies": {
-    "jquery": ">=1.4"
+    "jquery": ">=1.6"
   }
 }
