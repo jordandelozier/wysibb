@@ -2700,8 +2700,12 @@ wbbdebug=true;
 			return (window.chrome) ? true:false;
 		},
 		fixTableTransform: function(html) {
-			if ($.inArray("table",this.options.buttons)==-1) {return html;}
-			return (html) ? html.replace(/\<(\/*?(table|tr|td))[^>]*\>/ig,"[$1]".toLowerCase()).replace(/\<\/*tbody[^>]*\>/ig,""):"";
+			if (!html) {return "";}
+			if ($.inArray("table",this.options.buttons)==-1) {
+				return html.replace(/\<(\/*?(table|tr|td|tbody))[^>]*\>/ig,"");
+			}else{
+				return html.replace(/\<(\/*?(table|tr|td))[^>]*\>/ig,"[$1]".toLowerCase()).replace(/\<\/*tbody[^>]*\>/ig,"");
+			}
 		}
 	}
 	
