@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.4.2 - 2013-03-22
+/*! WysiBB - WYSIWYG BBCode editor - v1.4.2 - 2013-03-27
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -573,6 +573,14 @@ wbbdebug=true;
 				var ob = o.allButtons[btnlist[bidx]];
 				if (!ob ) {continue;}
 				ob.en=true;
+				
+				//check for simplebbcode
+				if (ob.simplebbcode && $.isArray(ob.simplebbcode) && ob.simplebbcode.length==2) {
+					ob.bbcode = ob.html = ob.simplebbcode[0]+"{SELTEXT}"+ob.simplebbcode[1];
+					if (ob.transform) delete ob.transform;
+					if (ob.modal)  delete ob.modal;
+				}
+				
 				//add transforms to option list
 				if (ob.type=="select" && typeof(ob.options)=="string") {
 					var olist = ob.options.split(",");
@@ -1293,10 +1301,12 @@ wbbdebug=true;
 					}
 				}else{
 					//custom command
-					for (var i=0; i<opt.rootSelector.length; i++) {
-						var n = this.isContain(this.getSelectNode(),opt.rootSelector[i]);
-						if (n) {
-							return this.getParams(n,opt.rootSelector[i]);
+					if ($.isArray(opt.rootSelector)) {
+						for (var i=0; i<opt.rootSelector.length; i++) {
+							var n = this.isContain(this.getSelectNode(),opt.rootSelector[i]);
+							if (n) {
+								return this.getParams(n,opt.rootSelector[i]);
+							}
 						}
 					}
 					return false;
@@ -1578,25 +1588,27 @@ wbbdebug=true;
 			
 			//insert first with max params
 			var rhtml=null,maxpcount=0;
-			var tr=[];
-			$.each(this.options.allButtons[command].transform,function(html,bb) {
-				tr.push(html);
-			});
-			tr=this.sortArray(tr,-1);
-			$.each(tr,function(i,v) {
-				var valid=true, pcount=0,pname={};
-				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
-					var vrgxp;
-					p = p.toLowerCase();
-					if (vrgx) {
-						vrgxp = new RegExp(vrgx+"+","i");
-					}
-					if (typeof(params[p])=="undefined" || (vrgx && params[p].toString().match(vrgxp)===null)) {valid=false;};
-					if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
-					return (typeof(params[p])=="undefined") ? "":params[p];
+			if (this.options.allButtons[command].transform) {
+				var tr=[];
+				$.each(this.options.allButtons[command].transform,function(html,bb) {
+					tr.push(html);
 				});
-				if (valid && (pcount>maxpcount)) {rhtml = v;maxpcount=pcount;}
-			});
+				tr=this.sortArray(tr,-1);
+				$.each(tr,function(i,v) {
+					var valid=true, pcount=0,pname={};
+					v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+						var vrgxp;
+						p = p.toLowerCase();
+						if (vrgx) {
+							vrgxp = new RegExp(vrgx+"+","i");
+						}
+						if (typeof(params[p])=="undefined" || (vrgx && params[p].toString().match(vrgxp)===null)) {valid=false;};
+						if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
+						return (typeof(params[p])=="undefined") ? "":params[p];
+					});
+					if (valid && (pcount>maxpcount)) {rhtml = v;maxpcount=pcount;}
+				});
+			}
 			return (rhtml || html)+postsel;
 		},
 		
