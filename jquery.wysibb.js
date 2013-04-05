@@ -1879,7 +1879,10 @@ wbbdebug=true;
 					//process html tag
 					var rpl,processed=false;
 
-					//for (var rootsel in this.options.rules) {
+                    // remove new lines from inside tags fixed by R.Lisin <roman@lisin.ru>
+                    if ($el) $el.html($el.html().replace(/[\n\r]+/g, " "));
+
+                    //for (var rootsel in this.options.rules) {
 					for (var j=0; j<this.rsellist.length; j++) {
 						var rootsel = this.rsellist[j];
 						if ($el && $el.is(rootsel)) {
