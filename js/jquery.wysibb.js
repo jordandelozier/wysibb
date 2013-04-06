@@ -1,4 +1,4 @@
-/*! WysiBB - WYSIWYG BBCode editor - v1.4.2 - 2013-03-27
+/*! WysiBB - WYSIWYG BBCode editor - v1.4.2 - 2013-04-06
 * http://www.wysibb.com
 * Copyright (c) 2013 Vadim Dobroskok; Licensed MIT, GPL */
 
@@ -1524,26 +1524,28 @@ wbbdebug=true;
 			});
 			
 			//insert first with max params
-			var rbbcode=null,maxpcount=0;;
-			var tr=[];
-			$.each(this.options.allButtons[command].transform,function(html,bb) {
-				tr.push(bb);
-			});
-			tr=this.sortArray(tr,-1);
-			$.each(tr,function(i,v) {
-				var valid=true,pcount=0,pname={};;
-				v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
-					var vrgxp;
-					p = p.toLowerCase();
-					if (vrgx) {
-						vrgxp = new RegExp(vrgx+"+","i");
-					}
-					if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
-					if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
-					return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
+			var rbbcode=null,maxpcount=0;
+			if (this.options.allButtons[command].transform) {
+				var tr=[];
+				$.each(this.options.allButtons[command].transform,function(html,bb) {
+					tr.push(bb);
 				});
-				if (valid && (pcount>maxpcount)) {rbbcode = v;maxpcount=pcount;}
-			});
+				tr=this.sortArray(tr,-1);
+				$.each(tr,function(i,v) {
+					var valid=true,pcount=0,pname={};;
+					v = v.replace(/\{(.*?)(\[.*?\])*\}/g,function(str,p,vrgx) {
+						var vrgxp;
+						p = p.toLowerCase();
+						if (vrgx) {
+							vrgxp = new RegExp(vrgx+"+","i");
+						}
+						if (typeof(params[p.toLowerCase()])=="undefined" || (vrgx && params[p.toLowerCase()].toString().match(vrgxp)===null)) {valid=false;};
+						if (typeof(params[p])!="undefined" && !pname[p]) {pname[p]=1;pcount++;}
+						return (typeof(params[p.toLowerCase()])=="undefined") ? "":params[p.toLowerCase()];
+					});
+					if (valid && (pcount>maxpcount)) {rbbcode = v;maxpcount=pcount;}
+				});
+			}
 			return rbbcode || bbcode;
 		},
 		getHTMLByCommand: function(command,params) {
@@ -2177,26 +2179,29 @@ wbbdebug=true;
 			return a;
 		},
 		clearFromSubInsert: function(html,cmd) {
-			var $wr = $('<div>').html(html);
-			$.each(this.options.allButtons[cmd].rootSelector,$.proxy(function(i,s) {
-				var seltext=false;
-				if (typeof(this.options.rules[s][0][1]["seltext"])!="undefined") {
-					seltext = this.options.rules[s][0][1]["seltext"]["sel"];
-				}
-				var res=true;
-				$wr.find("*").each(function() { //work with find("*") and "is", becouse in ie7-8 find is case sensitive
-					if ($(this).is(s)) {
-						if (seltext && seltext["sel"]) {
-							$(this).replaceWith($(this).find(seltext["sel"].toLowerCase()).html());
-						}else{
-							$(this).replaceWith($(this).html());
-						}
-						res=false;
+			if (this.options.allButtons[cmd] && this.options.allButtons[cmd].rootSelector) {
+				var $wr = $('<div>').html(html);
+				$.each(this.options.allButtons[cmd].rootSelector,$.proxy(function(i,s) {
+					var seltext=false;
+					if (typeof(this.options.rules[s][0][1]["seltext"])!="undefined") {
+						seltext = this.options.rules[s][0][1]["seltext"]["sel"];
 					}
-				});
-				return res;
-			},this));
-			return $wr.html();
+					var res=true;
+					$wr.find("*").each(function() { //work with find("*") and "is", becouse in ie7-8 find is case sensitive
+						if ($(this).is(s)) {
+							if (seltext && seltext["sel"]) {
+								$(this).replaceWith($(this).find(seltext["sel"].toLowerCase()).html());
+							}else{
+								$(this).replaceWith($(this).html());
+							}
+							res=false;
+						}
+					});
+					return res;
+				},this));
+				return $wr.html();
+			}
+			return html;
 		},
 		splitPrevNext: function(node) {
 			if (node.nodeType==3) {node = node.parentNode};
