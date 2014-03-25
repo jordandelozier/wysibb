@@ -394,7 +394,7 @@ html{height:100% !important;}
 /* SMILEBOX TOOLBAR */
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox{
   background:transparent;
-  border:0;
+  border:1px solid transparent;
   box-shadow:none;
 }
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox.on,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox.on:active{
