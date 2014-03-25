@@ -790,9 +790,9 @@ wbbdebug=true;
 				this.body = this.$body[0];
 				this.$txtArea.hide();
 				
-				//if (this.isMobile && typeof(this.$toolbar)!="undefined") {
+				if (height>32) {
 					this.$toolbar.css("max-height",height);
-				//}
+				}
 				
 				$.log("WysiBB loaded");
 				
