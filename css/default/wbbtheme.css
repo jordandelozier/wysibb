@@ -392,6 +392,16 @@ html{height:100% !important;}
 /* END SELECT */
 
 /* SMILEBOX TOOLBAR */
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox.on,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox.on:active{
+   border:1px solid #aaa;
+   background:#ccc;
+   box-shadow:inset 0px 0px 3px #aaa;
+}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-smilebox .wbb-list{
   width:156px;
 }
