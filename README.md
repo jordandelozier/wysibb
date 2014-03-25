@@ -1,15 +1,15 @@
-WysiBB - Wysiwyg BBcode editor based on jQuery
+WysiBB - Wysiwyg BBcode editor based
 =========
 
-## Easy to use & Powerful Wysiwyg BBCode editor
+Easy to use & Powerful Wysiwyg BBCode editor
 
-#Links
+##Links
 * [Official website](http://www.wysibb.com)
 * [Getting starting](http://www.wysibb.com/getting-started/)
 * [Docs](http://www.wysibb.com/docs/)
 * [Download](http://www.wysibb.com/download/)
 
-# Quick use
+## Quick use
 ```
 <head>
 <!-- Load jQuery  -->
@@ -31,9 +31,9 @@ $(function() {
   <textarea id="editor"></textarea>
 </body>
 ```
+##Donate
+[Support the project](http://www.wysibb.com/donate/)
 
-#License
+##License
 WysiBB is released under the MIT license
 
-#Donate
-[Donate](http://www.wysibb.com/donate/)
