@@ -1,7 +1,7 @@
 {
   "name": "wysibb",
-  "title": "WysiBB",
-  "description": "WYSIWYG BBcode editor.",
+  "title": "WysiBB - Wysiwyg BBcode editor",
+  "description": "Wysiwyg BBcode editor based on jQuery",
   "keywords": [
 	"wysibb",
     "wysiwyg",
@@ -9,7 +9,7 @@
 	"editor",
 	"ui"
   ],
-  "version": "1.4.2",
+  "version": "1.4.3",
   "author": {
     "name": "Vadim Dobroskok",
     "url": "http://www.wysibb.com"
