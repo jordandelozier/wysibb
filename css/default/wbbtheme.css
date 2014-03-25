@@ -258,7 +258,7 @@ html{height:100% !important;}
 .wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown.dis:hover{
 /*   padding-right:9px; */
 }
-.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown .wbb-list,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select .wbb-list{
+.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn .wbb-list{
   display:none;
   position:fixed;
   top:10px;
@@ -722,7 +722,7 @@ html{height:100% !important;}
 	  display:block;
 	}
 	
-	.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-dropdown .wbb-list,.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn.wbb-select .wbb-list{
+	.wysibb .wysibb-toolbar .wysibb-toolbar-container .wysibb-toolbar-btn .wbb-list{
 	  display:none;
 	  position:absolute;
 	  top:32px;
