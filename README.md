@@ -1,7 +1,6 @@
-WysiBB - Wysiwyg BBcode editor based
+WysiBB
 =========
-
-Easy to use & Powerful Wysiwyg BBCode editor
+### Easy to use & Powerful Wysiwyg BBCode editor
 
 ##Links
 * [Official website](http://www.wysibb.com)
