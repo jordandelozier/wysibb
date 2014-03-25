@@ -1,4 +1,4 @@
-/*! WysiBB v1.4.3 2014-03-25 
+/*! WysiBB v1.5.0 2014-03-25 
     Author: Vadim Dobroskok
  */
 if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
