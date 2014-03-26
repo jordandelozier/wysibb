@@ -658,6 +658,16 @@ html{height:100% !important;}
 /* END IMAGE UPLOAD */
 /* MODAL WINDOW */
 
+/* CONTENT STYLES*/
+.wysibb .wysibb-body .imgWrap{
+  position:relative;
+  display:inline-block;
+}
+.wysibb .wysibb-body .imgWrap img{
+  opacity:0.5;
+}
+
+
 /* PHPBB3 */
 .content-phpbb3{
   font-size:13px;

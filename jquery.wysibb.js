@@ -1,4 +1,4 @@
-/*! WysiBB v1.5.0 2014-03-25 
+/*! WysiBB v1.5.1 2014-03-26 
     Author: Vadim Dobroskok
  */
 if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
@@ -96,7 +96,7 @@ wbbdebug=true;
 			tabInsert:			true,
 //			toolbar:			false,
 			//img upload config 
-			imgupload:			true,
+			imgupload:			false,
 			img_uploadurl:		"/iupload.php",
 			img_maxwidth:		800,
 			img_maxheight:		800,
@@ -191,6 +191,7 @@ wbbdebug=true;
 					title: CURLANG.img,
 					buttonHTML: '<span class="fonticon ve-tlb-img1">\uE006</span>',
 					hotkey: 'ctrl+shift+1',
+					addWrap: true,
 					modal: {
 						title: CURLANG.modal_img_title,
 						width: "600px",
@@ -576,12 +577,21 @@ wbbdebug=true;
 					});
 				}
 				if (ob.transform && ob.skipRules!==true) {
-					
-					
 					var obtr = $.extend({},ob.transform);
+					
+					/* if (ob.addWrap) {
+						//addWrap
+						$.log("needWrap");
+						for (var bhtml in obtr) {
+							var bbcode = ob.transform[bhtml];
+							var newhtml = '<span wbb="'+btnlist[bidx]+'">'+bhtml+'</span>';
+							obtr[newhtml] = bbcode;
+						}
+					} */
+					
 					for (var bhtml in obtr) {
 						var orightml = bhtml;
-						var bbcode = ob.transform[bhtml];
+						var bbcode = obtr[bhtml];
 						
 						//create root selector for isContain bbmode
 						if (!ob.bbSelector) {ob.bbSelector=[];}
@@ -597,13 +607,14 @@ wbbdebug=true;
 							var $bel = $(document.createElement('DIV')).append($(this.elFromString(bhtml,document)));
 							var rootSelector = this.filterByNode($bel.children());
 							
+							
 							//check if current rootSelector is exist, create unique selector for each transform (1.2.2)
 							if (rootSelector=="div" || typeof(o.rules[rootSelector])!="undefined") {
 								//create unique selector
 								$.log("create unique selector: "+rootSelector);
 								this.setUID($bel.children());
 								rootSelector = this.filterByNode($bel.children());
-								
+								$.log("New rootSelector: "+rootSelector);
 								//replace transform with unique selector
 								var nhtml2 = $bel.html();
 								nhtml2 = this.unwrapAttrs(nhtml2);
@@ -823,7 +834,6 @@ wbbdebug=true;
 				
 				
 				//clear html on paste from external editors
-				
 				this.$body.bind('keydown', $.proxy(function(e) {
 					if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
 						if (!this.$pasteBlock) {
@@ -840,6 +850,7 @@ wbbdebug=true;
 									this.body.focus();
 
 									if (this.cleartext) {
+										$.log("Check if paste to clearText Block");
 										if (this.isInClearTextBlock()) {
 											rdata = this.toBB(rdata).replace(/\n/g,"<br/>").replace(/\s{3}/g,'<span class="wbbtab"></span>');
 										}
@@ -906,6 +917,7 @@ wbbdebug=true;
 						});
 				}
 				
+				this.imgListeners();
 			}
 			
 			
@@ -1193,8 +1205,10 @@ wbbdebug=true;
 					$btn.trigger('queryState');
 				},this));
 			}
+			
 			//check for onlyClearText
 			this.disNonActiveButtons();
+			
 		},
 		initModal: function() {
 			this.$modal=$("#wbbmodal");
@@ -1319,8 +1333,12 @@ wbbdebug=true;
 							return v;
 						}catch(e) {return false;}
 					}else{
-						try {
-							//Firefox fix, exception while get queryState for UnorderedList
+						try { //Firefox fix, exception while get queryState for UnorderedList
+							if ((opt.excmd=="bold" || opt.excmd=="italic" || opt.excmd=="underline" || opt.excmd=="strikeThrough") && $(this.getSelectNode()).is("img")) { //Fix, when img selected
+								return false;
+							}else if (opt.excmd=="underline" && $(this.getSelectNode()).closest("a").size()>0) { //fix, when link select
+								return false;
+							}
 							return document.queryCommandState(opt.excmd);
 						}catch(e) {return false;}
 					}
@@ -1420,7 +1438,8 @@ wbbdebug=true;
 					var $root = $(root);
 					var cs = this.options.rules[s][0][1];
 					if ($root.is("span[wbb]") || !$root.is("span,font")) { //remove only blocks
-						if (clear===true) {
+						if (clear===true || (!cs || !cs["seltext"])) {
+							this.setCursorByEl($root);
 							$root.remove();
 						}else{
 							if (cs && cs["seltext"] && cs["seltext"]["sel"]) {
@@ -1445,7 +1464,6 @@ wbbdebug=true;
 						var rng = this.getRange();
 						var shtml = this.getSelectText();
 						var rnode = this.getSelectNode();
-						$.log("selHTML: "+shtml);
 						if (shtml=="") {
 							shtml="\uFEFF";
 						}else{
@@ -1715,7 +1733,10 @@ wbbdebug=true;
 			this.body.focus();
 			if (!rng) {rng=this.getRange();}
 			if (!rng) {return this.$body;}
-			return (window.getSelection) ? rng.commonAncestorContainer:rng.parentElement();
+			//return (window.getSelection) ? rng.commonAncestorContainer:rng.parentElement();
+			var sn = (window.getSelection) ? rng.commonAncestorContainer:rng.parentElement();
+			if ($(sn).is(".imgWrap")) {sn = $(sn).children("img")[0];}
+			return sn;
 		},
 		getCursorPosBB: function() {	
 			var pos=0;
@@ -2021,6 +2042,8 @@ wbbdebug=true;
 					outbb+=this.toBB($el);
 				}
 			},this));
+			
+			outbb.replace(/\uFEFF/g,"");
 			return outbb;
 		},
 		getHTML: function(bbdata,init,skiplt) {
@@ -2441,23 +2464,25 @@ wbbdebug=true;
 			return "";
 		},
 		smileConversion: function() {
-			var snode = this.getSelectNode();
-			if (snode.nodeType==3) {
-				var ndata = snode.data;
-				if (ndata.length>=2 && !this.isInClearTextBlock(snode) && $(snode).parents("a").size()==0) {
-					$.each(this.options.srules,$.proxy(function(i,sar) {
-						var smbb = sar[0];
-						var fidx = ndata.indexOf(smbb);
-						if (fidx!=-1) {
-							var afternode_txt = ndata.substring(fidx+smbb.length,ndata.length);
-							var afternode = document.createTextNode(afternode_txt);
-							var afternode_cursor = document.createElement("SPAN");
-							snode.data = snode.data.substr(0,fidx);
-							$(snode).after(afternode).after(afternode_cursor).after(this.strf(sar[1],this.options));
-							this.selectNode(afternode_cursor);
-							return false;
-						}
-					},this));
+			if (this.options.smileList && this.options.smileList.length>0) {
+				var snode = this.getSelectNode();
+				if (snode.nodeType==3) {
+					var ndata = snode.data;
+					if (ndata.length>=2 && !this.isInClearTextBlock(snode) && $(snode).parents("a").size()==0) {
+						$.each(this.options.srules,$.proxy(function(i,sar) {
+							var smbb = sar[0];
+							var fidx = ndata.indexOf(smbb);
+							if (fidx!=-1) {
+								var afternode_txt = ndata.substring(fidx+smbb.length,ndata.length);
+								var afternode = document.createTextNode(afternode_txt);
+								var afternode_cursor = document.createElement("SPAN");
+								snode.data = snode.data.substr(0,fidx);
+								$(snode).after(afternode).after(afternode_cursor).after(this.strf(sar[1],this.options));
+								this.selectNode(afternode_cursor);
+								return false;
+							}
+						},this));
+					}
 				}
 			}
 		},
@@ -2491,6 +2516,34 @@ wbbdebug=true;
 				this.$toolbar.find(".wysibb-toolbar-btn:not(.on,.mswitch)").addClass("dis");
 			}else{
 				this.$toolbar.find(".wysibb-toolbar-btn.dis").removeClass("dis");
+			}
+		},
+		setCursorByEl: function(el) {
+			var sl = document.createTextNode("\uFEFF");
+			$(el).after(sl);
+			this.selectNode(sl);
+		},
+		
+		//img listeners
+		imgListeners: function() {
+			$(document).on("mousedown",$.proxy(this.imgEventHandler,this));
+		},
+		imgEventHandler: function(e) {
+			var $e = $(e.target);
+			if (this.hasWrapedImage && ($e.closest(".wbb-img,#wbbmodal").size()==0 || $e.hasClass("wbb-cancel-button"))) {
+				this.$body.find(".imgWrap ").each(function() {
+					$.log("Removed imgWrap block");
+					$(this).replaceWith($(this).find("img"));
+				})
+				this.hasWrapedImage = false;
+				this.updateUI();
+			}
+			
+			if ($e.is("img") && $e.closest(".wysibb-body").size()>0) {
+				$e.wrap("<span class='imgWrap'></span>");
+				this.hasWrapedImage = $e;
+				this.$body.focus();
+				this.selectNode($e.parent()[0]);
 			}
 		},
 		
@@ -2649,12 +2702,11 @@ wbbdebug=true;
 				var rules = this.options.rules[s][0][1];
 				$.each(rules,$.proxy(function(k,v) {
 					var value="";
+					var $v = (v.sel!==false) ? value=$(src).find(v.sel):$(src);
 					if (v.attr!==false) {
-						value=$(src).attr(v.attr);
-					}else if (v.sel!==false) {
-						value=$(src).find(v.sel).html();
+						value=$v.attr(v.attr);
 					}else{
-						value=$(src).html();
+						value=$v.html();
 					}
 					if (value) {
 						if (v.rgx!==false) {
