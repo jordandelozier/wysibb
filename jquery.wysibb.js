@@ -2568,7 +2568,7 @@ wbbdebug=true;
 					var tid = $(el).parents(".tab-cont").attr("tid");
 					var pname = $(el).attr("name").toLowerCase();
 					var pval="";
-					if ($(el).is("input,textrea")) {
+					if ($(el).is("input,textrea,select")) {
 						pval = $(el).val();
 					}else{
 						pval = $(el).html();
