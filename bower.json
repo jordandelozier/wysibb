@@ -1,0 +1,22 @@
+{
+  "name": "wysibb",
+  "version": "1.5.1",
+  "main": "jquery.wysibb.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "test",
+    "*.md",
+    "Gruntfile.js"
+  ],
+  "devDependencies": {
+    "jquery": "1.8.0"
+  },
+  "keywords": [
+	"wysibb",
+    "jquery",
+	"wysiwyg",
+	"bbcode",
+	"editor"
+  ]
+}
