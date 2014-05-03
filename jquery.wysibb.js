@@ -2124,22 +2124,27 @@ wbbdebug=true;
 			return $wrap.html();
 		},
 		getHTMLSmiles: function(rel) {
-			$(rel).contents().filter(function() {return this.nodeType==3}).each($.proxy(this.smileRPL,this));
+			$(rel).contents().filter(function() {return this.nodeType==3 || this.nodeType==1}).each($.proxy(this.smileRPL,this));
 		},
 		smileRPL: function(i,el) {
-			var ndata = el.data;
-			$.each(this.options.smileList,$.proxy(function(i,row) {
-				var fidx = ndata.indexOf(row.bbcode);
-				if (fidx!=-1) {
-					var afternode_txt = ndata.substring(fidx+row.bbcode.length,ndata.length);
-					var afternode = document.createTextNode(afternode_txt);
-					el.data = ndata = el.data.substr(0,fidx);
-					$(el).after(afternode).after(this.strf(row.img,this.options));
-					this.getHTMLSmiles(el.parentNode);
-					return false;
-				}
-			this.getHTMLSmiles(el);
-			},this));	
+			 if(el.nodeType==1){
+                //recursive edit
+                		$(el).contents().filter(function() {return this.nodeType==3 ||  this.nodeType==1}).each($.proxy(this.smileRPL,this));
+            		}else{
+				var ndata = el.data;
+				$.each(this.options.smileList,$.proxy(function(i,row) {
+					var fidx = ndata.indexOf(row.bbcode);
+					if (fidx!=-1) {
+						var afternode_txt = ndata.substring(fidx+row.bbcode.length,ndata.length);
+						var afternode = document.createTextNode(afternode_txt);
+						el.data = ndata = el.data.substr(0,fidx);
+						$(el).after(afternode).after(this.strf(row.img,this.options));
+						this.getHTMLSmiles(el.parentNode);
+						return false;
+					}
+				this.getHTMLSmiles(el);
+				},this));	
+            		}
 		},
 		//UTILS
 		setUID: function(el,attr) {
