@@ -1,4 +1,4 @@
-#WysiBB - WYSIWYG BBcode editor v1.4.2
+#WysiBB - WYSIWYG BBcode editor
 
 WysiBB is a JQuery visual WYSIWYG editor for BBcode.
 For more information please visit [wysibb.com](http://www.wysibb.com) 
@@ -238,5 +238,6 @@ Themes, translations, bug reports and bug fixes are greatly appreciated.
 
 ## Support 
 
-[Support forum](http://www.wysibb.com/forum/) (mostly in Russian)
-
+[Official website](http://www.wysibb.com)
+[Demo](http://www.wysibb.com/demo/)
+[Support forum](http://www.wysibb.com/forum/)
