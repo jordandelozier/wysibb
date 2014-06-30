@@ -1,0 +1,72 @@
+/*English translation by Yupy*/
+if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
+WBBLANG['en'] = {
+	bold: "Bold",
+	italic: "Italic",
+	underline: "Underline",
+	strike: "Strike",
+	link: "Link",
+	img: "Insert Image",
+	sup: "Exponent",
+	sub: "Subscript",
+	justifyleft: "Align Left",
+	justifycenter: "Align Center",
+	justifyright: "Align Right",
+	table: "Insert a table",
+	bullist: "• Unordered list",
+	numlist: "1. Ordered list",
+	quote: "Quote",
+	offtop: "Offtop",
+	code: "Code",
+	spoiler: "Spoiler",
+	fontcolor: "Font Color",
+	fontsize: "Font Size",
+	fontfamily: "Font Family",
+	fs_verysmall: "Very Small",
+	fs_small: "Small",
+	fs_normal: "Normal",
+	fs_big: "Big",
+	fs_verybig: "Very Big",
+	smilebox: "Insert Smilie",
+	
+	modal_link_title: "Insert a link",
+	modal_link_text: "View text",
+	modal_link_url: "URL",
+	modal_email_text: "Show email",
+	modal_email_url: "Email",
+	modal_link_tab1: "Insert URL",
+	
+	modal_img_title: "Insert Image",
+	modal_img_tab1: "Insert URL",
+	modal_img_tab2: "Download Image",
+	modal_imgsrc_text: "Enter the URL of the Image",
+	modal_img_btn: "Select a file",
+	add_attach: "Attach a file",
+	
+	close: "Close",
+	save: "Save",
+	cancel: "Cancel",
+	remove: "Remove",
+	
+	validation_err: "The data entered is invalid",
+	error_onupload: "Error loading file",
+	
+	fileupload_text1: "Drop the file here",
+	fileupload_text2: "or",
+	
+	loading: "Loading",
+	auto: "Auto",
+	views: "Views",
+	downloads: "Downloads",
+	
+	//smiles
+	sm1: "Smile",
+	sm2: "Laugh",
+	sm3: "Wink",
+	sm4: "Thanks",
+	sm5: "Growl",
+	sm6: "Shock",
+	sm7: "Angry",
+	sm8: "Pain",
+	sm9: "Sick"
+};
