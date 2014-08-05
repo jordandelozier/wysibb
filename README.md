@@ -32,15 +32,13 @@ To see how it works, you can try [the official demo](http://www.wysibb.com/demo/
 ####BBcodes
 WysiBB comes with all BBCodes by default (allButtons). You can configure BBCode you want.
 
-```html
-<script>
+```javascript
 $(document).ready(function() {
 var wbbOpt = {
   buttons: "bold,italic,underline,|,img,link,|,code,quote"
 }
 $("#editor").wysibb(wbbOpt);
 });
-</script>
 ```
 
 ####Language
@@ -55,8 +53,8 @@ WysiBB comes in russian by default, but you can set a different language
 <script src="/js/lang/en.js"></script>
 ...
 </head>
-
-<script>
+```
+```javascript
 $(document).ready(function() {
 var wbbOpt = {
 	lang : 	 "en",
@@ -64,7 +62,6 @@ var wbbOpt = {
 }
 $("#editor").wysibb(wbbOpt);
 });
-</script>
 ```
 
 (languages available: Arabic (ar), Chinese (cn), English (en), French (fr), Polish (pl), Turkish (tr) & Vietnamese (ci))
@@ -75,7 +72,7 @@ $("#editor").wysibb(wbbOpt);
 You can assign any keyboard shortcuts for BBcode. By default WysiBB set some hotkeys. You can add or change their combinations for existing BBcodes. 
 Consider hook up hotkeys for example.
 
-```js
+```javascript
 var wbbOpt = {
   allButtons: {
 	img: {
@@ -91,7 +88,7 @@ $("#editor").wysibb(wbbOpt);
 
 Note that certain key combinations are already used by browsers, so they might not work.
 
-```js
+```javascript
 var wbbOpt = {
   hotkeys: false, //disable hotkeys (native browser combinations will work)
   showHotkeys: false //hide combination in the tooltip when you hover.
@@ -103,7 +100,7 @@ $("#editor").wysibb(wbbOpt);
 
 You can set custom BBcode transformation, or add your own BBCodes
 
-```js
+```javascript
 var wbbOpt = {
   buttons: "bold,italic,underline,|,img,link,|,code,myquote",
   allButtons: {
@@ -148,7 +145,7 @@ It also works fine on modern smartphone & tablet browsers.
 
 Get to document editor
 
-```js
+```javascript
 $("#editor").getDoc()
 ```
 
@@ -157,7 +154,7 @@ $("#editor").getDoc()
 
 Get highlighted text
 
-```js
+```javascript
 $("#editor").getSelectText()
 ```
 
@@ -166,7 +163,7 @@ $("#editor").getSelectText()
 
 Get / replace BBcode editor content
 
-```js
+```javascript
 $("#editor").bbcode(); //get BBcode editor content
 $("#editor").bbcode(bbdata); //set BBcode editor content
 ```
@@ -176,7 +173,7 @@ $("#editor").bbcode(bbdata); //set BBcode editor content
 
 Get / replace HTML editor content
 
-```js
+```javascript
 $("#editor").htmlcode(); //get HTML editor content
 $("#editor").htmlcode(htmlcode); //set HTML editor content
 ```
@@ -185,7 +182,7 @@ $("#editor").htmlcode(htmlcode); //set HTML editor content
 
 Outputs the editor content as HTML. Where command - the command name, params - object variable
 
-```js
+```javascript
 $("#editor").getHTMLByCommand("code",{seltext:"this code"});
 ```
 
@@ -193,7 +190,7 @@ $("#editor").getHTMLByCommand("code",{seltext:"this code"});
  
 Get an outcome of the execution of commands in BB code form. Where command - the command name, params - object variable
 
-```js
+```javascript
 $("#editor").getBBCodeByCommand("code",{seltext:"this code"});
 ```
 
@@ -201,7 +198,7 @@ $("#editor").getBBCodeByCommand("code",{seltext:"this code"});
 
 Insert a text where the typing cursor is
 
-```js
+```javascript
 $("#editor").insertAtCursor("this code");
 ```
 
@@ -209,7 +206,7 @@ $("#editor").insertAtCursor("this code");
 
 Execute the command. Where command - the command name, value - value
 
-```js
+```javascript
 $("#editor").execCommand("bold");
 ```
 
@@ -217,7 +214,7 @@ $("#editor").execCommand("bold");
 
 Synchronize data editor and textarea
 
-```js
+```javascript
 $("#editor").sync();
 ```
 
