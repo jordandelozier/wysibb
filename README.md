@@ -6,19 +6,21 @@ For more information please visit [wysibb.com](http://www.wysibb.com)
 ## Usage
 
 Include the JQuery and WysiBB files
-
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="http://cdn.wysibb.com/js/jquery.wysibb.min.js"></script>
-	<link rel="stylesheet" href="http://cdn.wysibb.com/css/default/wbbtheme.css" />
-
+```html
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="http://cdn.wysibb.com/js/jquery.wysibb.min.js"></script>
+<link rel="stylesheet" href="http://cdn.wysibb.com/css/default/wbbtheme.css" />
+```
 Activate WysiBB on an existing textarea
 
-	<script>
-	$(document).ready(function() {
-	  $("#editor").wysibb()
-	})
-	</script>
-	<textarea id="editor" name="editor_name">My text</textarea>
+```html
+<script>
+$(document).ready(function() {
+  $("#editor").wysibb()
+})
+</script>
+<textarea id="editor" name="editor_name">My text</textarea>
+```
 
 To see how it works, you can try [the official demo](http://www.wysibb.com/).
 
@@ -28,36 +30,40 @@ To see how it works, you can try [the official demo](http://www.wysibb.com/).
 ####BBcodes
 WysiBB comes with all BBCodes by default (allButtons). You can configure BBCode you want.
 
-	<script>
-	$(document).ready(function() {
-	var wbbOpt = {
-	  buttons: "bold,italic,underline,|,img,link,|,code,quote"
-	}
-	$("#editor").wysibb(wbbOpt);
-	});
-	</script>
+```html
+<script>
+$(document).ready(function() {
+var wbbOpt = {
+  buttons: "bold,italic,underline,|,img,link,|,code,quote"
+}
+$("#editor").wysibb(wbbOpt);
+});
+</script>
+```
 
 ####Language
 WysiBB comes in russian by default, but you can set a different language 
 	
-	<head>
-	...
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-	<script src="http://cdn.wysibb.com/js/jquery.wysibb.min.js"></script>
-	<link rel="stylesheet" href="http://cdn.wysibb.com/css/default/wbbtheme.css" />
-	<script src="/js/lang/fr.js"></script>
-	...
-	</head>
-	
-	<script>
-	$(document).ready(function() {
-	var wbbOpt = {
-		lang : 	 "fr",
-		buttons: "bold,italic,underline,|,img,link,|,code,quote"
-	}
-	$("#editor").wysibb(wbbOpt);
-	});
-	</script>
+```html
+<head>
+...
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="http://cdn.wysibb.com/js/jquery.wysibb.min.js"></script>
+<link rel="stylesheet" href="http://cdn.wysibb.com/css/default/wbbtheme.css" />
+<script src="/js/lang/fr.js"></script>
+...
+</head>
+
+<script>
+$(document).ready(function() {
+var wbbOpt = {
+	lang : 	 "fr",
+	buttons: "bold,italic,underline,|,img,link,|,code,quote"
+}
+$("#editor").wysibb(wbbOpt);
+});
+</script>
+```
 
 (languages available: Arabic (ar), Chinese (cn), English (en), French (fr), Polish (pl), Turkish (tr) & Vietnamese (ci))
 
@@ -67,17 +73,19 @@ WysiBB comes in russian by default, but you can set a different language
 You can assign any keyboard shortcuts for BBcode. By default WysiBB set some hotkeys. You can add or change their combinations for existing BBcodes. 
 Consider hook up hotkeys for example.
 
-	var wbbOpt = {
-	  allButtons: {
-		img: {
-		  hotkey: "ctrl+shift+5"
-		},
-		link: {
-		  hotkey: "ctrl+shift+k"
-		}
-	 }
+```html
+var wbbOpt = {
+  allButtons: {
+	img: {
+	  hotkey: "ctrl+shift+5"
+	},
+	link: {
+	  hotkey: "ctrl+shift+k"
 	}
-	$("#editor").wysibb(wbbOpt);
+ }
+}
+$("#editor").wysibb(wbbOpt);
+```
 
 Note that certain key combinations are already used by browsers, so they might not work.
 
