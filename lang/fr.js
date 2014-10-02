@@ -28,6 +28,7 @@ WBBLANG['fr'] = {
 	fs_big: "Grand",
 	fs_verybig: "Très grand",
 	smilebox: "Insérer émoticône",
+	removeFormat: "Enlever la mise en forme",
 	
 	modal_link_title: "Insérer un lien",
 	modal_link_text: "Afficher le texte",
