@@ -27,7 +27,7 @@ WBBLANG['fr'] = {
 	fs_normal: "Normal",
 	fs_big: "Grand",
 	fs_verybig: "Très grand",
-	smilebox: "Insérer émoticône",
+	smilebox: "Afficher les émoticônes",
 	
 	modal_link_title: "Insérer un lien",
 	modal_link_text: "Afficher le texte",
