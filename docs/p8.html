@@ -1,0 +1,46 @@
+
+
+
+
+<!DOCTYPE HTML>
+<html>
+<!-- Mirrored from www.wysibb.com/docs/p8 by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Apr 2015 05:02:34 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>WysiBB settings — WysiBB</title><link rel="shortcut icon" href="../favicon.ico"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="../css/bootstrap.min.css"><link rel="stylesheet" href="../css/bootstrap-theme.min.css"><script src="../js/jquery-2.1.0.min.js"></script><script src="../js/bootstrap.min.js"></script><link href="../css/font-awesome.min.css" rel="stylesheet"><link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css"><script src="../js/prettify.js"></script><link rel="stylesheet" href="../css/prettify.css"><link rel="stylesheet" href="../../cdn.wysibb.com/css/default/wbbtheme.css" type="text/css"><script type="text/javascript" src="../../cdn.wysibb.com/js/jquery.wysibb.min.js"></script><link rel="stylesheet" href="../css/custom.css"><script src="../js/custom.js"></script><script>
+				  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','../../www.google-analytics.com/analytics.js','ga');
+
+				  ga('create', 'UA-32126002-1', 'wysibb.com');
+				  ga('send', 'pageview');
+
+				</script></head><body><nav id="navigation" class="navbar navbar-inverse navbar-wysibb" role="navigation"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse"><i class="fa fa-bars" style="color:#eee"></i></button><a class="navbar-brand" href="../index.html">WysiBB</a></div><div class="navbar-collapse collapse" style="height: 1px;"><ul class="nav navbar-nav cl-effect-13"><li class=""><a href="../index.html" class="smoothScroll">Home</a></li><li class=""><a href="../getting-started/index.html" class="smoothScroll">Getting started</a></li><li class="active"><a href="index.html" class="smoothScroll">Docs</a></li></ul><ul class="nav navbar-nav navbar-right"><div class="navbar-form pull-left"><a href="http://www.gitfund.org/wbb/wysibb" class="btn btn-warning"><i class="fa fa-usd"></i> Support the project</a> <a href="../download/index.html" type="button" class="btn btn-primary btn-download"><i class="fa fa-download"></i> Download WysiBB <small>v1.5.1</small></a></div></ul></div></div></nav><div class="content"><div class="container"><div class="info-block"><div class="row"><div class="col-sm-9"><style>
+							h1{
+							  margin-bottom:40px;
+							}
+						</style><h1>WysiBB settings</h1><style>
+			dd{
+			  margin-bottom:10px;
+			  margin-left:10px;
+			}
+		</style><p>For comfortable work with the editor WysiBB have many options.</p><dl><dt>onlyBBmode</dt><dd>Editor mode only «BBcode», without visualization (WYSIWYG). Default: false</dd><dt>themeName</dt><dd>Name of the editor theme. Default: "default"</dd><dt>lang</dt><dd>Lang editor. To enable it, <a href="p7.html">first load the language file to the page</a>. Default: "en"</dd><dt>tabInsert</dt><dd>Insert a tab character. Default: "true"</dd><dt>hotkeys</dt><dd>Support hot keys. Default: "true"</dd><dt>showHotkeys</dt><dd>Show hotkey on hover tooltip. Default: "true"</dd><dt>autoresize</dt><dd>Automatic change of height of the editor. Default: "true"</dd><dt>resize_maxheight</dt><dd>Maximum height of editor. Default: "800"</dd><dt>resize_maxheight</dt><dd>Maximum height in the automated elevation editor. Default: "800"</dd><dt>buttons</dt><dd>Enabled BBcodes. Read more <a href="index.html">here</a><br>Default: "bold,italic,underline,strike,sup,sub,|,img,video,link,|,bullist,numlist,|,fontcolor,fontsize,fontfamily,|, justifyleft, justifycenter,justifyright,|, quote,code,table,removeFormat"</dd><dt>smileList</dt><dd>Included emoticon. Example:
+				<pre class="prettyprint">
+[
+{title:CURLANG.sm1, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm1.png" class="sm"&gt;', bbcode:":)"},
+{title:CURLANG.sm8 ,img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm8.png" class="sm"&gt;', bbcode:":("},
+{title:CURLANG.sm1, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm2.png" class="sm"&gt;', bbcode:":D"},
+{title:CURLANG.sm3, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm3.png" class="sm"&gt;', bbcode:";)"},
+{title:CURLANG.sm4, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm4.png" class="sm"&gt;', bbcode:":up:"},
+{title:CURLANG.sm5, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm5.png" class="sm"&gt;', bbcode:":down:"},
+{title:CURLANG.sm6, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm6.png" class="sm"&gt;', bbcode:":shock:"},
+{title:CURLANG.sm7, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm7.png" class="sm"&gt;', bbcode:":angry:"},
+{title:CURLANG.sm9, img: '&lt;img src="{themePrefix}{themeName}/img/smiles/sm9.png" class="sm"&gt;', bbcode:":sick:"}
+]
+</pre></dd><dt>direction</dt><dd>Text output mode. Parameter must be changed, those who have the text is written from right to left by default: ltr</dd><dt>traceTextarea</dt><dd>Follow the changes in the original textarea. When this option is WysiBB monitors changes textarea and if a textarea changes were made from the outside, these data will be displayed in the editor window. Often, this option is required on the forums for the correct operation buttons "Quote", etc. Default: false</dd></dl><div style="margin-top:30px"><script async="true" src="../../pagead2.googlesyndication.com/pagead/js/f.txt"></script><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1709273310590791" data-ad-slot="9297905964" data-ad-format="auto"></ins><script>
+							(adsbygoogle = window.adsbygoogle || []).push({});
+							</script></div></div><div class="col-sm-3"><ul class="nav nav-pills nav-stacked" style="margin-top:20px"><li class=""><a href="index.html">Basic configuration</a></li><li class=""><a href="p1.html">Adding/Changing BBcodes</a></li><li class=""><a href="p2.html">MultiFormat BBcodes</a></li><li class=""><a href="p3.html">Simple modal window</a></li><li class=""><a href="p4.html">Modal window with tabs</a></li><li class=""><a href="p5.html">Custom modal window</a></li><li class=""><a href="p6.html">Custom handlers</a></li><li class=""><a href="p7.html">WysiBB language</a></li><li class="active"><a href="p8.html">WysiBB settings</a></li><li class=""><a href="p9.html">API</a></li><li class=""><a href="p10.html">Hotkeys</a></li></ul><div style="margin-top:30px"><script async="true" src="../../pagead2.googlesyndication.com/pagead/js/f.txt"></script><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1709273310590791" data-ad-slot="9297905964" data-ad-format="auto"></ins><script>
+							(adsbygoogle = window.adsbygoogle || []).push({});
+							</script></div></div></div></div></div><script>$(function() {prettyPrint();})</script></div><footer><div class="container"><div class="row"><div class="col-lg-4"><h4>Resources</h4><ul class="list-unstyled"><li><a href="../getting-started/index.html">Getting started</a></li><li><a href="index.html">Docs</a></li></ul></div><div class="col-lg-4"><h4>Links</h4><ul class="list-unstyled"><li><a href="https://github.com/wbb/WysiBB" target="_blank">GitHub</a></li><li><a href="https://github.com/wbb/WysiBB/issues?state=open" target="_blank">Issues</a></li><li><a href="https://github.com/wbb/WysiBB/releases" target="_blank">Releases</a></li><li><a href="../getting-started/index.html#license">WysiBB License</a></li></ul></div><div class="col-lg-4"><h4>Author</h4><ul class="list-unstyled"><li>Vadim Dobroskok</li></ul></div></div><hr><p>Copyright 2014 WysiBB (evo)</p></div></footer></body>
+<!-- Mirrored from www.wysibb.com/docs/p8 by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Apr 2015 05:02:34 GMT -->
+</html>

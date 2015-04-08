@@ -1,0 +1,67 @@
+
+
+
+
+<!DOCTYPE HTML>
+<html>
+<!-- Mirrored from www.wysibb.com/docs/p9 by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Apr 2015 05:02:34 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>API — WysiBB</title><link rel="shortcut icon" href="../favicon.ico"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="../css/bootstrap.min.css"><link rel="stylesheet" href="../css/bootstrap-theme.min.css"><script src="../js/jquery-2.1.0.min.js"></script><script src="../js/bootstrap.min.js"></script><link href="../css/font-awesome.min.css" rel="stylesheet"><link href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic" rel="stylesheet" type="text/css"><script src="../js/prettify.js"></script><link rel="stylesheet" href="../css/prettify.css"><link rel="stylesheet" href="../../cdn.wysibb.com/css/default/wbbtheme.css" type="text/css"><script type="text/javascript" src="../../cdn.wysibb.com/js/jquery.wysibb.min.js"></script><link rel="stylesheet" href="../css/custom.css"><script src="../js/custom.js"></script><script>
+				  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				  })(window,document,'script','../../www.google-analytics.com/analytics.js','ga');
+
+				  ga('create', 'UA-32126002-1', 'wysibb.com');
+				  ga('send', 'pageview');
+
+				</script></head><body><nav id="navigation" class="navbar navbar-inverse navbar-wysibb" role="navigation"><div class="container"><div class="navbar-header"><button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse"><i class="fa fa-bars" style="color:#eee"></i></button><a class="navbar-brand" href="../index.html">WysiBB</a></div><div class="navbar-collapse collapse" style="height: 1px;"><ul class="nav navbar-nav cl-effect-13"><li class=""><a href="../index.html" class="smoothScroll">Home</a></li><li class=""><a href="../getting-started/index.html" class="smoothScroll">Getting started</a></li><li class="active"><a href="index.html" class="smoothScroll">Docs</a></li></ul><ul class="nav navbar-nav navbar-right"><div class="navbar-form pull-left"><a href="http://www.gitfund.org/wbb/wysibb" class="btn btn-warning"><i class="fa fa-usd"></i> Support the project</a> <a href="../download/index.html" type="button" class="btn btn-primary btn-download"><i class="fa fa-download"></i> Download WysiBB <small>v1.5.1</small></a></div></ul></div></div></nav><div class="content"><div class="container"><div class="info-block"><div class="row"><div class="col-sm-9"><style>
+							h1{
+							  margin-bottom:40px;
+							}
+						</style><h1>API</h1><style>
+			dd{
+			  margin-bottom:10px;
+			  margin-left:10px;
+			}
+		</style><dl><dt>getSelectText()</dt><dd>
+				Get highlighted text.
+				<div class="code"><pre class="prettyprint">
+$("#editor").getSelectText()
+</pre></div></dd><dt>bbcode([bbcode])</dt><dd>
+				Get/set BBcode text in editor.
+				<div class="code"><pre class="prettyprint">
+$("#editor").bbcode(); //Get BBcode text
+$("#editor").bbcode(bbdata); //Set BBcode text
+</pre></div></dd><dt>htmlcode([htmlcode])</dt><dd>
+				Get/replace HTML content.
+				<div class="code"><pre class="prettyprint">
+$("#editor").htmlcode(); //Get HTML content
+$("#editor").htmlcode(htmlcode); //Set HTML content
+</pre></div></dd><dt>getHTMLByCommand(command,params)</dt><dd>
+				Get an outcome of the execution of the command in the HTML. Where <b>command</b> - the command name, <b>params</b> - object variable
+				<div class="code"><pre class="prettyprint">
+$("#editor").getHTMLByCommand("code",{seltext:"This is a program code"});
+</pre></div></dd><dt>getBBCodeByCommand(command,params)</dt><dd>
+				Get an outcome of the execution of commands in BBcode text. Where <b>command</b> - the command name, <b>params</b> - object variable
+				<div class="code"><pre class="prettyprint">
+$("#editor").getBBCodeByCommand("code",{seltext:"This is a program code"});
+</pre></div></dd><dt>insertAtCursor(data)</dt><dd>
+				Insert text into the editor. Where <b>data</b> - insert text
+				<div class="code"><pre class="prettyprint">
+$("#editor").getBBCodeByCommand(data);
+</pre></div></dd><dt>execCommand(command,value)</dt><dd>
+				Execute the command. Where <b>command</b> - the command name, <b>value</b> - value
+				<div class="code"><pre class="prettyprint">
+$("#editor").execCommand("bold");
+</pre></div></dd><dt>sync()</dt><dd>
+				Synchronize data between editor and textarea
+				<div class="code"><pre class="prettyprint">
+$("#editor").sync();
+</pre></div></dd></dl><div style="margin-top:30px"><script async="true" src="../../pagead2.googlesyndication.com/pagead/js/f.txt"></script><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1709273310590791" data-ad-slot="9297905964" data-ad-format="auto"></ins><script>
+							(adsbygoogle = window.adsbygoogle || []).push({});
+							</script></div></div><div class="col-sm-3"><ul class="nav nav-pills nav-stacked" style="margin-top:20px"><li class=""><a href="index.html">Basic configuration</a></li><li class=""><a href="p1.html">Adding/Changing BBcodes</a></li><li class=""><a href="p2.html">MultiFormat BBcodes</a></li><li class=""><a href="p3.html">Simple modal window</a></li><li class=""><a href="p4.html">Modal window with tabs</a></li><li class=""><a href="p5.html">Custom modal window</a></li><li class=""><a href="p6.html">Custom handlers</a></li><li class=""><a href="p7.html">WysiBB language</a></li><li class=""><a href="p8.html">WysiBB settings</a></li><li class="active"><a href="p9.html">API</a></li><li class=""><a href="p10.html">Hotkeys</a></li></ul><div style="margin-top:30px"><script async="true" src="../../pagead2.googlesyndication.com/pagead/js/f.txt"></script><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1709273310590791" data-ad-slot="9297905964" data-ad-format="auto"></ins><script>
+							(adsbygoogle = window.adsbygoogle || []).push({});
+							</script></div></div></div></div></div><script>$(function() {prettyPrint();})</script></div><footer><div class="container"><div class="row"><div class="col-lg-4"><h4>Resources</h4><ul class="list-unstyled"><li><a href="../getting-started/index.html">Getting started</a></li><li><a href="index.html">Docs</a></li></ul></div><div class="col-lg-4"><h4>Links</h4><ul class="list-unstyled"><li><a href="https://github.com/wbb/WysiBB" target="_blank">GitHub</a></li><li><a href="https://github.com/wbb/WysiBB/issues?state=open" target="_blank">Issues</a></li><li><a href="https://github.com/wbb/WysiBB/releases" target="_blank">Releases</a></li><li><a href="../getting-started/index.html#license">WysiBB License</a></li></ul></div><div class="col-lg-4"><h4>Author</h4><ul class="list-unstyled"><li>Vadim Dobroskok</li></ul></div></div><hr><p>Copyright 2014 WysiBB (evo)</p></div></footer></body>
+<!-- Mirrored from www.wysibb.com/docs/p9 by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 08 Apr 2015 05:02:34 GMT -->
+</html>
