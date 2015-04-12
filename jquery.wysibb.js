@@ -76,7 +76,7 @@ WBBLANG['en'] = CURLANG = {
 	sm8: "Pain",
 	sm9: "Sick"
 };
-wbbdebug=true;
+WBBDEBUG = false;
 (function($) {
 	'use strict';
 	$.wysibb = function(txtArea,settings) {
@@ -84,6 +84,7 @@ wbbdebug=true;
 		
 		if (settings && settings.deflang && typeof(WBBLANG[settings.deflang])!="undefined") {CURLANG = WBBLANG[settings.deflang];}
 		if (settings && settings.lang && typeof(WBBLANG[settings.lang])!="undefined") {CURLANG = WBBLANG[settings.lang];}
+		if (settings && settings.debug) {WBBDEBUG = settings.debug;}
 		this.txtArea=txtArea;
 		this.$txtArea=$(txtArea);
 		var id = this.$txtArea.attr("id") || this.setUID(this.txtArea);
@@ -2795,7 +2796,7 @@ wbbdebug=true;
 	}
 	
 	$.log = function(msg) {
-		if (typeof(wbbdebug)!="undefined" && wbbdebug===true) {
+		if (typeof(WBBDEBUG)!="undefined" && WBBDEBUG===true) {
 			if (typeof(console)!="undefined") {
 				console.log(msg);
 			}else{
