@@ -108,6 +108,8 @@ wbbdebug=true;
 			traceTextarea:		true,
 //			direction:			"ltr",
 			smileConversion:	true,
+            onToBBAction: false,// function wich fire on convertiong html to bb code
+            onToHTMLAction: false, //function wich fire on to converting bb to html
 
 			//END img upload config 
 			buttons: 			"bold,italic,underline,strike,sup,sub,|,img,video,link,|,bullist,numlist,|,fontcolor,fontsize,fontfamily,|,justifyleft,justifycenter,justifyright,|,quote,code,table,removeFormat",
@@ -2258,17 +2260,53 @@ wbbdebug=true;
 				$(node.previousSibling).remove();
 			}
 		},
+
+
+
+        /* This events we need to make thinks on
+           converting html code to bbcode.
+           it fire after wysibb made his job
+         */
+        onToBB: function(e)
+        {
+
+            if(this.options.onToBBAction)
+                this.options.onToBBAction(e);
+        },
+
+
+        /* This events we need to make thinks on
+         converting bbcode to html.
+         it fire after wysibb made his job
+         */
+        onToHTML: function (e)
+        {
+            if(this.options.onToHTMLAction)
+                this.options.onToHTMLAction(e);
+        },
+
+
+
+
+
+
+
+
+
+
 		modeSwitch: function() {
 			if (this.options.bbmode) {
 				//to HTML
 				this.$body.html(this.getHTML(this.$txtArea.val()));
 				this.$txtArea.hide().removeAttr("wbbsync").val("");
 				this.$body.css("min-height",this.$txtArea.height()).show().focus();
+                this.onToHTML(this.$body.html());
 			}else{
 				//to bbcode
 				this.$txtArea.val(this.getBBCode()).css("min-height",this.$body.height());
 				this.$body.hide();
 				this.$txtArea.show().focus();
+                this.onToBB(this.$txtArea.val());
 			}
 			this.options.bbmode=!this.options.bbmode;
 		},
