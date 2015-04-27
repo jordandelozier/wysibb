@@ -515,6 +515,7 @@ html{height:100% !important;}
   line-height: 28px;
   max-height:100px;
   overflow:auto;
+  height: 34px;
   font-size:14px;
 }
 #wbbmodal  .wbbm-bottom{
