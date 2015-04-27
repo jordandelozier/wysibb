@@ -192,8 +192,9 @@ Any contributions and/or pull requests would be welcome.
 Themes, translations, bug reports and bug fixes are greatly appreciated.
 
 
-## Support 
+## Buy project
 
-[Support forum](http://www.wysibb.com/forum/) (mostly in Russian)
+If you want buy a project, please contact us: admin[at]wysibb.com
+
 
 
