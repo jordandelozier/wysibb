@@ -69,7 +69,7 @@ $("#editor").wysibb(wbbOpt);
 </script>
 ```
 
-(languages available: Arabic (ar), Chinese (cn), English (en), French (fr), Polish (pl), Turkish (tr) & Vietnamese (ci))
+(languages available: Arabic (ar), Chinese (cn), English (en), French (fr), Polish (pl), Turkish (tr), Vietnamese (ci) & Spanish (es))
 
 
 ### Shortkeys
