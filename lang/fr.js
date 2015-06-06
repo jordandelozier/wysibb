@@ -28,6 +28,8 @@ WBBLANG['fr'] = {
 	fs_big: "Grand",
 	fs_verybig: "Très grand",
 	smilebox: "Afficher les émoticônes",
+	video: "Insérer une vidéo YouTube",
+	removeFormat: "Effacer le style",
 	
 	modal_link_title: "Insérer un lien",
 	modal_link_text: "Afficher le texte",
@@ -43,13 +45,15 @@ WBBLANG['fr'] = {
 	modal_img_btn: "Choisir un fichier",
 	add_attach: "Joindre un fichier",
 	
+	modal_video_text: "Entrez l'URL de la vidéo",
+	
 	close: "Fermer",
-	save: "Sauvgarder",
+	save: "Sauvegarder",
 	cancel: "Annuler",
 	remove: "Effacer",
 	
-	validation_err: "Les données saisies est invalide",
-	error_onupload: "Erreur lors du chargement de fichier",
+	validation_err: "Les données saisies sont invalides",
+	error_onupload: "Erreur lors du chargement du fichier",
 	
 	fileupload_text1: "Déposez le fichier ici",
 	fileupload_text2: "ou",
