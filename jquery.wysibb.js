@@ -1524,6 +1524,8 @@ wbbdebug=true;
 				var rng = (this.lastRange) ? this.lastRange:this.getRange();
 				rng.deleteContents();
 				rng.insertNode(e);
+                                rng.setStartAfter(e);
+                                rng.setEndAfter(e);
 				rng.collapse(false);
 				sel.removeAllRanges();
 				sel.addRange(rng);
