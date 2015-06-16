@@ -212,7 +212,3 @@ If you use WysiBB a link back or a donation would be appreciated, but not requir
 
 Any contributions and/or pull requests would be welcome.
 Themes, translations, bug reports and bug fixes are greatly appreciated.
-
-## Buy project
-
-If you want buy a project, please contact us: admin[at]wysibb.com
