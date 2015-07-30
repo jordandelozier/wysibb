@@ -3,7 +3,7 @@
 WysiBB is a jQuery visual WYSIWYG editor for BBcode.
 For more information please visit [wysibb.com](http://www.wysibb.com)
 
-[![Prioritize issues!](http://www.gitfund.org/img/badge/55a88db60a975a1154c22eea.svg?2)](http://www.gitfund.org/wbb/wysibb/)
+[![Prioritize issues!](http://www.gitfund.org/img/badge/55a88db60a975a1154c22eea.svg?3)](http://www.gitfund.org/wbb/wysibb/)
 
 ## Usage
 
