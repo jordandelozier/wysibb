@@ -2797,7 +2797,7 @@ wbbdebug=true;
 	$.log = function(msg) {
 		if (typeof(wbbdebug)!="undefined" && wbbdebug===true) {
 			if (typeof(console)!="undefined") {
-				console.log(msg);
+				//console.log(msg);
 			}else{
 				$("#exlog").append('<p>'+msg+'</p>');  
 			}
