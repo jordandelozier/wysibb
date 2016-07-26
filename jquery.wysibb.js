@@ -2051,6 +2051,7 @@ wbbdebug=true;
 		getHTML: function(bbdata,init,skiplt) {
 			if (!this.options.bbmode && !init) {return this.$body.html()}
 			
+		    if (!this.options.bbmode && typeof init !== "undefined" && !init) { return this.$body.html() }
 			if (!skiplt) {bbdata = bbdata.replace(/</g,"&lt;").replace(/\{/g,"&#123;").replace(/\}/g,"&#125;");}
 			bbdata = bbdata.replace(/\[code\]([\s\S]*?)\[\/code\]/g,function(s) {
 				s = s.substr("[code]".length,s.length-"[code]".length-"[/code]".length).replace(/\[/g,"&#91;").replace(/\]/g,"&#93;");
