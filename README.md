@@ -205,8 +205,10 @@ $("#editor").sync();
 
 ## License
 
-WysiBB is licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) license.
-If you use WysiBB a link back or a donation would be appreciated, but not required.
+WysiBB is licensed under the [CC BY-NC «Attribution-NonCommercial» license](https://creativecommons.org/licenses/by-nc/4.0/) license.
+
+If you want to use WysiBB in commercial purposes, please buy WysiBB PRO commercial license by 199$. [Contact sales](mailto:sale@wysibb.com)
+
 
 ## Contribute
 
