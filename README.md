@@ -205,7 +205,7 @@ $("#editor").sync();
 
 ## License
 
-WysiBB is licensed under the [CC BY-NC «Attribution-NonCommercial» license](https://creativecommons.org/licenses/by-nc/4.0/) license.
+WysiBB is licensed under the [CC BY-NC «Attribution-NonCommercial» license](https://creativecommons.org/licenses/by-nc/4.0/).
 
 If you want to use WysiBB in commercial purposes, please buy WysiBB PRO commercial license by 199$. [Contact sales](mailto:sale@wysibb.com)
 
