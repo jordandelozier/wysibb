@@ -1,4 +1,4 @@
-﻿/* Turkish translation by Mahmut Yaman */
+/* Turkish translation by Mahmut Yaman */
 if (typeof (WBBLANG) == "undefined") { WBBLANG = {}; }
 WBBLANG['tr'] = {
     bold: "Kalın",
