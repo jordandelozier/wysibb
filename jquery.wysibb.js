@@ -1025,7 +1025,7 @@ wbbdebug=true;
 					$btn.find(".ve-tlb-colorpick span.fonticon").css("color",(this.options.bbmode) ? r.color:r);
 				}
 			},this));
-			$btn.mousedown($.proxy(function(e) {
+			$btn.click($.proxy(function(e) {
 				e.preventDefault();
 				this.dropdownclick(".wbb-cp",".wbb-list",e);
 			},this));
