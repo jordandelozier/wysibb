@@ -834,8 +834,7 @@ wbbdebug=true;
 				
 				
 				//clear html on paste from external editors
-				this.$body.bind('keydown', $.proxy(function(e) {
-					if ((e.which == 86 && (e.ctrlKey==true || e.metaKey==true)) || (e.which == 45 && (e.shiftKey==true || e.metaKey==true))) {
+				this.$body.bind('paste', $.proxy(function(e) {
 						if (!this.$pasteBlock) {
 							this.saveRange();
 							this.$pasteBlock = $(this.elFromString('<div style="opacity:0;" contenteditable="true">\uFEFF</div>'));
@@ -865,7 +864,6 @@ wbbdebug=true;
 							this.selectNode(this.$pasteBlock[0]);
 						}
 						return true;
-					}
 				},this));
 				
 				//insert BR on press enter
