@@ -2875,7 +2875,7 @@ wbbdebug=true;
 			if (this.data('wbb').options.bbmode) {
 				this.data('wbb').$txtArea.val(data);
 			}else{
-				this.data('wbb').$body.html(this.data("wbb").getHTML(data));
+				this.data('wbb').$body.html(this.data("wbb").getHTML(data, true));
 			}
 			return this;
 		}else{
