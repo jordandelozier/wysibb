@@ -2061,7 +2061,8 @@ wbbdebug=true;
 			$.each(this.options.btnlist,$.proxy(function(i,b){
 				if (b!="|" && b!="-") {
 					var find=true;
-					if (!this.options.allButtons[b] || !this.options.allButtons[b].transform) {
+					var button = this.options.allButtons[b];
+					if (!button || !button.transform) {
 						return true;
 					}
 
@@ -2086,6 +2087,10 @@ wbbdebug=true;
 								$.each(a,$.proxy(function(i,k) {
 									r[k]=am[i+1];
 								},this));
+								r = this.keysToLower(r);
+								if (button.processor) {
+									button.processor(r);
+								}
 								var nhtml = html;
 								nhtml = nhtml.replace(/\{(.*?)(\[.*?\])\}/g,"{$1}");
 								nhtml = this.strf(nhtml,r);
