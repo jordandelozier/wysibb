@@ -174,33 +174,6 @@ html{height:100% !important;}
 }
 
  
-
-.ve-tlb-bold{background:url(./img/icons.png) 0 0 no-repeat;width:20px;}
-.ve-tlb-italic{background:url(./img/icons.png) 0 -40px no-repeat;width:20px;}
-.ve-tlb-underline{background:url(./img/icons.png) 0 -20px no-repeat;width:20px;}
-.ve-tlb-strike{background:url(./img/icons.png) 0 -120px no-repeat;width:20px;}
-.ve-tlb-link{background:url(./img/icons.png) 0 -80px no-repeat;width:20px;}
-.ve-tlb-unlink{background:url(./img/icons.png) 0 -100px no-repeat;width:20px;}
-.ve-tlb-img{background:url(./img/icons.png) 0 -60px no-repeat;width:20px;}
-.ve-tlb-quote{background:url(./img/icons.png) 0 -140px no-repeat;width:20px;}
-.ve-tlb-spoiler{background:url(./img/icons.png) 0 -160px no-repeat;width:20px;}
-.ve-tlb-list{background:url(./img/icons.png) 0 -180px no-repeat;width:20px;}
-.ve-tlb-bbcode{background:url(./img/icons.png) 0 -200px no-repeat;width:40px !important;margin:1px auto !important;height:20px;}
-.ve-tlb-numlist{background:url(./img/icons.png) 0 -220px no-repeat;width:20px;}
-.ve-tlb-textleft{background:url(./img/icons.png) 0 -240px no-repeat;width:20px;}
-.ve-tlb-textcenter{background:url(./img/icons.png) 0 -260px no-repeat;width:20px;}
-.ve-tlb-textright{background:url(./img/icons.png) 0 -280px no-repeat;width:20px;}
-.ve-tlb-offtopic{background:url(./img/icons.png) 0 -300px no-repeat;width:20px;}
-.ve-tlb-code{background:url(./img/icons.png) 0 -320px no-repeat;width:20px;}
-.ve-tlb-spoiler{background:url(./img/icons.png) 0 -340px no-repeat;width:20px;}
-.ve-tlb-sub{background:url(./img/icons.png) 0 -360px no-repeat;width:20px;}
-.ve-tlb-sup{background:url(./img/icons.png) 0 -380px no-repeat;width:20px;}
-.ve-tlb-colorpick{width:50px;height:24px;line-height:24px;text-align:center;}
-.ve-tlb-table{background: url(./img/icons.png) 0 -460px;width:20px;}
-.ve-tlb-smilebox{background: url(./img/icons.png) 0 -480px;width:20px;}
-.ve-tlb-video{background: url(./img/icons.png) 0 -500px;width:20px;}
-.ve-tlb-removeformat{background: url(./img/icons.png) 0 -540px;width:20px;}
-
 .tthotkey{color:#ddd;font-size:9px;}
 
 /* END TOOLBAR */
@@ -242,7 +215,6 @@ html{height:100% !important;}
   top:0px;
   width:9px;
   height:24px;
- /*  background: url(./img/icons.png) -8px -400px; */
   cursor:default;
   text-decoration:none;
   font-size:14px;
