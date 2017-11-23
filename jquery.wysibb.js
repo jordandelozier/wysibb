@@ -2089,7 +2089,7 @@ wbbdebug=true;
 								var nhtml = html;
 								nhtml = nhtml.replace(/\{(.*?)(\[.*?\])\}/g,"{$1}");
 								nhtml = this.strf(nhtml,r);
-								bbdata = bbdata.replace(am[0],nhtml);
+								bbdata = bbdata.replace(am[0],function(){return nhtml});
 							}
 						}
 					},this));
