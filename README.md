@@ -7,7 +7,7 @@ For more information please visit [wysibb.com](http://www.wysibb.com)
 
 ## Usage
 
-Include the JQuery and WysiBB files
+Include the JQuery and WysiBB files.
 
 ```html
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
@@ -74,7 +74,7 @@ $("#editor").wysibb(wbbOpt);
 
 ### Shortkeys
 
-You can assign any keyboard shortcuts for BBcode. By default WysiBB set some hotkeys. You can add or change their combinations for existing BBcodes. 
+You can assign any keyboard shortcuts for BBcode. By default WysiBB set some hotkeys. You can add or change their combinations for existing BBcodes.
 Consider hook up hotkeys for example.
 
 ```javascript
@@ -175,7 +175,7 @@ Outputs the editor content as HTML. Where command - the command name, params - o
 $("#editor").getHTMLByCommand("code",{seltext:"this code"});
 ```
 
-getBBCodeByCommand (command, params) 
+getBBCodeByCommand (command, params)
 Get an outcome of the execution of commands in BB code form. Where command - the command name, params - object variable
 
 ```javascript
@@ -205,8 +205,10 @@ $("#editor").sync();
 
 ## License
 
-WysiBB is licensed under the [MIT](http://www.opensource.org/licenses/mit-license.php) license.
-If you use WysiBB a link back or a donation would be appreciated, but not required.
+WysiBB is licensed under the [CC BY-NC «Attribution-NonCommercial» license](https://creativecommons.org/licenses/by-nc/4.0/).
+
+If you want to use WysiBB in commercial purposes, please buy WysiBB PRO commercial license by 199$. [Contact sales](mailto:sale@wysibb.com)
+
 
 ## Contribute
 

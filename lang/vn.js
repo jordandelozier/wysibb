@@ -1,4 +1,4 @@
-﻿if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
+if (typeof (WBBLANG)=="undefined") {WBBLANG = {};}
 WBBLANG['vi'] = {
     bold: "In đậm",
     italic: "In nghiêng",
